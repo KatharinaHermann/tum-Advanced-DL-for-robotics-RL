@@ -18,7 +18,7 @@ Requirements:
 The environment can be installed with the following commands:
 * With GPU:
     * create environment and install all packages: `conda env create -f environment_gpu.yml`
-    * activate environment: `conda activate adlr`
+    * activate environment: `conda activate adlr_gpu`
 * With CPU:
     * create environment and install all packages: `conda env create -f environment_cpu.yml`
-    * activate environment: `conda activate adlr`
+    * activate environment: `conda activate adlr_cpu`
