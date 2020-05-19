@@ -19,3 +19,4 @@ dependencies:
   - pip:
     - matplotlib==3.2.1
     - tf2rl==0.1.12
+    - argparse==1.4.0

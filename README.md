@@ -1,4 +1,4 @@
-# Advance Deep Learning for Robotics Project
+# Advanced Deep Learning for Robotics Project
 
 ## Installation
 
@@ -14,6 +14,7 @@ Requirements:
 * `matplotlib=3.2.1`
 * `pylint=2.5.2`
 * `jupyter=1.0.0`
+* `tf2rl=0.1.12`
 
 The environment can be installed with the following commands:
 * With GPU:
