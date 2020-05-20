@@ -31,50 +31,46 @@ def random_workspace(grid_size, num_obj_max, obj_size_avg):
 
     workspace=np.zeros((grid_size,grid_size), dtype=int)
 
-    #Assign each entry with an object a -1. 
+    #Assign each entry with an object a 1. 
     
     for i in range(num_objects):
-        if origin[i,0]+width[i]+1 > grid_size:
+        if origin[i,1]+width[i] > grid_size:
             right_bound=grid_size+1
-        else: right_bound = np.asscalar(origin[i,0]+width[i]+1)
+        else: right_bound = np.asscalar(origin[i,1]+width[i])
 
-        if origin[i,1]+height[i]+1 > grid_size:
+        if origin[i,0]+height[i] > grid_size:
             upper_bound=grid_size+1
-        else: upper_bound = np.asscalar(origin[i,1]+height[i]+1)
-        
-        workspace[origin[i,0]:right_bound, origin[i,1]:upper_bound]=-1
+        else: upper_bound = np.asscalar(origin[i,0]+height[i])
+        workspace[origin[i,0]:upper_bound, origin[i,1]:right_bound]=1
+        workspace
 
     #Generate start point (repeat until point is found where no object ist placed)
 
-    start_blocked=(-1)
-    while (start_blocked==(-1)):
+    start_blocked=1
+    while (start_blocked==1):
         start= np.random.randint(low=0, high=grid_size, size=(1,2))
         start= np.asarray(start, dtype=None, order=None)
-        x=start[0,0]
-        y=start[0,1]
-        start_blocked=workspace[x,y]
+        y=start[0,0]
+        x=start[0,1]
+        start_blocked=workspace[y,x]
     
-    #label start as 1
-    workspace[x,y]=1
         #start = tf.random.uniform( 
     #shape=[1,2], minval=0, maxval=grid_size, dtype=tf.int32, seed=None, name=None)
 
     #Generate goal point (repeat until point is found where no object ist placed) and assign goal point with a 1
 
-    goal_blocked=-1
-    while (goal_blocked==-1):
+    goal_blocked=1
+    while (goal_blocked==1):
         goal= np.random.randint(low=0, high=grid_size, size=(1,2))
         goal= np.asarray(goal, dtype=None, order=None)
-        x=goal[0,0]
-        y=goal[0,1]
-        goal_blocked=workspace[x,y]
+        y=goal[0,0]
+        x=goal[0,1]
+        goal_blocked=workspace[y,x]
        #goal = tf.random.uniform( 
     #shape=[1,2], minval=0, maxval=grid_size, dtype=tf.int32, seed=None, name=None)
-    
-    #label goal as 10
-    workspace[x,y]=10
+   
 
-    return workspace
+    return start, goal, workspace
 
 workspace_sample=random_workspace(32, 3, 4)
 print(workspace_sample)
