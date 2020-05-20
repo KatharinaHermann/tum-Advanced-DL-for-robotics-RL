@@ -1,0 +1,22 @@
+name: adlr_cpu2
+channels:
+  - jmcmurray
+  - powerai
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7.6
+  - cloudpickle=1.2.2
+  - gym=0.15.4
+  - jupyter=1.0.0
+  - numpy=1.18.4
+  - os=0.1.4
+  - pandas=1.0.3
+  - pickle5=0.0.9
+  - pip=20.1
+  - tensorflow=2.1.0
+  - pip:
+    - matplotlib==3.2.1
+    - tf2rl==0.1.12
+prefix: /home/ferenc/anaconda3/envs/adlr_cpu
+
