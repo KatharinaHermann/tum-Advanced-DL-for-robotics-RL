@@ -15,6 +15,7 @@ Requirements:
 * `pylint=2.5.2`
 * `jupyter=1.0.0`
 * `tf2rl=0.1.12`
+* `argparse=1.4.0`
 
 The environment can be installed with the following commands:
 * With GPU:
