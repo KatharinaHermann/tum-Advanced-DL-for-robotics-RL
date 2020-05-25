@@ -22,8 +22,8 @@ class PointroboEnv(gym.Env):
      # Define action and observation space
      # They must be gym.spaces objects
     
-     # Continuous action space with velocities in x- & y- direction
-     self.action_space = spaces.Box(low=0, high=255, shape=
+     # Continuous action space with velocities up to 10m/s in x- & y- direction
+     self.action_space = spaces.Box(low=0, high=10, shape=
                     (2, 1), dtype=np.uint8)
     
      # The observation will be the coordinate of the agent
