@@ -1,6 +1,5 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Layer, Conv2D, MaxPool2D, AveragePooling2D, Dense, Flatten, Conv2DTranspose, Reshape, InputLayer
-import numpy as np
 
 
 class Encoder(Layer):
@@ -73,7 +72,7 @@ class Decoder(Layer):
         # convolution layers:
         self._conv1 = Conv2D(filters=conv_filters[-2], kernel_size=(3, 3), padding='same', activation='relu')
         self._conv2 = Conv2D(filters=conv_filters[-3], kernel_size=(3, 3), padding='same', activation='relu')
-        self._conv3 = Conv2D(filters=1, kernel_size=(3, 3), padding='same')
+        self._conv3 = Conv2D(filters=1, kernel_size=(3, 3), padding='same', activation='sigmoid')
 
 
     def call(self, x):
@@ -112,6 +111,7 @@ class CAE(tf.Module):
         self._decoder = Decoder(latent_dim=latent_dim, input_shape=input_shape, conv_filters=conv_filters)
 
 
+    @tf.function
     def __call__(self, x):
         """forward pass of the CAE"""
 
