@@ -1,35 +1,36 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Layer, Conv2D, MaxPool2D, AveragePooling2D, Dense, Flatten, Conv2DTranspose
+from tensorflow.keras.layers import Layer, Conv2D, MaxPool2D, AveragePooling2D, Dense, Flatten, Conv2DTranspose, Reshape, InputLayer
 import numpy as np
 
 
 class Encoder(Layer):
     """Encoder of a Convolutional Autoencoder"""
 
-    def __init__(self, pooling, padding, latent_dim, input_dim, conv_filters):
+    def __init__(self, pooling, latent_dim, conv_filters):
 
         super().__init__()
 
         # convolutional layers:
-        self._conv1 = Conv2D(filters=conv_filters[0], kernel_size=(3, 3), padding=padding, activation='relu')
-        self._conv2 = Conv2D(filters=conv_filters[1], kernel_size=(3, 3), padding=padding, activation='relu')
-        self._conv3 = Conv2D(filters=conv_filters[2], kernel_size=(3, 3), padding=padding, activation='relu')
+        self._conv1 = Conv2D(filters=conv_filters[0], kernel_size=(3, 3), padding='same', activation='relu')
+        self._conv2 = Conv2D(filters=conv_filters[1], kernel_size=(3, 3), padding='same', activation='relu')
+        self._conv3 = Conv2D(filters=conv_filters[2], kernel_size=(3, 3), padding='same', activation='relu')
 
         # pooling layers:
         if pooling == 'max':
-            self._pool1 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding=padding)
-            self._pool2 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding=padding)
-            self._pool3 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding=padding)
+            self._pool1 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')
+            self._pool2 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')
+            self._pool3 = MaxPool2D(pool_size=(2, 2), strides=(2, 2), padding='same')
         else:
-            self._pool1 = AveragePooling2D(pool_size=(2, 2), strides=(2, 2), padding=padding)
-            self._pool2 = AveragePooling2D(pool_size=(2, 2), strides=(2, 2), padding=padding)
-            self._pool3 = AveragePooling2D(pool_size=(2, 2), strides=(2, 2), padding=padding)
+            self._pool1 = AveragePooling2D(pool_size=(2, 2), strides=(2, 2), padding='same')
+            self._pool2 = AveragePooling2D(pool_size=(2, 2), strides=(2, 2), padding='same')
+            self._pool3 = AveragePooling2D(pool_size=(2, 2), strides=(2, 2), padding='same')
 
         # flattening:
         self._flatten = Flatten()
 
         # dense layer:
-        self._dense = Dense(units=latent_dim,  activation='relu')
+        self._dense = Dense(units=latent_dim)
+
 
     def call(self, x):
         """forward pass of the encoder"""
@@ -44,7 +45,7 @@ class Encoder(Layer):
 class Decoder(Layer):
     """Decoder of a Convolutional Autoencoder."""
 
-    def __init__(self, padding, latent_dim, input_shape, conv_filters):
+    def __init__(self, latent_dim, input_shape, conv_filters):
 
         super().__init__()
         
@@ -53,25 +54,30 @@ class Decoder(Layer):
 
         # calculating the number of units for the dense layer:
         num_pool_layers = len(conv_filters)
-        dense_units = input_shape[0] / (4 ** num_pool_layers) * conv_filters[-1]
+        dense_units = input_shape[0] * input_shape[1] / (4 ** num_pool_layers) * conv_filters[-1]
 
         # dense layer:
         self._dense = Dense(units=dense_units,  activation='relu')
 
+        # reshaping layer:
+        height = int(self._input_shape[0] / (2 ** num_pool_layers))
+        width = int(self._input_shape[1] / (2 ** num_pool_layers))
+        filter_size = int(self._conv_filters[-1])
+        self._reshape = Reshape(target_shape=(height, width, filter_size), trainable=False, dynamic=False)
+
         # deconvolution layers:
-        self._deconv1 = Conv2DTranspose(filters=conv_filters[-1], kernel_size=(3, 3), strides=(2, 2), padding=padding, activation='relu')
-        self._deconv2 = Conv2DTranspose(filters=conv_filters[-2], kernel_size=(3, 3), strides=(2, 2), padding=padding, activation='relu')
-        self._deconv3 = Conv2DTranspose(filters=conv_filters[-3], kernel_size=(3, 3), strides=(2, 2), padding=padding, activation='relu')
+        self._deconv1 = Conv2DTranspose(filters=conv_filters[-1], kernel_size=(3, 3), strides=(2, 2), padding='same', activation='relu')
+        self._deconv2 = Conv2DTranspose(filters=conv_filters[-2], kernel_size=(3, 3), strides=(2, 2), padding='same', activation='relu')
+        self._deconv3 = Conv2DTranspose(filters=conv_filters[-3], kernel_size=(3, 3), strides=(2, 2), padding='same', activation='relu')
 
         # convolution layers:
-        self._conv1 = Conv2D(filters=conv_filters[-2], kernel_size=(3, 3), padding=padding, activation='relu')
-        self._conv2 = Conv2D(filters=conv_filters[-3], kernel_size=(3, 3), padding=padding, activation='relu')
-        self._conv3 = Conv2D(filters=1, kernel_size=(3, 3), padding=padding, activation='relu')
+        self._conv1 = Conv2D(filters=conv_filters[-2], kernel_size=(3, 3), padding='same', activation='relu')
+        self._conv2 = Conv2D(filters=conv_filters[-3], kernel_size=(3, 3), padding='same', activation='relu')
+        self._conv3 = Conv2D(filters=1, kernel_size=(3, 3), padding='same')
 
 
     def call(self, x):
         """forward pass of the decoder"""
-
         x = self._dense(x)
         x = self._reshape(x)
         x = self._conv1(self._deconv1(x))
@@ -81,23 +87,10 @@ class Decoder(Layer):
         return x
 
 
-
-    def _reshape(self, x):
-        """for reshaping the dense layer into a tensor that can be given
-        to the transpose convolutional layers.
-        """
-        num_of_layers = len(self._conv_filters)
-        height = self._input_shape[0] / (2 ** num_of_layers)
-        width = self._input_shape[1] / (2 ** num_of_layers)
-        filter_size = self._conv_filters[-1]
-        
-        return tf.reshape(x, [-1, height, width, filter_size])
-
-
 class CAE(tf.Module):
     """Convolutional Auto Encoder class"""
 
-    def __init__(self, pooling, padding, latent_dim,
+    def __init__(self, pooling, latent_dim,
                  input_shape=(32, 32), conv_filters=[4, 8, 16]):
         """Initializing a Convolutional Auto Encoder.
         Args:
@@ -112,37 +105,17 @@ class CAE(tf.Module):
         """
 
         assert pooling in ['max', 'average'] , 'pooling should be either \'max\' or \'average\' but received {}'.format(pooling)
-        assert padding in ['valid', 'same'] , 'padding should be either \'valid\' or \'same\' but received {}'.format(padding)
         
         super().__init__()
 
-        self._encoder = Encoder(pooling=pooling, padding=padding, latent_dim=latent_dim,
-                                input_shape=input_shape, conv_filters=conv_filters)
-        self._decoder = Decoder(padding=padding, latent_dim=latent_dim,
-                                input_shape=input_shape, conv_filters=conv_filters)
+        self._encoder = Encoder(pooling=pooling, latent_dim=latent_dim, conv_filters=conv_filters)
+        self._decoder = Decoder(latent_dim=latent_dim, input_shape=input_shape, conv_filters=conv_filters)
 
-        
-    def call(self, x):
+
+    def __call__(self, x):
         """forward pass of the CAE"""
 
         x = self._encoder(x)
         x = self._decoder(x)
 
         return x
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
