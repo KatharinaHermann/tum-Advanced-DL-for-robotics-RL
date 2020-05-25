@@ -6,9 +6,8 @@ import tensorflow as tf
 def random_workspace(grid_size, num_obj_max, obj_size_avg):
     
     #Define number of objects
-    num_objects= np.random.randint(low=1, high=num_obj_max, size=None)
-    #num_objects = tf.random.uniform( 
-    #shape=[], minval=0, maxval=num_obj_max, dtype=tf.int32, seed=None, name=None)
+    #num_objects= np.random.randint(low=1, high=num_obj_max, size=None)
+    num_objects = tf.random.uniform(shape=[], minval=0, maxval=num_obj_max, dtype=tf.int32, seed=None, name=None)
 
     #Generate an origin from a uniform distribution for each object
 
