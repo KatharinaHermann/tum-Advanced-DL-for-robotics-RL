@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 
 
@@ -71,5 +72,14 @@ def random_workspace(grid_size, num_obj_max, obj_size_avg):
 
     return start, goal, workspace
 
-workspace_sample=random_workspace(32, 3, 4)
-print(workspace_sample)
+start,goal,workspace_sample=random_workspace(32, 10, 5)
+
+workspace_sample[start[0,0],start[0,1]]=2
+workspace_sample[goal[0,0],goal[0,1]]=3
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+cax = ax.matshow(workspace_sample)
+fig.colorbar(cax)
+
+plt.show()
