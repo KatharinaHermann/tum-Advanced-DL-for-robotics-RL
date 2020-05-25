@@ -8,7 +8,7 @@ Requirements:
 * `os=0.1.4`
 * `importlib_resources=1.5.0`
 * `pandas=1.0.3`
-* `tensorflow-gpu=2.1.0` / `tensorflow=2.1.0`
+* `tensorflow-gpu=2.2.0` / `tensorflow-cpu=2.2.0`
 * `gym=0.15.3`
 * `pickle5=0.0.9`
 * `matplotlib=3.2.1`
@@ -19,8 +19,8 @@ Requirements:
 
 The environment can be installed with the following commands:
 * With GPU:
-    * create environment and install all packages: `conda env create -f environment_gpu.yml`
-    * activate environment: `conda activate adlr_gpu`
+    * create environment and install all packages: `conda env create --name <name> -f environment_gpu.yml`
+    * activate environment: `conda activate <name>`
 * With CPU:
-    * create environment and install all packages: `conda env create -f environment_cpu.yml`
-    * activate environment: `conda activate adlr_cpu`
+    * create environment and install all packages: `conda env create --name <name> -f environment_cpu.yml`
+    * activate environment: `conda activate <name>`
