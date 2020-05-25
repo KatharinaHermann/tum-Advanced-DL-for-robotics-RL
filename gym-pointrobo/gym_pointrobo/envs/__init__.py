@@ -1,0 +1,1 @@
+from gym_pointrobo.envs.pointrobo_env import PointroboEnv
