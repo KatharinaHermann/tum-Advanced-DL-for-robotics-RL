@@ -28,7 +28,7 @@ class Encoder(Layer):
         self._flatten = Flatten()
 
         # dense layer:
-        self._dense = Dense(units=latent_dim)
+        self._dense = Dense(units=latent_dim, activation='tanh')
 
 
     def call(self, x):
@@ -86,7 +86,7 @@ class Decoder(Layer):
         return x
 
 
-class CAE(tf.Module):
+class CAE(tf.keras.Model):
     """Convolutional Auto Encoder class"""
 
     def __init__(self, pooling, latent_dim,
@@ -111,11 +111,36 @@ class CAE(tf.Module):
         self._decoder = Decoder(latent_dim=latent_dim, input_shape=input_shape, conv_filters=conv_filters)
 
 
-    @tf.function
-    def __call__(self, x):
+    #@tf.function
+    def call(self, x):
         """forward pass of the CAE"""
 
         x = self._encoder(x)
         x = self._decoder(x)
 
         return x
+
+    
+    def evaluate(self, x):
+        """Evaluating the CAE, that is giving back the latent features
+        that were produced by the encoder.
+        """
+
+        return self._encoder(x)
+
+
+if __name__ == '__main__':
+    """For testing."""
+
+    x = tf.random.uniform([1, 32, 32, 1])
+    pooling = 'max'
+    latent_dim = 16
+    input_shape = (32, 32)
+    conv_filters = [4, 8, 16]
+
+    model = CAE(pooling, latent_dim, input_shape, conv_filters)
+
+    y = model(x)
+
+    print('output shape: {}'.format(y.shape))
+
