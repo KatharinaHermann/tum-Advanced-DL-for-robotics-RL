@@ -80,6 +80,17 @@ def get_star_goal_for_workspace(workspace):
     return start, goal
 
 
+def visualize_workspace(workspace, fignum=1):
+    """for nicely visualize a workspace."""
+
+    fig = plt.figure(fignum)
+    ax = fig.add_subplot(111)
+    cax = ax.matshow(workspace)
+    fig.colorbar(cax)
+
+    return fig
+
+
 if __name__ == '__main__':
     workspace_sample = random_workspace(32, 10, 5)
     start, goal = get_star_goal_for_workspace(workspace_sample)
@@ -87,9 +98,5 @@ if __name__ == '__main__':
     workspace_sample[start[0, 0], start[0, 1]] = 2
     workspace_sample[goal[0, 0], goal[0, 1]] = 3
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    cax = ax.matshow(workspace_sample)
-    fig.colorbar(cax)
-
+    fig = visualize_workspace(workspace_sample)
     plt.show()

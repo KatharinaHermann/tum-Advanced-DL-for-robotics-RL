@@ -3,6 +3,7 @@ import tensorflow.keras.optimizers as opt
 import numpy as np
 import argparse
 import os
+import matplotlib.pyplot as plt
 import random_workspace
 
 from tensorflow.data import Dataset
@@ -69,6 +70,10 @@ class CAEtrainer():
         print('-' * 5 + 'TRAINING HAS ENDED' + '-' * 5)
         print('best validation loss: {}'.format(best_val_loss))
         print('best validation accuracy: {}'.format(best_val_acc))
+
+        # loading the best model:
+        self._CAE.load_weights(os.path.join(self._model_dir, 'model.h5'))
+
 
     #@tf.function
     def _train_on_batch(self, X):
@@ -248,13 +253,31 @@ if __name__ == '__main__':
                          loss_func=loss_func,
                          args=args)
 
-    trainer._num_workspaces = 1
-    trainer._gen_workspace = True
-    trainer._train_shuffle = False
-    trainer._batch_size = 1
+    # for overfitting to a single data instance:
+    #trainer._num_workspaces = 1
+    #trainer._gen_workspace = True
+    #trainer._train_shuffle = False
+    #trainer._batch_size = 1
 
     trainer()
+
+    fig = plt.figure(num=1, figsize=(10, 5))
+    plt.plot(trainer._train_losses)
+    plt.plot(trainer._val_losses)
+
+    # check out the model:
+    path = '../workspaces/ws_0.csv'
+    x = np.expand_dims(np.loadtxt(path), axis=2).astype('float32')
+    x = np.expand_dims(x, axis=0)
+    x = tf.convert_to_tensor(x)
+
+    x_hat = trainer._CAE(x)
+
+    fig2 = random_workspace.visualize_workspace(x.numpy()[0, :, :, 0], fignum=2)
+    fig3 = random_workspace.visualize_workspace(x_hat.numpy()[0, :, :, 0], fignum=3)
     
+    plt.show()
+
 
     
 

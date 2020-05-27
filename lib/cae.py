@@ -28,7 +28,7 @@ class Encoder(Layer):
         self._flatten = Flatten()
 
         # dense layer:
-        self._dense = Dense(units=latent_dim, activation='tanh')
+        self._dense = Dense(units=latent_dim)
 
 
     def call(self, x):
