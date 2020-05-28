@@ -6,8 +6,7 @@ import numpy as np
 import scipy.ndimage as ndimage
 import sys
 sys.path.insert(1, 'C:/Users/Katharina Hermann/Documents/UniMaster/2.Semester/ADLR/Project/GITHUB/project/lib')
-#sys.path.append("C:/Users/Katharina Hermann/Documents/UniMaster/2.Semester/ADLR/Project/GITHUB/project/lib")
-from random_workspace import random_workspace 
+from random_workspace import * 
 
 class PointroboEnv(gym.Env):
   metadata = {'render.modes': ['human']}
@@ -32,20 +31,21 @@ class PointroboEnv(gym.Env):
      self.action_space = spaces.Box(low=0, high=10, shape=
                     (2, 1), dtype=np.uint8)
     
-     # The observation will be the coordinate of the agent *****SHOULD WE OBSERVE MORE?**********
+     #The observation will be the coordinate of the agent 
      #this can be described by Box space
      self.observation_space = spaces.Box(low=0, high=self.grid_size,
-                                        shape=(1,), dtype=np.float32)
+                                        shape=(2,1), dtype=np.float32)
 
 
   def step(self, action):
       
-      self._take_action(action) 
+      take_action(action, self.agent_pos) 
 
       self.agent_pos[0,0] = np.clip(self.agent_pos[0,0], 0, self.grid_size)
       self.agent_pos[0,1] = np.clip(self.agent_pos[0,1], 0, self.grid_size)
 
       self.current_step += 1
+      
       done = 0
       #Episode stop
       #Have we reached the goal?
@@ -55,14 +55,14 @@ class PointroboEnv(gym.Env):
       elif self.current_step==self.MAX_EPISODE_STEPS:
         done = 1
         #Have we hit an obstacle?
-      elif self.collision_check()==1:
+      elif collision_check(self.workspace, self.agent_pos)==1:
         done = 1
 
       #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made=-0.01
       if (self.agent_pos[0,0] == self.goal_pos[0,0]) and (self.agent_pos[0,1] == self.goal_pos[0,1]):
         reward = 1
         #Have we hit an obstacle?
-      elif self.collision_check()==1:
+      elif collision_check(self.workspace, self.agent_pos)==1:
         reward=-1
         #We made another step
       else: 
@@ -85,48 +85,45 @@ class PointroboEnv(gym.Env):
     self.workspace[self.goal_pos[0,0],self.goal_pos[0,1]]=4
     self.workspace[self.agent_pos[0,0],self.agent_pos[0,1]]=3
 
-    fig = plt.figure()
-    ax = fig.add_subplot(221)
-    cax = ax.matshow(self.workspace)
-    fig.colorbar(cax)
-
-    dist_img = ndimage.distance_transform_edt(-self.workspace + 1)  # Excpects blocks as 0 and free space as 1
-
-    dm = fig.add_subplot(212)
-    cdm=dm.imshow(dist_img, cmap='Reds')
-    cdm=dm.imshow(self.workspace, cmap='Blues', alpha=0.3)
+    fig1 = visualize_workspace(self.workspace)
+    fig2= visualize_distance_field(self.workspace)
     plt.show()
+    
 
-  def _take_action(self, action):
-    action_x = action[0]
-    action_y = action[1]
-    t=1
+def take_action(action, agent_pos):
+  action_x = action[0]
+  action_y = action[1]
+  t=1
 
-    self.agent_pos[0,1] += action_x*t
-    self.agent_pos[0,0] += action_y*t
+  agent_pos[0,1] += action_x*t
+  agent_pos[0,0] += action_y*t
 
-  def collision_check(self):
-    collision = 0
 
-    #Treat boundaries as obstacles
-    padding_workspace=np.ones((34,34))
-    padding_workspace[1:33,1:33]=self.workspace
+def collision_check(workspace, agent_pos):
+  collision = 0
 
-    #Create distance map
-    dist_img = ndimage.distance_transform_edt(-padding_workspace + 1)  # Excpects blocks as 0 and free space as 1
-    pixel_size=1 #10/32
-    #Compute distance to the nearest obstacle at the center
-    dist_fun = image_interpolation(img=dist_img, pixel_size=pixel_size)
-    x=np.array([self.agent_pos[0,0],self.agent_pos[0,1]])
-    nearest_dist = dist_fun(x=x)
-    print("Distance to the nearest obstacle at the center: ",
-        nearest_dist)
+  #Treat boundaries as obstacles
+  padding_workspace=np.ones((34,34))
+  padding_workspace[1:33,1:33]=workspace
+
+  #Create distance map
+  dist_img = ndimage.distance_transform_edt(-padding_workspace + 1)  # Expects blocks as 0 and free space as 1
+  pixel_size=1 #10/32
+  
+  #Compute distance to the nearest obstacle at the center
+  dist_fun = image_interpolation(img=dist_img, pixel_size=pixel_size)
+  x=np.array([float(agent_pos[0,0]),float(agent_pos[0,1])])
+  nearest_dist = dist_fun(x=x)
+  print("Distance to the nearest obstacle at the center: ",
+      nearest_dist)
       
-    if nearest_dist <= 2:
-        collision=1
-        print("Collision is: ",
-        collision)
-    return collision
+  if nearest_dist <= 0.5:
+    collision=1
+    print("Collision is: ",
+    collision)
+  
+  return collision
+
 
 def image_interpolation(*, img, pixel_size=1, order=1, mode='nearest'):
 
@@ -138,8 +135,8 @@ def image_interpolation(*, img, pixel_size=1, order=1, mode='nearest'):
     if x2.ndim == 1:
       x2 = x2[np.newaxis, :]
       # Transform physical coordinates to image coordinates 
-      #x2 *= factor
-      #x2 -= 0.5
+      x2 *= factor
+      x2 += 0.5
 
     return ndimage.map_coordinates(input=img, coordinates=x2.T, order=order, mode=mode).T
 
@@ -149,7 +146,9 @@ def image_interpolation(*, img, pixel_size=1, order=1, mode='nearest'):
 
 #***************TEST THE ENVIRONMENT******************************
 grid_size=32
-start,goal,workspace=random_workspace(grid_size, 10, 5)
+workspace=random_workspace(grid_size, 10, 5)
+start, goal = get_start_goal_for_workspace(workspace)
+
 env = PointroboEnv(grid_size=grid_size, start_pos=start, goal_pos=goal, workspace=workspace, MAX_EPISODE_STEPS=30)
 obs = env.reset()
 env.render()
@@ -161,7 +160,7 @@ for step in range(n_steps):
   print("Step {}".format(step + 1))
   obs, reward, done, info = env.step(action)
   print('obs=', obs, 'reward=', reward, 'done=', done)
-  env.render()
+  
   if done:
     print("reward=", reward)
     if reward==1:
@@ -169,3 +168,4 @@ for step in range(n_steps):
     elif reward==-1:
       print ("OOOOpssss you crashed!!")
     break
+  env.render()
