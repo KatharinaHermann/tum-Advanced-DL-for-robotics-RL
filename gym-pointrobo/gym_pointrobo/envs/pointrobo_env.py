@@ -6,7 +6,7 @@ import numpy as np
 import scipy.ndimage as ndimage
 import sys
 sys.path.insert(1, 'C:/Users/Katharina Hermann/Documents/UniMaster/2.Semester/ADLR/Project/GITHUB/project/lib')
-
+sys.path.insert(2, '/home/ferenc/Documents/TUM/2019_20_SS/Advanced_Deep_Learning_for_Robotics/project/lib/')
 
 from random_workspace import * 
 
