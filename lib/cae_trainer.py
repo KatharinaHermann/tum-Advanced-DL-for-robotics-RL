@@ -26,8 +26,10 @@ class CAEtrainer():
         self._CAE = CAE
         self._optimizer = optimizer
         self._loss_func = loss_func
-        self._train_losses, self._val_losses = [], [0]
-        self._train_accs, self._val_accs = [], [0]
+        self._train_losses, self._val_losses = [], []
+        self._train_accs, self._val_accs = [], []
+        self._epoch_train_losses, self._epoch_val_losses = [], []
+        self._epoch_train_accs, self._epoch_val_accs = [], []
         self._set_up_from_args(args)
 
 
@@ -48,11 +50,20 @@ class CAEtrainer():
         # Training Loop #
         print('-' * 5 + 'TRAINING HAS STARTED' + '-' * 5)
         for epoch in range(self._epochs):
+            self._epoch_train_losses, self._epoch_val_losses = [], []
+            self._epoch_train_accs, self._epoch_val_accs = [], []
+
             for X in self._train_data:
                 self._train_on_batch(X)
             
             for X in self._val_data:
                 self._validate_on_batch(X)
+
+            # losses and accuracy of the epoch:
+            self._train_losses.append(np.mean(self._epoch_train_losses))
+            self._train_accs.append(np.mean(self._epoch_train_accs))
+            self._val_losses.append(np.mean(self._epoch_val_losses))
+            self._val_accs.append(np.mean(self._epoch_val_accs))
 
             print('EPOCH {}'.format(epoch))
             print('Train loss / Val loss : {} / {}'.format(self._train_losses[-1], self._val_losses[-1]))
@@ -80,10 +91,10 @@ class CAEtrainer():
         """carries out a gradient step on a mini-batch."""
         with tf.GradientTape() as tape:
             out = self._CAE(X)
-            loss = self._loss_func(X, out)
+            loss = self._loss_func(X, out) 
 
-        self._train_losses.append(loss.numpy())
-        self._train_accs.append(self._calc_accuracy(X, out))
+        self._epoch_train_losses.append(loss.numpy())
+        self._epoch_train_accs.append(self._calc_accuracy(X, out))
 
         grads = tape.gradient(loss, self._CAE.trainable_weights)
         self._optimizer.apply_gradients(zip(grads, self._CAE.trainable_weights))
@@ -95,8 +106,8 @@ class CAEtrainer():
         out = self._CAE(X)
         loss = self._loss_func(X, out)
 
-        self._val_losses.append(loss.numpy())
-        self._val_accs.append(self._calc_accuracy(X, out))
+        self._epoch_val_losses.append(loss.numpy())
+        self._epoch_val_accs.append(self._calc_accuracy(X, out))
 
         
     def _calc_accuracy(self, X, out):
@@ -189,6 +200,8 @@ class CAEtrainer():
                             help='batch size. default: 32')
         parser.add_argument('--train_shuffle', type=bool, default=True,
                             help='Whether to shuffle or not during training. default: True')
+        #parser.add_argument('--pos_weight', type=float, default=2,
+        #                    help='weight for positive weighting in cross entropy loss. default: 2')
         parser.add_argument('--model_dir', type=str, default='../models/cae',
                             help='directory to save the best trained model. default: ../models/cae')
         
@@ -201,10 +214,10 @@ class CAEtrainer():
                             help='number of workspaces to use for training. default: 1000')
         parser.add_argument('--grid_size', type=int, default=32,
                             help='number of grid points in the workspace. default: 32')
-        parser.add_argument('--num_obj_max', type=int, default=8,
-                            help='maximum number of objects in the workspace. default: 8')
-        parser.add_argument('--obj_size_avg', type=int, default=5,
-                            help='average size of the objects in the workspace. default: 5')
+        parser.add_argument('--num_obj_max', type=int, default=5,
+                            help='maximum number of objects in the workspace. default: 5')
+        parser.add_argument('--obj_size_avg', type=int, default=8,
+                            help='average size of the objects in the workspace. default: 8')
 
         # CAE related:
         parser.add_argument('--pooling', type=str, default='max',
@@ -220,19 +233,35 @@ class CAEtrainer():
     def _set_up_from_args(self, args):
         """setting up some variables from the parsed arguments."""
 
+        # training related:
         self._epochs = args.epochs                      # number of training epochs
         self._batch_size = args.batch_size              # batch size
         self._train_shuffle = args.train_shuffle        # whether to shuffle or not during training.
         self._model_dir = args.model_dir                # directory to save the best model during training.
+        # workspace related
         self._gen_workspace = args.gen_workspace        # whether to newly generate workspaces (True) or use saved ones (False)
         self._workspace_dir = args.workspace_dir        # folder from which saved workspaces can be loaded
         self._num_workspaces = args.num_workspaces       # numbr of worksapces to train on
         self._grid_size = args.grid_size                # number of grid points in the workspace
         self._num_obj_max = args.num_obj_max            # maximum number of objects in the workspace
         self._obj_size_avg = args.obj_size_avg          # average size of the objects in the workspace
-        #self._pooling = args.pooling                    # pooling type. Either 'max' or 'average'
-        #self._latent_dim = args.latent_dim              # latent dimension of the Autoencoder
-        #self._conv_filters = args.conv_filters          # Filter numbers of the convolution layers. list.
+
+
+def weighted_cross_entropy(beta):
+    """returns a weighted cross entropy loss function
+    weighted by beta.
+    """
+
+    def loss(y_true, y_pred):
+        # getting logits from sigmoid output:
+        y_pred = tf.clip_by_value(y_pred, tf.keras.backend.epsilon(), (1 - tf.keras.backend.epsilon()))
+        y_logits = tf.math.log(y_pred / (1 - y_pred))
+        loss = tf.nn.weighted_cross_entropy_with_logits(y_true, y_logits,
+                                                        pos_weight=beta)
+        
+        return tf.reduce_mean(loss)
+
+    return loss
 
 
 if __name__ == '__main__':
@@ -246,50 +275,37 @@ if __name__ == '__main__':
                          beta_1=0.9,
                          beta_2=0.999,
                          epsilon=1e-7)
-    loss_func = BinaryCrossentropy()
+    print('optimizer: {}'.format(optimizer))
+
+    # loss function. Calculating the positive weights for it:
+    mean_obj_num = (args.num_obj_max + 1) / 2
+    ratio = args.grid_size ** 2 / (mean_obj_num * (args.obj_size_avg ** 2))
+    beta = ratio
+    loss_func = weighted_cross_entropy(beta=beta)
+    print('Loss function: WCE with beta: {}'.format(beta))
 
     trainer = CAEtrainer(CAE=model,
                          optimizer=optimizer,
                          loss_func=loss_func,
                          args=args)
 
-    # for overfitting to a single data instance:
-    #trainer._num_workspaces = 1
-    #trainer._gen_workspace = True
-    #trainer._train_shuffle = False
-    #trainer._batch_size = 1
-
     trainer()
+
+    # Plot results on an unseen workspace: #
 
     fig = plt.figure(num=1, figsize=(10, 5))
     plt.plot(trainer._train_losses)
     plt.plot(trainer._val_losses)
 
     # check out the model:
-    path = '../workspaces/ws_0.csv'
+    path = '../workspaces/ws_' + str(args.num_workspaces - 1) + '.csv'
     x = np.expand_dims(np.loadtxt(path), axis=2).astype('float32')
     x = np.expand_dims(x, axis=0)
     x = tf.convert_to_tensor(x)
 
-    x_hat = trainer._CAE(x)
+    x_hat = tf.cast(trainer._CAE(x) >= 0.5, tf.float32)
 
     fig2 = random_workspace.visualize_workspace(x.numpy()[0, :, :, 0], fignum=2)
     fig3 = random_workspace.visualize_workspace(x_hat.numpy()[0, :, :, 0], fignum=3)
     
     plt.show()
-
-
-    
-
-
-
-    
-
-
-
-
-
-
-
-    
-
