@@ -6,6 +6,8 @@ import numpy as np
 import scipy.ndimage as ndimage
 import sys
 sys.path.insert(1, 'C:/Users/Katharina Hermann/Documents/UniMaster/2.Semester/ADLR/Project/GITHUB/project/lib')
+
+
 from random_workspace import * 
 
 class PointroboEnv(gym.Env):
