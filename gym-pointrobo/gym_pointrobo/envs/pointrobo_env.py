@@ -86,7 +86,7 @@ class PointroboEnv(gym.Env):
     self.workspace[self.agent_pos[0,0],self.agent_pos[0,1]]=3
 
     fig1 = visualize_workspace(self.workspace)
-    fig2= visualize_distance_field(self.workspace)
+    fig2 = visualize_distance_field(self.workspace)
     plt.show()
     
 
