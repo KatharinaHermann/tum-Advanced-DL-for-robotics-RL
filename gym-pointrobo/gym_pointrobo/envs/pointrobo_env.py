@@ -8,6 +8,15 @@ import sys
 sys.path.insert(1, 'C:/Users/Katharina Hermann/Documents/UniMaster/2.Semester/ADLR/Project/GITHUB/project/lib')
 from random_workspace import * 
 
+
+"""
+Install the environment with: pip install -e .
+Use it then with:
+    import gym
+    import gym_pointrobo
+    env = gym.make('pointrobo-v0')
+"""
+
 class PointroboEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
@@ -29,16 +38,16 @@ class PointroboEnv(gym.Env):
         
         # Continuous action space with velocities up to 10m/s in x- & y- direction
         self.action_space = spaces.Box(low=0, high=1, shape=
-                        (2, 1), dtype=np.uint8)
+                        (2, 1), dtype=np.float32)
         
         #The observation will be the coordinate of the agent 
         #this can be described by Box space
-        self.observation_space = spaces.Box(low=0, high=self.grid_size,
+        self.observation_space = spaces.Box(low=0.0, high=self.grid_size,
                                             shape=(2,1), dtype=np.float32)
 
 
     def step(self, action):
-        
+        """Implements the step function for taking an action and evaluating it"""
         take_action(action, self.agent_pos) 
 
         self.agent_pos[0] = np.clip(self.agent_pos[0], 0, self.grid_size)
@@ -71,12 +80,16 @@ class PointroboEnv(gym.Env):
         return np.asarray(self.agent_pos).astype(np.float32), reward, done, {}
 
     def reset(self):
+        """Resets the robot state to the initial state"""
         # here we convert start to float32 to make it more general (we want to use continuous actions)
         self.agent_pos = np.asarray(self.start_pos).astype(np.float64)
+        
         return self.agent_pos
 
     def render(self, mode='console', close=False):
-        "The x-axis of the environment is pointing from left to right. The y-axis is pointing downwards. The origin of the KOSY is in the top left corner."
+        """"The x-axis of the environment is pointing from left to right. 
+            The y-axis is pointing downwards. 
+            The origin of the KOSY is in the top left corner."""
         # Render the environment to the screen
         if mode != 'console':
             raise NotImplementedError()
@@ -103,6 +116,8 @@ def take_action(action, agent_pos):
 
 
 def collision_check(workspace, agent_pos):
+    """Checks whether the robot' collides with an object or the workspace boundary. If it collides collision ist set to 1"""
+    
     collision = 0
 
     #Treat boundaries as obstacles
@@ -149,28 +164,33 @@ def image_interpolation(*, img, pixel_size=1, order=1, mode='nearest'):
 
 
 #***************TEST THE ENVIRONMENT******************************
-grid_size=32
-workspace=random_workspace(grid_size, 10, 5)
-start, goal = get_start_goal_for_workspace(workspace)
-
-env = PointroboEnv(grid_size=grid_size, start_pos=start, goal_pos=goal, workspace=workspace, MAX_EPISODE_STEPS=30)
-obs = env.reset()
-env.render()
-
-action=[0.5,0.5]
-# Hardcoded best agent: always go left!
-n_steps = 20
-for step in range(n_steps):
-    print("Step {}".format(step + 1))
-    obs, reward, done, info = env.step(action)
-    print('obs=', obs, 'reward=', reward, 'done=', done)
+if __name__ == '__main__':
     
-    if done:
-        print("reward=", reward)
-        if reward==1:
-            print ("Goal reached!")
-        elif reward==-1:
-            print ("OOOOpssss you crashed!!")
-        break
+    grid_size=32
+    num_obj_max=10
+    obj_size_avg=5
+    workspace=random_workspace(grid_size, num_obj_max, obj_size_avg)
+    start, goal = get_start_goal_for_workspace(workspace)
+
+    env = PointroboEnv(grid_size=grid_size, start_pos=start, goal_pos=goal, workspace=workspace, MAX_EPISODE_STEPS=30)
+    obs = env.reset()
     env.render()
+
+    # Hardcoded agent: always go diagonal
+    action=[0.5,0.5]
+
+    n_steps = 20
+    for step in range(n_steps):
+        print("Step {}".format(step + 1))
+        obs, reward, done, info = env.step(action)
+        print('obs=', obs, 'reward=', reward, 'done=', done)
+        
+        if done:
+            print("reward=", reward)
+            if reward==1:
+                print ("Goal reached!")
+            elif reward==-1:
+                print ("OOOOpssss you crashed!!")
+            break
+        env.render()
 
