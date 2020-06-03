@@ -5,7 +5,6 @@ import argparse
 
 import numpy as np
 import tensorflow as tf
-from gym.spaces import Box
 
 from tf2rl.experiments.utils import save_path, frames_to_gif
 from tf2rl.misc.get_replay_buffer import get_replay_buffer
@@ -13,6 +12,8 @@ from tf2rl.misc.prepare_output_dir import prepare_output_dir
 from tf2rl.misc.initialize_logger import initialize_logger
 from tf2rl.envs.normalizer import EmpiricalNormalizer
 
+
+from cae import CAE #####################
 
 if tf.config.experimental.list_physical_devices('GPU'):
     for cur_device in tf.config.experimental.list_physical_devices("GPU"):
@@ -25,16 +26,14 @@ class Trainer:
             self,
             policy,
             env,
+            reduced_workspace
             args,
             test_env=None):
         self._set_from_args(args)
         self._policy = policy
         self._env = env
+        self._reduced_workspace = reduced_workspace
         self._test_env = self._env if test_env is None else test_env
-        if self._normalize_obs:
-            assert isinstance(env.observation_space, Box)
-            self._obs_normalizer = EmpiricalNormalizer(
-                shape=env.observation_space.shape)
 
         # prepare log directory
         self._output_dir = prepare_output_dir(
@@ -64,58 +63,8 @@ class Trainer:
             self._checkpoint.restore(self._latest_path_ckpt)
             self.logger.info("Restored {}".format(self._latest_path_ckpt))
 
-    def __call__(self):
-        total_steps = 0
+    def __call__(self,replay_buffer, episode_return, total_steps):
         tf.summary.experimental.set_step(total_steps)
-        episode_steps = 0
-        episode_return = 0
-        episode_start_time = time.perf_counter()
-        n_episode = 0
-
-        replay_buffer = get_replay_buffer(
-            self._policy, self._env, self._use_prioritized_rb,
-            self._use_nstep_rb, self._n_step)
-
-        obs = self._env.reset()
-
-        #Concatenate position observation with start, goal, and reduced workspace!!
-        obs = [obs, self._env.start, self._env.goal, reduced_workspace]
-
-        while total_steps < self._max_steps:
-            if total_steps < self._policy.n_warmup:
-                action = self._env.action_space.sample()
-            else:
-                action = self._policy.get_action(obs)
-
-            next_obs, reward, done, _ = self._env.step(action)
-            if self._show_progress:
-                self._env.render()
-            episode_steps += 1
-            episode_return += reward
-            total_steps += 1
-            tf.summary.experimental.set_step(total_steps)
-
-            done_flag = done
-            if hasattr(self._env, "_max_episode_steps") and \
-                    episode_steps == self._env._max_episode_steps:
-                done_flag = False
-            replay_buffer.add(obs=obs, act=action,
-                              next_obs=next_obs, rew=reward, done=done_flag)
-            obs = next_obs
-
-            if done or episode_steps == self._episode_max_steps:
-                obs = self._env.reset()
-
-                n_episode += 1
-                fps = episode_steps / (time.perf_counter() - episode_start_time)
-                self.logger.info("Total Epi: {0: 5} Steps: {1: 7} Episode Steps: {2: 5} Return: {3: 5.4f} FPS: {4:5.2f}".format(
-                    n_episode, total_steps, episode_steps, episode_return, fps))
-                tf.summary.scalar(
-                    name="Common/training_return", data=episode_return)
-
-                episode_steps = 0
-                episode_return = 0
-                episode_start_time = time.perf_counter()
 
             if total_steps < self._policy.n_warmup:
                 continue
@@ -147,7 +96,7 @@ class Trainer:
                 self.checkpoint_manager.save()
 
         tf.summary.flush()
-
+    '''
     def evaluate_policy_continuously(self):
         """
         Periodically search the latest checkpoint, and keep evaluating with the latest model until user kills process.
@@ -164,6 +113,7 @@ class Trainer:
                 self._checkpoint.restore(self._latest_path_ckpt)
                 self.logger.info("Restored {}".format(self._latest_path_ckpt))
             self.evaluate_policy(total_steps=0)
+    '''
 
     def evaluate_policy(self, total_steps):
         tf.summary.experimental.set_step(total_steps)
@@ -178,12 +128,20 @@ class Trainer:
             episode_return = 0.
             frames = []
             obs = self._test_env.reset()
+            
+            #Concatenate position observation with start, goal, and reduced workspace!!
+            obs_full = [obs, self._env.start, self._env.goal, self._reduced_workspace]
+
+
             for _ in range(self._episode_max_steps):
-                action = self._policy.get_action(obs, test=True)
+                action = self._policy.get_action(obs_full, test=True)
                 next_obs, reward, done, _ = self._test_env.step(action)
+                #Concatenate position observation with start, goal, and reduced workspace!!
+                next_obs_full = [obs, self._env.start, self._env.goal, self._reduced_workspace]
+                
                 if self._save_test_path:
-                    replay_buffer.add(obs=obs, act=action,
-                                      next_obs=next_obs, rew=reward, done=done)
+                    replay_buffer.add(obs=obs_full, act=action,
+                                      next_obs=next_obs_full, rew=reward, done=done)
 
                 if self._save_test_movie:
                     frames.append(self._test_env.render(mode='rgb_array'))
@@ -191,8 +149,11 @@ class Trainer:
                     self._test_env.render()
                 episode_return += reward
                 obs = next_obs
+                obs_full = next_obs_full
+
                 if done:
                     break
+
             prefix = "step_{0:08d}_epi_{1:02d}_return_{2:010.4f}".format(
                 total_steps, i, episode_return)
             if self._save_test_path:
@@ -202,16 +163,17 @@ class Trainer:
             if self._save_test_movie:
                 frames_to_gif(frames, prefix, self._output_dir)
             avg_test_return += episode_return
+        
         if self._show_test_images:
             images = tf.cast(
                 tf.expand_dims(np.array(obs).transpose(2, 0, 1), axis=3),
                 tf.uint8)
             tf.summary.image('train/input_img', images,)
+        
         return avg_test_return / self._test_episodes
 
     def _set_from_args(self, args):
         # experiment settings
-        self._max_steps = args.max_steps
         self._episode_max_steps = args.episode_max_steps \
             if args.episode_max_steps is not None \
             else args.max_steps
@@ -239,8 +201,6 @@ class Trainer:
         if parser is None:
             parser = argparse.ArgumentParser(conflict_handler='resolve')
         # experiment settings
-        parser.add_argument('--max-steps', type=int, default=int(1e6),
-                            help='Maximum number steps to interact with env.')
         parser.add_argument('--episode-max-steps', type=int, default=int(1e3),
                             help='Maximum steps in an episode')
         parser.add_argument('--n-experiments', type=int, default=1,

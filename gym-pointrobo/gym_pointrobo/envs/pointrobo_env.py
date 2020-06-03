@@ -4,10 +4,11 @@ from gym.utils import seeding
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.ndimage as ndimage
-import sys
-sys.path.insert(1, 'C:/Users/Katharina Hermann/Documents/UniMaster/2.Semester/ADLR/Project/GITHUB/project/lib')
-sys.path.insert(2, '/home/ferenc/Documents/TUM/2019_20_SS/Advanced_Deep_Learning_for_Robotics/project/lib/')
 
+import os
+import sys
+
+sys.path.append(os.path.join(os.getcwd(), "lib"))
 from random_workspace import * 
 
 
@@ -22,7 +23,7 @@ Use it then with:
 class PointroboEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, grid_size, start_pos, goal_pos, workspace, MAX_EPISODE_STEPS):
+    def __init__(self, start_pos, goal_pos, workspace, MAX_EPISODE_STEPS=int(1e3), grid_size=32):
         super(PointroboEnv, self).__init__()
 
         # Size of the 1D-grid
@@ -167,14 +168,13 @@ def image_interpolation(*, img, pixel_size=1, order=1, mode='nearest'):
 
 #***************TEST THE ENVIRONMENT******************************
 if __name__ == '__main__':
-    
     grid_size=32
     num_obj_max=10
     obj_size_avg=5
     workspace=random_workspace(grid_size, num_obj_max, obj_size_avg)
     start, goal = get_start_goal_for_workspace(workspace)
 
-    env = PointroboEnv(grid_size=grid_size, start_pos=start, goal_pos=goal, workspace=workspace, MAX_EPISODE_STEPS=30)
+    env = PointroboEnv( start_pos=start, goal_pos=goal, workspace=workspace)
     obs = env.reset()
     env.render()
 
