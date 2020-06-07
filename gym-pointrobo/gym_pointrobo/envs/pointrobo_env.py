@@ -23,14 +23,13 @@ Use it then with:
 class PointroboEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, MAX_EPISODE_STEPS=int(1e3)):
+    def __init__(self): 
         super(PointroboEnv, self).__init__()
 
         # Initialize the agent
         self.workspace_buffer, self.grid_size, self.buffer_size  = create_workspace_buffer()
-        self.workspace, self.start_pos, self.goal_pos = setup_rndm_workspace_from_buffer(self.workspace_buffer, self.grid_size, self.buffer_size)
+        self.workspace, self.start_pos, self.goal_pos, self.reduced_workspace = setup_rndm_workspace_from_buffer(self.workspace_buffer, self.grid_size, self.buffer_size)
         self.agent_pos = np.asarray(self.start_pos).astype(np.float64)
-        self.MAX_EPISODE_STEPS=MAX_EPISODE_STEPS
         self.current_step=1
 
         # Define action and observation space
@@ -60,9 +59,7 @@ class PointroboEnv(gym.Env):
         #Have we reached the goal?
         if (self.agent_pos[0] == self.goal_pos[0]) and (self.agent_pos[1] == self.goal_pos[1]):
             done = 1
-        #Have we reached the maximum episode steps?
-        elif self.current_step==self.MAX_EPISODE_STEPS:
-            done = 1
+
         #Have we hit an obstacle?
         elif collision_check(self.workspace, self.agent_pos)==1:
             done = 1
@@ -83,7 +80,7 @@ class PointroboEnv(gym.Env):
         """Resets the robot state to the initial state"""
         # here we convert start to float32 to make it more general (we want to use continuous actions)
         
-        self.workspace, self.start_pos, self.goal_pos = setup_rndm_workspace_from_buffer(self.workspace_buffer, self.grid_size, self.buffer_size)
+        self.workspace, self.start_pos, self.goal_pos, self.reduced_workspace = setup_rndm_workspace_from_buffer(self.workspace_buffer, self.grid_size, self.buffer_size)
         self.agent_pos = np.asarray(self.start_pos).astype(np.float64)
 
         
@@ -184,11 +181,11 @@ def setup_rndm_workspace_from_buffer(workspace_buffer, grid_size, buffer_size):
     start, goal = get_start_goal_for_workspace(workspace)
 
     #Shrink workspace to latent space
-    #CAE_model = CAE(pooling='max', latent_dim=16, input_shape=(grid_size, grid_size), conv_filters=[4, 8, 16])
-    #CAE_model.load_weights(os.path.join(os.getcwd(), "models/cae/model_num_5_size_8.h5"))
-    #reduced_workspace = CAE_model.evaluate(workspace)
+    CAE_model = CAE(pooling='max', latent_dim=16, input_shape=(grid_size, grid_size), conv_filters=[4, 8, 16])
+    CAE_model.load_weights(os.path.join(os.getcwd(), "models/cae/model_num_5_size_8.h5"))
+    reduced_workspace = CAE_model.evaluate(workspace)
     
-    return workspace, start, goal, #reduced_workspace
+    return workspace, start, goal, reduced_workspace
 
 
 

@@ -21,10 +21,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     #Initialize the environment
-    #env = gym.make(args.env_name)
-    #test_env = gym.make(args.env_name)
-    env = PointroboEnv()
-    test_env = PointroboEnv()
+    env = gym.make(args.env_name)
+    test_env = gym.make(args.env_name)
+    #env = PointroboEnv()
+    #test_env = PointroboEnv()
 
 
 

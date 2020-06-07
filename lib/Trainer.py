@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import logging
 import argparse
@@ -102,8 +103,9 @@ class Trainer:
             #Concatenate position observation with start, goal, and reduced workspace!!
             next_obs_full=[next_obs, self._env.start, self._env.goal, self._env.reduced_workspace]
 
-            # Add obersvation to the trajectory storage
-            trajectory.add({'workspace':self._env.workspace,'position':obs, 'next_position':next_obs,'start':self._env.start,'goal':self._env.goal, 'action':action, 'reward'=reward, 'done':done})
+            #Add obersvation to the trajectory storage
+            self.trajectory.append({'workspace':self._env.workspace,'position':obs,
+                'next_position':next_obs,'start':self._env.start,'goal':self._env.goal, 'action':action, 'reward':reward, 'done':done})
 
             #Visualize environment if "show_progess"
             if self._show_progress:
@@ -124,36 +126,36 @@ class Trainer:
             # This is where the workspace relabeling comes into play!:
             #If the robot crashed (reward=-1), then the whole trajectory must be relabeld with a new workspace, a new goal_position, and a reward of 1 for the last element.
 
-            if reward == -1
+            if reward == -1:
                 # Add fail obersvation to replay buffer
                 replay_buffer.add(obs=obs_full, act=action,
                               next_obs=next_obs_full, rew=reward, done=done_flag)
 
                 # Create new workspace ################ Insert better workspace relbeling function later ############
                 buffer_index= np.random.randint(low=0, high=self._env.buffer_size-1, size=None)
-                relabeld_workspace=self._env.workspace_buffer[buffer_index]
+                relabeled_workspace=self._env.workspace_buffer[buffer_index]
                 
                 #Shrink workspace to latent space
                 CAE_model = CAE(pooling='max', latent_dim=16, input_shape=(self._env.grid_size, self._env.grid_size), conv_filters=[4, 8, 16])
                 CAE_model.load_weights(os.path.join(os.getcwd(), "models/cae/model_num_5_size_8.h5"))
-                relabeld_reduced_workspace = CAE_model.evaluate(relabeld_wokspace)
+                relabeled_reduced_workspace = CAE_model.evaluate(relabeled_workspace)
                 
                 #Relabel all observations in the trajectory so far with the new workspace and insert to replay buffer
-                relabeld goal = self.trajectory[-1]["next_position"]
+                relabeld_goal = self.trajectory[-1]["next_position"]
                 for tra_i in self.trajectory[:-1]:
-                    obs_relabeld = [tra_i["position"], self._env.start, relabeld goal, relabeld_reduced_workspace]
-                    next_obs_relabeld = [tra_i["next_position"], self._env.start, relabeld goal, relabeld_reduced_workspace] 
+                    obs_relabeld = [tra_i["position"], self._env.start, relabeld_goal, relabeled_reduced_workspace]
+                    next_obs_relabeld = [tra_i["next_position"], self._env.start, relabeld_goal, relabeled_reduced_workspace] 
 
                     replay_buffer.add(obs=obs_relabeld, act=tra_i["action"],
                                 next_obs=next_obs_relabeld, rew=tra_i["reward"], done=tra_i["done"])
 
                 # The last element in the trajectory must be relabeld with a new reward=1 (goal reached)
                 last_traj_element=self.trajectory[-1]
-                obs_relabeld = [last_traj_element["position"], self._env.start, relabeld goal, relabeld_reduced_workspace]
-                    next_obs_relabeld = [last_traj_element["next_position"], self._env.start, relabeld goal, relabeld_reduced_workspace] 
+                obs_relabeld = [last_traj_element["position"], self._env.start, relabeld_goal, relabeled_reduced_workspace]
+                next_obs_relabeld = [last_traj_element["next_position"], self._env.start, relabeld_goal, relabeled_reduced_workspace] 
 
-                    replay_buffer.add(obs=obs_relabeld, act=last_traj_element["action"],
-                                next_obs=next_obs_relabeld, rew=1, done=last_traj_element["done"])
+                replay_buffer.add(obs=obs_relabeld, act=last_traj_element["action"],
+                            next_obs=next_obs_relabeld, rew=1, done=last_traj_element["done"])
 
             #Normal observation adding to replay buffer 
             else:
@@ -193,14 +195,14 @@ class Trainer:
                 samples = replay_buffer.sample(self._policy.batch_size)
                 
                 with tf.summary.record_if(total_steps % self._save_summary_interval == 0):
-                    # Here we train 
+                    # Here we update the Actor-NN, Critic-NN, and the Target-Actor-NN & Target-Critic-NN after computing the Critic-loss and the Actor-loss
                     self._policy.train(
                         samples["obs"], samples["act"], samples["next_obs"],
                         samples["rew"], np.array(samples["done"], dtype=np.float32),
                         None if not self._use_prioritized_rb else samples["weights"])
                
                 if self._use_prioritized_rb:
-                    #Here we compute the Loss/error for the ????-NN
+                    #Here we compute the Td-Critic-Loss/error
                     td_error = self._policy.compute_td_error(
                         samples["obs"], samples["act"], samples["next_obs"],
                         samples["rew"], np.array(samples["done"], dtype=np.float32))
@@ -258,66 +260,65 @@ class Trainer:
             frames = []
             obs = self._test_env.reset()
             #Concatenate position observation with start, goal, and reduced workspace!!
-            obs_full = [obs, self._env.start, self._env.goal, self.self._env.reduced_workspace]
+            obs_full = [obs, self._env.start, self._env.goal, self._env.reduced_workspace]
 
             for _ in range(self._episode_max_steps):
                 action = self._policy.get_action(obs_full, test=True)
 
                 next_obs, reward, done, _ = self._test_env.step(action)
                 #Concatenate position observation with start, goal, and reduced workspace!!
-                next_obs_full = [obs, self._env.start, self._env.goal, self.self._env.reduced_workspace]
+                next_obs_full = [obs, self._env.start, self._env.goal, self._env.reduced_workspace]
 
                 # Add obersvation to the trajectory storage
-                trajectory.add({'workspace':self._env.workspace,'position':obs, 'next_position':next_obs,'start':self._env.start,'goal':self._env.goal, 'action':action, 'reward'=reward, 'done':done})
+                self.trajectory.append({'workspace':self._env.workspace,'position':obs,
+                    'next_position':next_obs,'start':self._env.start,'goal':self._env.goal, 'action':action, 'reward':reward, 'done':done})
                 
                 if self._save_test_path:
-                    if reward == -1
+                    if reward == -1:
                         # Add fail obersvation to replay buffer
                         replay_buffer.add(obs=obs_full, act=action,
-                                    next_obs=next_obs_full, rew=reward, done=done_flag)
+                                    next_obs=next_obs_full, rew=reward, done=done)
 
                         # Create new workspace ################ Insert better workspace relbeling function later ############
                         buffer_index= np.random.randint(low=0, high=self._env.buffer_size-1, size=None)
-                        relabeld_workspace=self._env.workspace_buffer[buffer_index]
+                        relabeled_workspace=self._env.workspace_buffer[buffer_index]
                         
                         #Shrink workspace to latent space
                         CAE_model = CAE(pooling='max', latent_dim=16, input_shape=(self._env.grid_size, self._env.grid_size), conv_filters=[4, 8, 16])
                         CAE_model.load_weights(os.path.join(os.getcwd(), "models/cae/model_num_5_size_8.h5"))
-                        relabeld_reduced_workspace = CAE_model.evaluate(relabeld_wokspace)
+                        relabeled_reduced_workspace = CAE_model.evaluate(relabeled_workspace)
                         
                         #Relabel all observations in the trajectory so far with the new workspace and insert to replay buffer
-                        relabeld goal = self.trajectory[-1]["next_position"]
+                        relabeld_goal = self.trajectory[-1]["next_position"]
                         for tra_i in self.trajectory[:-1]:
-                            obs_relabeld = [tra_i["position"], self._env.start, relabeld goal, relabeld_reduced_workspace]
-                            next_obs_relabeld = [tra_i["next_position"], self._env.start, relabeld goal, relabeld_reduced_workspace] 
+                            obs_relabeld = [tra_i["position"], self._env.start, relabeld_goal, relabeled_reduced_workspace]
+                            next_obs_relabeld = [tra_i["next_position"], self._env.start, relabeld_goal, relabeled_reduced_workspace] 
 
                             replay_buffer.add(obs=obs_relabeld, act=tra_i["action"],
                                         next_obs=next_obs_relabeld, rew=tra_i["reward"], done=tra_i["done"])
 
                         # The last element in the trajectory must be relabeld with a new reward=1 (goal reached)
                         last_traj_element=self.trajectory[-1]
-                        obs_relabeld = [last_traj_element["position"], self._env.start, relabeld goal, relabeld_reduced_workspace]
-                            next_obs_relabeld = [last_traj_element["next_position"], self._env.start, relabeld goal, relabeld_reduced_workspace] 
+                        obs_relabeld = [last_traj_element["position"], self._env.start, relabeld_goal, relabeled_reduced_workspace]
+                        next_obs_relabeld = [last_traj_element["next_position"], self._env.start, relabeld_goal, relabeled_reduced_workspace] 
 
-                            replay_buffer.add(obs=obs_relabeld, act=last_traj_element["action"],
-                                        next_obs=next_obs_relabeld, rew=1, done=last_traj_element["done"])
+                        replay_buffer.add(obs=obs_relabeld, act=last_traj_element["action"],
+                                    next_obs=next_obs_relabeld, rew=1, done=last_traj_element["done"])
 
                     else:
                         # Add success obersvation to replay buffer
                         replay_buffer.add(obs=obs_full, act=action,
-                                    next_obs=next_obs_full, rew=reward, done=done_flag)
+                                    next_obs=next_obs_full, rew=reward, done=done)
 
                 if self._save_test_movie:
                     frames.append(self._test_env.render(mode='rgb_array'))
 
                 elif self._show_test_progress:
                     self._test_env.render()
+
                 episode_return += reward
                 obs = next_obs
                 obs_full = next_obs_full
-
-                # Add obersvation to the trajectory storage
-                self.trajectory.add({'workspace':self._env.workspace,'position':obs,'start':self._env.start,'goal':self._env.goal})
                 
                 if done:
                     break
@@ -325,13 +326,17 @@ class Trainer:
 
             prefix = "step_{0:08d}_epi_{1:02d}_return_{2:010.4f}".format(
                 total_steps, i, episode_return)
+
             if self._save_test_path:
                 save_path(replay_buffer._encode_sample(np.arange(self._episode_max_steps)),
                           os.path.join(self._output_dir, prefix + ".pkl"))
                 replay_buffer.clear()
+
             if self._save_test_movie:
                 frames_to_gif(frames, prefix, self._output_dir)
+            
             avg_test_return += episode_return
+
         if self._show_test_images:
             images = tf.cast(
                 tf.expand_dims(np.array(obs).transpose(2, 0, 1), axis=3),
