@@ -5,3 +5,4 @@ Untitled.ipynb
 .vscode/adlr_cpu.code-workspace
 workspaces/
 pseudo_algorithm.txt
+lib/__pycache__
