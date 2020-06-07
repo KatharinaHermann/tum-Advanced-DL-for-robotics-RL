@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import logging
 import argparse
@@ -12,8 +13,8 @@ from tf2rl.misc.prepare_output_dir import prepare_output_dir
 from tf2rl.misc.initialize_logger import initialize_logger
 from tf2rl.envs.normalizer import EmpiricalNormalizer
 
-
-from cae import CAE #####################
+sys.path.append(os.path.join(os.getcwd(), "lib"))
+from cae import CAE 
 
 if tf.config.experimental.list_physical_devices('GPU'):
     for cur_device in tf.config.experimental.list_physical_devices("GPU"):

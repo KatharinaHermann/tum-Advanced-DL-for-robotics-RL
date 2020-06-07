@@ -9,6 +9,7 @@ import gym_pointrobo
 from tf2rl.algos.ddpg import DDPG
 
 sys.path.append(os.path.join(os.getcwd(), "lib"))
+sys.path.append(os.path.join(os.getcwd(), "lib"))
 from cae import CAE 
 from Trainer import Trainer
 from Exploration import Exploration
@@ -49,7 +50,7 @@ if __name__ == '__main__':
     n_episode = 1
     max_steps = int(1e6)
     
-    while total_steps < max_steps
+    while total_steps < max_steps:
     
         # Make an episode of explorations in the sampled workspace
         explorer = Exploration(policy, env, reduced_workspace, workspace_buffer, args, test_env=test_env)
@@ -76,7 +77,7 @@ def create_workspace_buffer():
     num_obj_max=10
     obj_size_avg=5
 
-    for i in range (buffer_size)
+    for i in range (buffer_size):
         random_workspace=random_workspace(grid_size, num_obj_max, obj_size_avg)
         workspace_buffer.append(random_workspace)
     return workspace_buffer
