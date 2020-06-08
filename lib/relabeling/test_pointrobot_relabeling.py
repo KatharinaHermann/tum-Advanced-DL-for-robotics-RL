@@ -15,14 +15,14 @@ def test_remove_obstacle():
     workspace = np.zeros((32, 32))
     workspace[5:10, 12:19] = 1
     etalon_workspace = workspace
-    workspace[22:25, 14:20] = 1
+    workspace[22:, :5] = 1
 
-    obstacle_entries = [(0, 0) for _ in range(5)]
-    obstacle_entries[0] = (22, 14)
-    obstacle_entries[1] = (22, 19)
-    obstacle_entries[2] = (24, 19)
-    obstacle_entries[3] = (24, 14)
-    obstacle_entries[4] = (23, 17)
+    obstacle_entries = []
+    obstacle_entries.append((22, 0))
+    obstacle_entries.append((22, 4))
+    obstacle_entries.append((31, 4))
+    obstacle_entries.append((31, 0))
+    obstacle_entries.append((5, 2))
 
     relabeler = PointrobotRelabeler(ws_shape=(32, 32),
                                     mode='erease')
@@ -77,22 +77,36 @@ def test_erease_relabeling():
     etalon_workspace = workspace
     workspace[22:, :5] = 1
 
-    obstacle_entries = [(0, 0) for _ in range(5)]
-    obstacle_entries[0] = (22, 0)
-    obstacle_entries[1] = (22, 4)
-    obstacle_entries[2] = (31, 4)
-    obstacle_entries[3] = (31, 0)
-    obstacle_entries[4] = (25, 2)
-
+    env = test_env(radius=0.5)
     relabeler = PointrobotRelabeler(ws_shape=(32, 32),
                                     mode='erease')
 
+    trajectory = []
+    trajectory.append({'workspace': workspace, 'position': np.array([21.0, 5.0]), 'done': False, 'reward': -0.01})
+    trajectory.append({'workspace': workspace, 'position': np.array([21.3, 4.7]), 'done': False, 'reward': -0.01})
+    trajectory.append({'workspace': workspace, 'position': np.array([21.6, 4.4]), 'done': True, 'reward': -1})
+    etalon_relabeled_traj = []
+    etalon_relabeled_traj.append({'workspace': etalon_workspace, 'position': np.array([21.0, 5.0]), 'done': False, 'reward': -0.01})
+    etalon_relabeled_traj.append({'workspace': etalon_workspace, 'position': np.array([21.3, 4.7]), 'done': False, 'reward': -0.01})
+    etalon_relabeled_traj.append({'workspace': etalon_workspace, 'position': np.array([21.6, 4.4]), 'done': True, 'reward': 1})
 
+    relabeled_traj = relabeler.relabel(trajectory, env)
+
+    for i in range(len(trajectory)):
+        assert (etalon_relabeled_traj[i]['workspace'] == relabeled_traj[i]['workspace']).all(), \
+                                                    "workspace in point {} is not correct".format(i)
+        assert (etalon_relabeled_traj[i]['position'] == relabeled_traj[i]['position']).all(), \
+                                                    "postion in point {} is not correct".format(i)
+        assert etalon_relabeled_traj[i]['done'] == relabeled_traj[i]['done'], \
+                                                    "done in point {} is not correct".format(i)
+        assert etalon_relabeled_traj[i]['reward'] == relabeled_traj[i]['reward'], \
+                                                    "reward in point {} is not correct".format(i)
 
 
 if __name__ == '__main__':
 
     test_remove_obstacle()
     test_find_collision_entries()
+    test_erease_relabeling()
     print('All tests has run successfully!')
 

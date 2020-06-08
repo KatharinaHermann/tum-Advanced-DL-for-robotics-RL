@@ -33,11 +33,11 @@ class PointrobotRelabeler:
         """creates a new workspace and goal for the given trajectory."""
 
         if self._mode == 'erease':
-            relabeled_trajectory = self._erease_relabel(trajectory)
+            relabeled_trajectory = self._erease_relabel(trajectory, env)
         elif self._mode == 'random':
-            relabeled_trajectory = self._random_relabel(trajectory)
+            relabeled_trajectory = self._random_relabel(trajectory, env)
         elif self._mode == 'slding':
-            relabeled_trajectory = self._sliding_relabel(trajectory)
+            relabeled_trajectory = self._sliding_relabel(trajectory, env)
 
         return relabeled_trajectory
 
