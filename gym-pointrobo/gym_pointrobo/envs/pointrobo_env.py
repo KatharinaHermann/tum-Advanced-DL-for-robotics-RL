@@ -10,6 +10,7 @@ import sys
 
 sys.path.append(os.path.join(os.getcwd(), "lib"))
 from random_workspace import * 
+from cae.cae import CAE
 
 
 """
@@ -23,17 +24,13 @@ Use it then with:
 class PointroboEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, start_pos, goal_pos, workspace, MAX_EPISODE_STEPS=int(1e3), grid_size=32):
+    def __init__(self): 
         super(PointroboEnv, self).__init__()
 
-        # Size of the 1D-grid
-        self.grid_size = grid_size
-        # Initialize the agent at the right of the grid
-        self.agent_pos = np.asarray(start_pos).astype(np.float64)
-        self.start_pos = start_pos
-        self.goal_pos = goal_pos
-        self.workspace= workspace
-        self.MAX_EPISODE_STEPS=MAX_EPISODE_STEPS
+        # Initialize the agent
+        self.workspace_buffer, self.grid_size, self.buffer_size  = create_workspace_buffer()
+        self.workspace, self.start_pos, self.goal_pos, self.reduced_workspace = setup_rndm_workspace_from_buffer(self.workspace_buffer, self.grid_size, self.buffer_size)
+        self.agent_pos = np.asarray(self.start_pos).astype(np.float64)
         self.current_step=1
 
         # Define action and observation space
@@ -63,9 +60,7 @@ class PointroboEnv(gym.Env):
         #Have we reached the goal?
         if (self.agent_pos[0] == self.goal_pos[0]) and (self.agent_pos[1] == self.goal_pos[1]):
             done = 1
-        #Have we reached the maximum episode steps?
-        elif self.current_step==self.MAX_EPISODE_STEPS:
-            done = 1
+
         #Have we hit an obstacle?
         elif collision_check(self.workspace, self.agent_pos)==1:
             done = 1
@@ -85,7 +80,10 @@ class PointroboEnv(gym.Env):
     def reset(self):
         """Resets the robot state to the initial state"""
         # here we convert start to float32 to make it more general (we want to use continuous actions)
+        
+        self.workspace, self.start_pos, self.goal_pos, self.reduced_workspace = setup_rndm_workspace_from_buffer(self.workspace_buffer, self.grid_size, self.buffer_size)
         self.agent_pos = np.asarray(self.start_pos).astype(np.float64)
+
         
         return self.agent_pos
 
@@ -164,17 +162,38 @@ def image_interpolation(*, img, pixel_size=1, order=1, mode='nearest'):
 
     return interp_fun
 
+def create_workspace_buffer():
+    #Create workspace buffer of size "buffer_size"
+    workspace_buffer = []
+    buffer_size = 100
+    grid_size = 32
+    num_obj_max = 10
+    obj_size_avg = 5
+
+    for i in range (buffer_size):
+        random_ws = random_workspace(grid_size, num_obj_max, obj_size_avg)
+        workspace_buffer.append(random_ws)
+    return workspace_buffer, grid_size, buffer_size
+
+def setup_rndm_workspace_from_buffer(workspace_buffer, grid_size, buffer_size):
+    #Choose random workspace from buffer
+    buffer_index = np.random.randint(low=0, high=buffer_size-1, size=None)
+    workspace = workspace_buffer[buffer_index]
+    start, goal = get_start_goal_for_workspace(workspace)
+
+    #Shrink workspace to latent space
+    CAE_model = CAE(pooling='max', latent_dim=16, input_shape=(grid_size, grid_size), conv_filters=[4, 8, 16])
+    CAE_model.load_weights(os.path.join(os.getcwd(), "models/cae/model_num_5_size_8.h5"))
+    reduced_workspace = CAE_model.evaluate(workspace)
+    
+    return workspace, start, goal, reduced_workspace
+
 
 
 #***************TEST THE ENVIRONMENT******************************
 if __name__ == '__main__':
-    grid_size=32
-    num_obj_max=10
-    obj_size_avg=5
-    workspace=random_workspace(grid_size, num_obj_max, obj_size_avg)
-    start, goal = get_start_goal_for_workspace(workspace)
 
-    env = PointroboEnv( start_pos=start, goal_pos=goal, workspace=workspace)
+    env = PointroboEnv()
     obs = env.reset()
     env.render()
 
