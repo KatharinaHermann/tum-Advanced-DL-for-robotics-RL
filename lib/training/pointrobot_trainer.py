@@ -36,6 +36,17 @@ class Trainer:
         self._policy = policy
         self._env = env
         self._test_env = self._env if test_env is None else test_env
+
+        # Convolutional Autoencoder:
+        self._CAE = CAE(pooling=self._cae_pooling,
+                        latent_dim=self._cae_latent_dim,
+                        input_shape=self._env.workspace.shape,
+                        conv_filters=self._cae_conv_filters)
+        self._CAE.build(input_shape=(1, self._env.workspace.shape[0], self._env.workspace.shape[1], 1))
+        self._CAE.load_weights(filepath=self._cae_weights_path)
+        for k, _ in model._get_trainable_state().items():
+            k.trainable = False
+
         #Initialize array for trajectory storage
         self.trajectory=[]
 
@@ -85,10 +96,14 @@ class Trainer:
             self._policy, self._env, self._use_prioritized_rb,
             self._use_nstep_rb, self._n_step)
 
+        # Empty trajectory list:
+        self.trajectory = []
+
         obs = self._env.reset()
         
         #Concatenate position observation with start, goal, and reduced workspace!!
-        obs_full = [obs, self._env.start, self._env.goal, self._env.reduced_workspace]
+        reduced_workspace = self._CAE.evaluate(self._env.workspace)
+        obs_full = [obs, self._env.start, self._env.goal, reduced_workspace]
 
         while total_steps < self._max_steps:
             #Get action randomly for warmup /from Actor-NN otherwise
@@ -369,6 +384,11 @@ class Trainer:
         self._save_test_path = args.save_test_path
         self._save_test_movie = args.save_test_movie
         self._show_test_images = args.show_test_images
+        # autoencoder settings
+        self._cae_pooling = args.cae_pooling
+        self._cae_latent_dim = args.cae_latent_dim
+        self._cae_conv_filters = args.cae_conv_filters
+        self._cae_weights_path = args.cae_weights_path
 
     @staticmethod
     def get_argument(parser=None):
@@ -420,4 +440,14 @@ class Trainer:
         # others
         parser.add_argument('--logging-level', choices=['DEBUG', 'INFO', 'WARNING'],
                             default='INFO', help='Logging level')
+        # autoencoder related
+        parser.add_argument('--cae_pooling', type=str, default='max',
+                            help='pooling type of the CAE. default: max')
+        parser.add_argument('--cae_latent_dim', type=int, default=16,
+                            help='latent dimension of the CAE. default: 16')
+        parser.add_argument('--cae_conv_filters', type=int, nargs='+', default=[4, 8, 16],
+                            help='number of filters in the conv layers. default: [4, 8, 16]')
+        parser.add_argument('--cae_weights_path', type=str, default='models/cae/model_num_5_size_8.h5',
+                            help='path to saved CAE weights. default: models/cae/model_num_5_size_8.h5')
+
         return parser

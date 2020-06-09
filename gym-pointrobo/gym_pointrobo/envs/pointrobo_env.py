@@ -8,9 +8,9 @@ import scipy.ndimage as ndimage
 import os
 import sys
 
-sys.path.append(os.path.join(os.getcwd(), "lib"))
-from random_workspace import * 
-from cae.cae import CAE
+#sys.path.append(os.path.join(os.getcwd(), "lib"))
+from lib.random_workspace import * 
+from lib.cae.cae import CAE
 
 
 """
@@ -29,7 +29,7 @@ class PointroboEnv(gym.Env):
 
         # Initialize the agent
         self.workspace_buffer, self.grid_size, self.buffer_size  = create_workspace_buffer()
-        self.workspace, self.start_pos, self.goal_pos, self.reduced_workspace = setup_rndm_workspace_from_buffer(self.workspace_buffer, self.grid_size, self.buffer_size)
+        self.workspace, self.start_pos, self.goal_pos = setup_rndm_workspace_from_buffer(self.workspace_buffer, self.grid_size, self.buffer_size)
         self.agent_pos = np.asarray(self.start_pos).astype(np.float64)
         self.current_step=1
 
@@ -81,7 +81,7 @@ class PointroboEnv(gym.Env):
         """Resets the robot state to the initial state"""
         # here we convert start to float32 to make it more general (we want to use continuous actions)
         
-        self.workspace, self.start_pos, self.goal_pos, self.reduced_workspace = setup_rndm_workspace_from_buffer(self.workspace_buffer, self.grid_size, self.buffer_size)
+        self.workspace, self.start_pos, self.goal_pos = setup_rndm_workspace_from_buffer(self.workspace_buffer, self.grid_size, self.buffer_size)
         self.agent_pos = np.asarray(self.start_pos).astype(np.float64)
 
         
@@ -180,13 +180,8 @@ def setup_rndm_workspace_from_buffer(workspace_buffer, grid_size, buffer_size):
     buffer_index = np.random.randint(low=0, high=buffer_size-1, size=None)
     workspace = workspace_buffer[buffer_index]
     start, goal = get_start_goal_for_workspace(workspace)
-
-    #Shrink workspace to latent space
-    CAE_model = CAE(pooling='max', latent_dim=16, input_shape=(grid_size, grid_size), conv_filters=[4, 8, 16])
-    CAE_model.load_weights(os.path.join(os.getcwd(), "models/cae/model_num_5_size_8.h5"))
-    reduced_workspace = CAE_model.evaluate(workspace)
     
-    return workspace, start, goal, reduced_workspace
+    return workspace, start, goal
 
 
 
