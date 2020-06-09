@@ -143,4 +143,60 @@ class PointrobotRelabeler:
         return collision_entries
 
 
+    def _shift_from_boarder(self, trajectory, env, shift_distance):
+        """Shifts the total workspace and trajectory so that it does not end at the boarder of the workspace."""
+
+        shift_distance = int(shift_distance)
+        last_pos = trajectory[-1]['position']
+        workspace = trajectory[0]['workspace']
+        radius = env.radius
+
+        # shifting the workspace. With the if conditions it is decided to which wall is the robot near:
+        if last_pos[0] <= radius:
+            new_workspace = np.zeros_like(workspace)
+            new_workspace[shift_distance: , :] = workspace[ :(-shift_distance), :]
+            workspace = new_workspace
+            for point in trajectory:
+                point['position'][0] += shift_distance
+                point['goal'][0] += shift_distance
+
+        elif last_pos[0] >= (workspace.shape[0] - 1 - radius):
+            new_workspace = np.zeros_like(workspace)
+            new_workspace[ :(-shift_distance), :] = workspace[shift_distance: , :]
+            workspace = new_workspace
+            for point in trajectory:
+                point['position'][0] -= shift_distance
+                point['goal'][0] -= shift_distance
+
+        if last_pos[1] <= radius:
+            new_workspace = np.zeros_like(workspace)
+            new_workspace[ :, shift_distance:] = workspace[ :, :(-shift_distance)]
+            workspace = new_workspace
+            for point in trajectory:
+                point['position'][1] += shift_distance
+                point['goal'][1] += shift_distance
+                
+        elif last_pos[1] >= (workspace.shape[1] - 1 - radius):
+            new_workspace = np.zeros_like(workspace)
+            new_workspace[ :, :(-shift_distance)] = workspace[ :, shift_distance: ]
+            workspace = new_workspace
+            for point in trajectory:
+                point['position'][1] -= shift_distance
+                point['goal'][1] -= shift_distance
+
+        for point in trajectory:
+            point['workspace'] = workspace
+
+        # remove points from trajectory which have out of bunds coordinates after shifting:
+        trajectory_to_return = []
+        for point in trajectory:
+            if (point['position'] > radius).all() and\
+                (point['position'] < workspace.shape[0] - 1 - radius).all():
+                trajectory_to_return.append(point)
+
+        return trajectory_to_return
+        
+
+
+
 
