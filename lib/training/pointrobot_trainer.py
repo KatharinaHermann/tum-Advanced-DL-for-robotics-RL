@@ -14,8 +14,9 @@ from tf2rl.misc.prepare_output_dir import prepare_output_dir
 from tf2rl.misc.initialize_logger import initialize_logger
 from tf2rl.envs.normalizer import EmpiricalNormalizer
 
-sys.path.append(os.path.join(os.getcwd(), "lib"))
-from cae.cae import CAE
+# sys.path.append(os.path.join(os.getcwd(), "lib"))
+from lib.cae.cae import CAE
+from lib.relabeling.pointrobot_relabeling import PointrobotRelabeler
 
 
 if tf.config.experimental.list_physical_devices('GPU'):
