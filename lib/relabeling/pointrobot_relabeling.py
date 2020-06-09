@@ -20,10 +20,11 @@ class PointrobotRelabeler:
         Args:
             - ws_shape: tuple, (ws_height, ws_width)
             - mode: str, determines the mode of the workspace generation.
-                    possible values are: 'random', ...
+                    possible values are: 'erease', 'random', 'sliding'
         """
 
-        assert mode in ['erease', 'random', 'sliding'] , 'mode should be either \'erease\', \'random\' or \'sliding\'. Received {}'.format(mode)
+        assert mode in ['erease', 'random', 'sliding'] ,\
+            'mode should be either \'erease\', \'random\' or \'sliding\'. Received {}'.format(mode)
 
         self._ws_shape = ws_shape
         self._mode = mode
@@ -43,25 +44,42 @@ class PointrobotRelabeler:
 
 
     def _erease_relabel(self, trajectory, env):
-        """Simply removes the obsticle into which the agent has collided."""
+        """Simply removes the obsticle into which the agent has collided.
+        If the episonde has ended unsuccessfully, because the robot has collided 
+        into an obstacle (or possibly more than one obstacles at the same time.),
+        these obstacles are removed.
+        If the episode has ended, because the agent has left the workspace, (that is,
+        no obstacle has been found, with thich it has collided.), the workspace, the trajectory
+        points and the goal is shifted away from the boarder with a random value.
+        """
 
-        relabeled_trajectory = trajectory
         workspace = trajectory[0]['workspace']
-        last_pos = trajectory[-1]['position']
+
         # find the entries of the matrix where the robot has collided.:
         obstacle_entries = self._find_collision_entries(trajectory, env)
-        for obstacle_entry in obstacle_entries:
-            workspace = self._remove_obstacle(workspace=workspace, obstacle_entry=obstacle_entry)
 
+        if obstacle_entries:
+            # if the robot really has collided.
+            for obstacle_entry in obstacle_entries:
+                workspace = self._remove_obstacle(workspace=workspace, obstacle_entry=obstacle_entry)
+            for data_point in trajectory:
+                data_point['workspace'] = workspace
+        else:
+            # if the obstacle has just left the workspace without collision.
+            # choosing a distance with which the ws and the trajectory will be shifted away from the boarder:
+            shift_distance = np.random.randint(low=1, high=4)
+            trajectory = self._shift_from_boarder(trajectory=trajectory,
+                                     env=env,
+                                     shift_distance=shift_distance)
+
+        # filling in the relabeled trajectory with the new goal state:
+        new_goal = trajectory[-1]['position']
         for data_point in trajectory:
-            data_point['workspace'] = workspace
-            data_point['goal'] = last_pos
-
-        # giving the last state the reward +1:
+            data_point['goal'] = new_goal
         trajectory[-1]['reward'] = 1
         trajectory[-1]['done'] = True
 
-        return relabeled_trajectory
+        return trajectory
 
 
     def _random_relabel(self, trajectory, env):
@@ -120,17 +138,17 @@ class PointrobotRelabeler:
         radius = env.radius
         # range of distances to check in every direction:
         # (it is possible that the radius of the robot is bigger than the grid size, this is why this is necessary.)
-        distances = list(range(int(radius)))
+        distances = list(range(int(radius) + 1))
         distances.append(radius)
 
         directions_to_check = [np.array([1, 0]), 
-                               np.array([math.sqrt(2), math.sqrt(2)]), 
+                               np.array([math.sqrt(2) / 2, math.sqrt(2) / 2]), 
                                np.array([0, 1]),
-                               np.array([-math.sqrt(2), math.sqrt(2)]), 
+                               np.array([-math.sqrt(2) / 2, math.sqrt(2) / 2]), 
                                np.array([-1, 0]),
-                               np.array([-math.sqrt(2), -math.sqrt(2)]), 
+                               np.array([-math.sqrt(2) / 2, -math.sqrt(2) / 2]), 
                                np.array([0, -1]),
-                               np.array([math.sqrt(2), -math.sqrt(2)])]
+                               np.array([math.sqrt(2) / 2, -math.sqrt(2) / 2])]
         
         collision_entries = []
         for direction in directions_to_check:
@@ -195,8 +213,3 @@ class PointrobotRelabeler:
                 trajectory_to_return.append(point)
 
         return trajectory_to_return
-        
-
-
-
-
