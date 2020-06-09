@@ -7,7 +7,10 @@ class PointrobotRelabeler:
     It generates a workspace for a given failed training trajectory for which
     the trajectory would have been a successful one. There are several strategies
     implemented for this purpose:
-        - erease: Simply removes the object with which the agent has collided into. 
+        In all cases if the episode has ended because the agent has left the workspace,
+        the workspace, the trajectory points and the goal is shifted away from the boarder
+        with some value. (Possibly a random value)
+        - erease: Simply removes the object with which the agent has collided. 
         - random: Randomly tries to throw in obstacles, and generates a workspace
                  in which the trajectory is feasible, however possibly not very effective.
         - sliding: Slides the obstacles of the original workspace and hence creates a workspace,
