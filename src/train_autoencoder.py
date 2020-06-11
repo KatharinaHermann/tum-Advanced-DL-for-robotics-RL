@@ -46,7 +46,7 @@ plt.plot(trainer._val_losses)
 
 # check out the model:
 
-path = os.path.join('workspaces/', ('ws_' + str(args.num_workspaces - 1) + '.csv'))
+path = os.path.join('../workspaces/', ('ws_' + str(args.num_workspaces - 1) + '.csv'))
 x = np.expand_dims(np.loadtxt(path), axis=2).astype('float32')
 x = np.expand_dims(x, axis=0)
 x = tf.convert_to_tensor(x)

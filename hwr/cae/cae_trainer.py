@@ -202,13 +202,13 @@ class CAEtrainer():
                             help='Whether to shuffle or not during training. default: True')
         #parser.add_argument('--pos_weight', type=float, default=2,
         #                    help='weight for positive weighting in cross entropy loss. default: 2')
-        parser.add_argument('--model_dir', type=str, default='models/cae',
+        parser.add_argument('--model_dir', type=str, default='../models/cae',
                             help='directory to save the best trained model. default: models/cae')
         
         # workspace related
         parser.add_argument('--gen_workspace', type=bool, default=False, 
                             help='If gen_workspace==False, saved workspaces are used. default: False')
-        parser.add_argument('--workspace_dir', type=str, default='workspaces',
+        parser.add_argument('--workspace_dir', type=str, default='../workspaces',
                             help='folder where the generated workspaces are stored. default: workspaces')
         parser.add_argument('--num_workspaces', type=int, default=1000,
                             help='number of workspaces to use for training. default: 1000')
