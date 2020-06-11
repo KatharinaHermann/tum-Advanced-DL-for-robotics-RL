@@ -9,3 +9,6 @@ lib/__pycache__/
 lib/cae/__pycache__/
 lib/relabeling/__pycache__/
 .vscode/
+build/
+dist/
+hwr.egg-info/

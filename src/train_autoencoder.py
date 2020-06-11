@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 
 from tensorflow.data import Dataset
 from tensorflow.keras.losses import BinaryCrossentropy
-from lib.cae.cae import CAE
-from lib.cae.cae_trainer import CAEtrainer, weighted_cross_entropy
-from lib.random_workspace import visualize_workspace
+from hwr.cae.cae import CAE
+from hwr.cae.cae_trainer import CAEtrainer, weighted_cross_entropy
+from hwr.random_workspace import visualize_workspace
 
 
 """Train a Convolutional Autoencoder."""

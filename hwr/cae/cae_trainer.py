@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 from tensorflow.data import Dataset
 from tensorflow.keras.losses import BinaryCrossentropy
-from lib.cae.cae import CAE
-from lib.random_workspace import random_workspace
+from hwr.cae.cae import CAE
+from hwr.random_workspace import random_workspace
 
 
 
@@ -18,7 +18,7 @@ class CAEtrainer():
     def __init__(self, CAE, optimizer, loss_func, args):
         """Initializing a CAE trainer object.
         Args:
-            - CAE: a Convolutional Autoencoder. An instance of lib.cae.cae.CAE
+            - CAE: a Convolutional Autoencoder. An instance of hwr.cae.cae.CAE
             - optimizer: A tensorflow.keras.optimizers instance
             - lass_func: A tensorflow.keras.losses instance
         """
