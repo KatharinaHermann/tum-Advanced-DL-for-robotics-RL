@@ -8,3 +8,7 @@ pseudo_algorithm.txt
 hwr/__pycache__/
 hwr/cae/__pycache__/
 hwr/relabeling/__pycache__/
+.vscode/
+build/
+dist/
+hwr.egg-info/
