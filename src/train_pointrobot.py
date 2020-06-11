@@ -9,8 +9,8 @@ import gym_pointrobo
 from tf2rl.algos.ddpg import DDPG
 
 #sys.path.append(os.path.join(os.getcwd(), "lib"))
-from lib.cae.cae import CAE
-from lib.training.pointrobot_trainer import Trainer
+from hwr.cae.cae import CAE
+from hwr.training.pointrobot_trainer import Trainer
 
 
 parser = Trainer.get_argument()

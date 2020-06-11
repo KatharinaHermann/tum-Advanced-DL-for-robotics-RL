@@ -9,8 +9,8 @@ import os
 import sys
 
 #sys.path.append(os.path.join(os.getcwd(), "lib"))
-from lib.random_workspace import * 
-from lib.cae.cae import CAE
+from hwr.random_workspace import * 
+from hwr.cae.cae import CAE
 
 
 """
