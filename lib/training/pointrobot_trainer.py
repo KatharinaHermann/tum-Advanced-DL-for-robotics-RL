@@ -44,8 +44,8 @@ class Trainer:
                         conv_filters=self._cae_conv_filters)
         self._CAE.build(input_shape=(1, self._env.workspace.shape[0], self._env.workspace.shape[1], 1))
         self._CAE.load_weights(filepath=self._cae_weights_path)
-        for k, _ in model._get_trainable_state().items():
-            k.trainable = False
+        for layer, _ in self._CAE._get_trainable_state().items():
+            layer.trainable = False
 
         #Initialize array for trajectory storage
         self.trajectory=[]
