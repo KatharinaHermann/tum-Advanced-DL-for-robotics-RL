@@ -59,10 +59,76 @@ def test_state_concatenation():
     print('complete_state type: {}, dtype: {}, shape: {}'.format(type(complete_state), complete_state.dtype, complete_state.shape))
 
 
+def test_evaluation():
+    """Possibly a good ide to first test the eval_policy method of the agent.
+    If that works, than debugging training may be easier.
+    """
+    total_steps = 10
+
+    parser = PointrobotTrainer.get_argument()
+    parser = DDPG.get_argument(parser)
+    parser.add_argument('--env-name', type=str, default="pointrobo-v0")
+    parser.set_defaults(batch_size=100)
+    parser.set_defaults(n_warmup=10000)
+    args = parser.parse_args()
+
+    #######
+    # possibly set some args attributes to small numbers, so that testing does not last that long.
+    # like for example args.n_warmup = 10, args.max_steps = 100...
+    #######
+
+    #Initialize the environment
+    env = gym.make(args.env_name)
+    test_env = gym.make(args.env_name)
+
+    policy = DDPG(
+        state_shape=env.observation_space.shape,
+        action_dim=env.action_space.high.size,
+        gpu=args.gpu,
+        memory_capacity=args.memory_capacity,
+        max_action=env.action_space.high[0],
+        batch_size=args.batch_size,
+        n_warmup=args.n_warmup)
+    trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
+
+    avg_return = trainer.evaluate_policy(total_steps=total_steps)
+
+
+def test_training():
+    parser = PointrobotTrainer.get_argument()
+    parser = DDPG.get_argument(parser)
+    parser.add_argument('--env-name', type=str, default="pointrobo-v0")
+    parser.set_defaults(batch_size=100)
+    parser.set_defaults(n_warmup=10000)
+    args = parser.parse_args()
+
+    #######
+    # possibly set some args attributes to small numbers, so that testing does not last that long.
+    # like for example args.n_warmup = 10, args.max_steps = 100...
+    #######
+
+    #Initialize the environment
+    env = gym.make(args.env_name)
+    test_env = gym.make(args.env_name)
+
+    policy = DDPG(
+        state_shape=env.observation_space.shape,
+        action_dim=env.action_space.high.size,
+        gpu=args.gpu,
+        memory_capacity=args.memory_capacity,
+        max_action=env.action_space.high[0],
+        batch_size=args.batch_size,
+        n_warmup=args.n_warmup)
+    trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
+    trainer()
+
+
 if __name__ == '__main__':
 
     test_pointrobot_trainer_init()
     test_state_concatenation()
+    #test_evaluation()
+    #test_training()
     print('All tests have run successfully!')
 
     
