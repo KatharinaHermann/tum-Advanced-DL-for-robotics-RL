@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 
 from tensorflow.data import Dataset
 from tensorflow.keras.losses import BinaryCrossentropy
-from lib.cae.cae import CAE
-from lib.cae.cae_trainer import CAEtrainer, weighted_cross_entropy
-from lib.random_workspace import visualize_workspace
+from hwr.cae.cae import CAE
+from hwr.cae.cae_trainer import CAEtrainer, weighted_cross_entropy
+from hwr.random_workspace import visualize_workspace
 
 
 """Train a Convolutional Autoencoder."""
@@ -46,7 +46,7 @@ plt.plot(trainer._val_losses)
 
 # check out the model:
 
-path = os.path.join('workspaces/', ('ws_' + str(args.num_workspaces - 1) + '.csv'))
+path = os.path.join('../workspaces/', ('ws_' + str(args.num_workspaces - 1) + '.csv'))
 x = np.expand_dims(np.loadtxt(path), axis=2).astype('float32')
 x = np.expand_dims(x, axis=0)
 x = tf.convert_to_tensor(x)

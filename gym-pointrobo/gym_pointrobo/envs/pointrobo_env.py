@@ -8,9 +8,8 @@ import scipy.ndimage as ndimage
 import os
 import sys
 
-sys.path.append(os.path.join(os.getcwd(), "lib"))
-from random_workspace import * 
-from cae.cae import CAE
+from hwr.random_workspace import * 
+from hwr.cae.cae import CAE
 
 
 """

@@ -5,4 +5,6 @@ Untitled.ipynb
 .vscode/adlr_cpu.code-workspace
 workspaces/
 pseudo_algorithm.txt
-lib/__pycache__
+**/__pycache__
+hwr.egg-info
+
