@@ -84,7 +84,7 @@ class PointroboEnv(gym.Env):
         self.workspace, self.start_pos, self.goal_pos = setup_rndm_workspace_from_buffer(self.workspace_buffer, self.grid_size, self.buffer_size)
         self.agent_pos = np.asarray(self.start_pos).astype(np.float64)
    
-        return self.workspace, self.goal_pos, self.agent_pos
+        return self.workspace.astype(np.float32), self.goal_pos.astype(np.float32), self.agent_pos.astype(np.float32)
 
 
     def render(self, mode='console', close=False):
