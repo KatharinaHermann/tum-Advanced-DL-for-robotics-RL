@@ -18,7 +18,7 @@ class CAEtrainer():
     def __init__(self, CAE, optimizer, loss_func, args):
         """Initializing a CAE trainer object.
         Args:
-            - CAE: a Convolutional Autoencoder. An instance of lib.cae.cae.CAE
+            - CAE: a Convolutional Autoencoder. An instance of hwr.cae.cae.CAE
             - optimizer: A tensorflow.keras.optimizers instance
             - lass_func: A tensorflow.keras.losses instance
         """
