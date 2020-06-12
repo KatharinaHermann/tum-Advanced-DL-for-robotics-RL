@@ -29,7 +29,7 @@ def random_workspace(grid_size, num_obj_max, obj_size_avg):
     #height = tf.random.normal(shape=[num_objects,1], mean=obj_size_avg, stddev=2, dtype=tf.int32)
 
     #Initialize workspace
-    workspace=np.zeros((grid_size,grid_size), dtype=int)
+    workspace=np.zeros((grid_size, grid_size), dtype=int)
 
     #Assign each entry with an object a 1. 
     for i in range(num_objects):
@@ -54,27 +54,21 @@ def get_start_goal_for_workspace(workspace):
     grid_size = workspace.shape[0]
 
     #Generate start point (repeat until point is found where no object ist placed)
-    start_blocked = 1
-    while (start_blocked == 1):
+    start_blocked = True
+    while start_blocked:
         
-        start = np.random.randint(low=0, high=grid_size, size=(2))
-        #start = np.asarray(start, dtype=None, order=None)
-        y = start[0]
-        x = start[1]
-        start_blocked = workspace[y, x]
-        #start = tf.random.uniform( 
-        #shape=[1,2], minval=0, maxval=grid_size, dtype=tf.int32, seed=None, name=None)
+        start = np.random.uniform(low=0.0, high=float(grid_size), size=(2,))
+        y = int(start[0])
+        x = int(start[1])
+        start_blocked = (workspace[y, x] == 1)
 
     #Generate goal point (repeat until point is found where no object ist placed) and assign goal point with a 1
-    goal_blocked = 1
-    while (goal_blocked == 1):
-        goal = np.random.randint(low=0, high=grid_size, size=(2))
-        goal = np.asarray(goal, dtype=None, order=None)
-        y = goal[0]
-        x = goal[1]
-        goal_blocked = workspace[y, x]
-        #goal = tf.random.uniform( 
-        #shape=[1,2], minval=0, maxval=grid_size, dtype=tf.int32, seed=None, name=None)
+    goal_blocked = True
+    while goal_blocked:
+        goal = np.random.uniform(low=0.0, high=float(grid_size), size=(2,))
+        y = int(goal[0])
+        x = int(goal[1])
+        goal_blocked = (workspace[y, x] == 1)
 
     return start, goal
 
