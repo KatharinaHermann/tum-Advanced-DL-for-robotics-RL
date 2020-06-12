@@ -25,7 +25,7 @@ if tf.config.experimental.list_physical_devices('GPU'):
         tf.config.experimental.set_memory_growth(cur_device, enable=True)
 
 
-class Trainer:
+class PointrobotTrainer:
     def __init__(
             self,
             policy,
@@ -78,7 +78,8 @@ class Trainer:
             self._checkpoint, directory=self._output_dir, max_to_keep=5)
 
         if model_dir is not None:
-            assert os.path.isdir(model_dir)
+            if not os.path.isdir(model_dir):
+                os.mkdir(model_dir)
             self._latest_path_ckpt = tf.train.latest_checkpoint(model_dir)
             self._checkpoint.restore(self._latest_path_ckpt)
             self.logger.info("Restored {}".format(self._latest_path_ckpt))
@@ -99,11 +100,11 @@ class Trainer:
         # Empty trajectory list:
         self.trajectory = []
 
-        obs = self._env.reset()
+        workspace, goal, obs = self._env.reset()
         
         #Concatenate position observation with start, goal, and reduced workspace!!
-        reduced_workspace = self._CAE.evaluate(self._env.workspace)
-        obs_full = [obs, self._env.start, self._env.goal, reduced_workspace]
+        reduced_workspace = self._CAE.evaluate(workspace)
+        obs_full = np.concatenate((obs, goal, reduced_workspace))
 
         while total_steps < self._max_steps:
             #Get action randomly for warmup /from Actor-NN otherwise
@@ -184,7 +185,7 @@ class Trainer:
 
 
             if done or episode_steps == self._episode_max_steps:
-                obs = self._env.reset()
+                workspace, goal, obs = self._env.reset()
 
                 #Concatenate position observation with start, goal, and reduced workspace!!
                 obs_full = [obs, self._env.start, self._env.goal, self._env.reduced_workspace]
@@ -274,7 +275,7 @@ class Trainer:
         for i in range(self._test_episodes):
             episode_return = 0.
             frames = []
-            obs = self._test_env.reset()
+            workspace, goal, obs = self._test_env.reset()
             #Concatenate position observation with start, goal, and reduced workspace!!
             obs_full = [obs, self._env.start, self._env.goal, self._env.reduced_workspace]
 
@@ -407,8 +408,8 @@ class Trainer:
                             help='Interval to save model')
         parser.add_argument('--save-summary-interval', type=int, default=int(1e3),
                             help='Interval to save summary')
-        parser.add_argument('--model-dir', type=str, default=None,
-                            help='Directory to restore model')
+        parser.add_argument('--model-dir', type=str, default='../models/agents',
+                            help='Directory to restore model. default =  ../models/agents')
         parser.add_argument('--dir-suffix', type=str, default='',
                             help='Suffix for directory that contains results')
         parser.add_argument('--normalize-obs', action='store_true',
@@ -447,7 +448,7 @@ class Trainer:
                             help='latent dimension of the CAE. default: 16')
         parser.add_argument('--cae_conv_filters', type=int, nargs='+', default=[4, 8, 16],
                             help='number of filters in the conv layers. default: [4, 8, 16]')
-        parser.add_argument('--cae_weights_path', type=str, default='models/cae/model_num_5_size_8.h5',
-                            help='path to saved CAE weights. default: models/cae/model_num_5_size_8.h5')
+        parser.add_argument('--cae_weights_path', type=str, default='../models/cae/model_num_5_size_8.h5',
+                            help='path to saved CAE weights. default: ../models/cae/model_num_5_size_8.h5')
 
         return parser

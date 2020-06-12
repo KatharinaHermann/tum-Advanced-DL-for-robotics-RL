@@ -37,13 +37,12 @@ class PointroboEnv(gym.Env):
         # They must be gym.spaces objects
         
         # Continuous action space with velocities up to 10m/s in x- & y- direction
-        self.action_space = spaces.Box(low=0, high=1, shape=
-                        (2, 1), dtype=np.float32)
+        self.action_space = spaces.Box(low=0, high=1, shape=(2,), dtype=np.float32)
         
         #The observation will be the coordinate of the agent 
         #this can be described by Box space
         self.observation_space = spaces.Box(low=0.0, high=self.grid_size,
-                                            shape=(2,1), dtype=np.float32)
+                                            shape=(2,), dtype=np.float32)
 
 
     def step(self, action):
@@ -77,15 +76,16 @@ class PointroboEnv(gym.Env):
 
         return np.asarray(self.agent_pos).astype(np.float32), reward, done, {}
 
+
     def reset(self):
         """Resets the robot state to the initial state"""
         # here we convert start to float32 to make it more general (we want to use continuous actions)
         
         self.workspace, self.start_pos, self.goal_pos = setup_rndm_workspace_from_buffer(self.workspace_buffer, self.grid_size, self.buffer_size)
         self.agent_pos = np.asarray(self.start_pos).astype(np.float64)
+   
+        return self.workspace, self.goal_pos, self.agent_pos
 
-        
-        return self.agent_pos
 
     def render(self, mode='console', close=False):
         """"The x-axis of the environment is pointing from left to right. 
@@ -189,7 +189,7 @@ def setup_rndm_workspace_from_buffer(workspace_buffer, grid_size, buffer_size):
 if __name__ == '__main__':
 
     env = PointroboEnv()
-    obs = env.reset()
+    workspace, goal, obs = env.reset()
     env.render()
 
     # Hardcoded agent: always go diagonal

@@ -11,6 +11,23 @@ from hwr.cae.cae_trainer import CAEtrainer, weighted_cross_entropy
 from hwr.random_workspace import visualize_workspace
 
 
+def test_cae_initialization():
+    pooling = 'max'
+    latent_dim = 16
+    input_shape = (32, 32)
+    conv_filters = [4, 8, 16]
+    model = CAE(pooling, latent_dim, input_shape, conv_filters)
+
+    x = tf.random.uniform([1, 32, 32, 1])
+    x_hat = model(x)
+    assert x_hat.shape == (1, 32, 32, 1), "output shape is not (1, 32, 32, 1)"
+
+    workspace = np.random.uniform(size=(32, 32))
+    y = model.evaluate(workspace)
+    assert isinstance(y, np.ndarray), "Type of latent output is not np.ndarray"
+    assert y.shape == (16,), "latent output shape is not (16,)"
+
+
 def test_weight_loading():
     model = CAE(pooling='max',
                     latent_dim=16,
@@ -79,6 +96,7 @@ def test_autoencoder_training():
 
 if __name__ == '__main__':
 
+    test_cae_initialization()
     test_weight_loading()
     test_autoencoder_training()
     print('All tests have run successfully!')

@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 from tensorflow.keras.layers import Layer, Conv2D, MaxPool2D, AveragePooling2D, Dense, Flatten, Conv2DTranspose, Reshape, InputLayer
 
 
@@ -126,21 +127,10 @@ class CAE(tf.keras.Model):
         that were produced by the encoder.
         """
 
-        return self._encoder(x)
+        assert isinstance(x, np.ndarray), "Expected type np.ndarray for input x. Received: {}".format(type(x))
+        assert len(x.shape) == 2, "Expected number of dimensions of 2 for input array x. Received: {}".format(len(x.shape))
+        x = np.expand_dims(x, axis=(0, 3))
+        x = tf.convert_to_tensor(x)
 
-
-if __name__ == '__main__':
-    """For testing."""
-
-    x = tf.random.uniform([1, 32, 32, 1])
-    pooling = 'max'
-    latent_dim = 16
-    input_shape = (32, 32)
-    conv_filters = [4, 8, 16]
-
-    model = CAE(pooling, latent_dim, input_shape, conv_filters)
-
-    y = model(x)
-
-    print('output shape: {}'.format(y.shape))
+        return self._encoder(x).numpy().squeeze()
 

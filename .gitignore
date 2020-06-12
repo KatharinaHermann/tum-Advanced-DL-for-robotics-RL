@@ -1,14 +1,21 @@
+# environment folders:
 conda_env_cpu/
 conda_env_gpu/
-Untitled.ipynb
-.ipynb_checkpoints/
-.vscode/adlr_cpu.code-workspace
-workspaces/
-pseudo_algorithm.txt
-hwr/__pycache__/
-hwr/cae/__pycache__/
-hwr/relabeling/__pycache__/
+
+# vscode settings:
 .vscode/
+
+# data folders:
+workspaces/
 build/
 dist/
 hwr.egg-info/
+
+# cache:
+**/__pycache__/
+
+# logs:
+tests/results/
+
+# others:
+pseudo_algorithm.txt

@@ -8,12 +8,11 @@ import gym_pointrobo
 
 from tf2rl.algos.ddpg import DDPG
 
-#sys.path.append(os.path.join(os.getcwd(), "lib"))
 from hwr.cae.cae import CAE
-from hwr.training.pointrobot_trainer import Trainer
+from hwr.training.pointrobot_trainer import PointrobotTrainer
 
 
-parser = Trainer.get_argument()
+parser = PointrobotTrainer.get_argument()
 parser = DDPG.get_argument(parser)
 parser.add_argument('--env-name', type=str, default="pointrobo-v0")
 parser.set_defaults(batch_size=100)
@@ -34,5 +33,5 @@ policy = DDPG(
     max_action=env.action_space.high[0],
     batch_size=args.batch_size,
     n_warmup=args.n_warmup)
-trainer = Trainer(policy, env, args, test_env=test_env)
+trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
 trainer()
