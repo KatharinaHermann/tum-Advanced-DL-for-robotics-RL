@@ -1,6 +1,6 @@
 import numpy as np
 
-from pointrobot_relabeling import PointrobotRelabeler
+from hwr.relabeling.pointrobot_relabeling import PointrobotRelabeler
 
 
 class test_env():
