@@ -179,6 +179,7 @@ class PointrobotRelabeler:
             workspace = new_workspace
             for point in trajectory:
                 point['position'][0] += shift_distance
+                point['next_position'][0] += shift_distance
                 point['goal'][0] += shift_distance
 
         elif last_pos[0] >= (workspace.shape[0] - 1 - radius):
@@ -187,6 +188,7 @@ class PointrobotRelabeler:
             workspace = new_workspace
             for point in trajectory:
                 point['position'][0] -= shift_distance
+                point['next_position'][0] -= shift_distance
                 point['goal'][0] -= shift_distance
 
         if last_pos[1] <= radius:
@@ -195,6 +197,7 @@ class PointrobotRelabeler:
             workspace = new_workspace
             for point in trajectory:
                 point['position'][1] += shift_distance
+                point['next_position'][1] += shift_distance
                 point['goal'][1] += shift_distance
                 
         elif last_pos[1] >= (workspace.shape[1] - 1 - radius):
@@ -203,6 +206,7 @@ class PointrobotRelabeler:
             workspace = new_workspace
             for point in trajectory:
                 point['position'][1] -= shift_distance
+                point['next_position'][1] -= shift_distance
                 point['goal'][1] -= shift_distance
 
         for point in trajectory:
@@ -212,7 +216,9 @@ class PointrobotRelabeler:
         trajectory_to_return = []
         for point in trajectory:
             if (point['position'] > radius).all() and\
-                (point['position'] < workspace.shape[0] - 1 - radius).all():
+                    (point['position'] < workspace.shape[0] - 1 - radius).all() and\
+                    (point['next_position'] > radius).all() and\
+                    (point['next_position'] < workspace.shape[0] - 1 - radius).all():
                 trajectory_to_return.append(point)
 
         return trajectory_to_return

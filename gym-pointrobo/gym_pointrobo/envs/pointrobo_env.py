@@ -72,9 +72,7 @@ class PointroboEnv(gym.Env):
 
 
     def reset(self):
-        """Resets the robot state to the initial state"""
-        # here we convert start to float32 to make it more general (we want to use continuous actions)
-        
+        """Resets the robot state to the initial state"""        
         self.setup_rndm_workspace_from_buffer()
         self.agent_pos = self.start_pos
    
@@ -104,10 +102,7 @@ class PointroboEnv(gym.Env):
         """The action is encoded like a real velocity vector with the first element 
         pointing in x-direction and the second element pointing in y-direction
         """
-
         t = 1.0
-        print('pos: {}'.format(self.agent_pos.dtype))
-        print('action: {}'.format(action.dtype))
         self.agent_pos += action * t
         self.agent_pos = np.clip(self.agent_pos, [0.0, 0.0], [float(self.grid_size), float(self.grid_size)])
 
@@ -150,21 +145,3 @@ class PointroboEnv(gym.Env):
             #print("Collision is: ", collision)
         
         return collision
-
-
-def image_interpolation(*, img, pixel_size=1, order=1, mode='nearest'):
-
-    factor = 1 / pixel_size
-
-    def interp_fun(x):
-        x2 = x.copy()
-
-        if x2.ndim == 1:
-            x2 = x2[np.newaxis, :]
-        # Transform physical coordinates to image coordinates 
-        x2 *= factor
-        x2 += 0.5
-
-        return ndimage.map_coordinates(input=img, coordinates=x2.T, order=order, mode=mode).T
-
-    return interp_fun

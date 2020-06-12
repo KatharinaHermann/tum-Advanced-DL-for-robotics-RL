@@ -55,7 +55,8 @@ def test_find_collision_entries():
     
     radiuses = [0.3, 0.6, 0.9, 1.8]
     trajectory = [{'workspace': workspace, 
-                  'position' : np.array([6.5, 6.5])}]
+                  'position' : np.array([6.5, 6.5]),
+                  'next_position': np.array([7.0, 7.0])}]
     relabeler = PointrobotRelabeler(ws_shape=(32, 32),
                                     mode='erease')
 
@@ -80,11 +81,16 @@ def test_shifting():
     relabeler = PointrobotRelabeler(ws_shape=(32, 32), mode='erease')
 
     trajs = []
-    trajs.append([{'workspace': workspace, 'position': np.array([10, 20]), 'goal': np.array([10, 21])}])
-    trajs.append([{'workspace': workspace, 'position': np.array([10, 30.6]), 'goal': np.array([10, 21])}])
-    trajs.append([{'workspace': workspace, 'position': np.array([10, 0.4]), 'goal': np.array([10, 21])}])
-    trajs.append([{'workspace': workspace, 'position': np.array([30.6, 20]), 'goal': np.array([10, 21])}])
-    trajs.append([{'workspace': workspace, 'position': np.array([0.4, 20]), 'goal': np.array([10, 21])}])
+    trajs.append([{'workspace': workspace, 'position': np.array([10, 20]),
+        'next_position': np.array([10, 20]), 'goal': np.array([10, 21])}])
+    trajs.append([{'workspace': workspace, 'position': np.array([10, 30.6]),
+        'next_position': np.array([10, 30.6]), 'goal': np.array([10, 21])}])
+    trajs.append([{'workspace': workspace, 'position': np.array([10, 0.4]),
+        'next_position': np.array([10, 0.4]), 'goal': np.array([10, 21])}])
+    trajs.append([{'workspace': workspace, 'position': np.array([30.6, 20]),
+        'next_position': np.array([30.6, 20]), 'goal': np.array([10, 21])}])
+    trajs.append([{'workspace': workspace, 'position': np.array([0.4, 20]),
+        'next_position': np.array([0.4, 20]), 'goal': np.array([10, 21])}])
 
     # etalon solutions:
     etalon_wss = [np.zeros_like(workspace) for _ in range(5)]
@@ -95,11 +101,16 @@ def test_shifting():
     etalon_wss[4][11:16, 10:15] = 1
 
     etalon_trajs = []
-    etalon_trajs.append([{'workspace': etalon_wss[0], 'position': np.array([10, 20]), 'goal': np.array([10, 21])}])
-    etalon_trajs.append([{'workspace': etalon_wss[1], 'position': np.array([10, 29.6]), 'goal': np.array([10, 20])}])
-    etalon_trajs.append([{'workspace': etalon_wss[2], 'position': np.array([10, 1.4]), 'goal': np.array([10, 22])}])
-    etalon_trajs.append([{'workspace': etalon_wss[3], 'position': np.array([29.6, 20]), 'goal': np.array([9, 21])}])
-    etalon_trajs.append([{'workspace': etalon_wss[4], 'position': np.array([1.4, 20]), 'goal': np.array([11, 21])}])
+    etalon_trajs.append([{'workspace': etalon_wss[0], 'position': np.array([10, 20]),
+        'next_position': np.array([10, 20]), 'goal': np.array([10, 21])}])
+    etalon_trajs.append([{'workspace': etalon_wss[1], 'position': np.array([10, 29.6]),
+        'next_position': np.array([10, 29.6]), 'goal': np.array([10, 20])}])
+    etalon_trajs.append([{'workspace': etalon_wss[2], 'position': np.array([10, 1.4]),
+        'next_position': np.array([10, 1.4]), 'goal': np.array([10, 22])}])
+    etalon_trajs.append([{'workspace': etalon_wss[3], 'position': np.array([29.6, 20]),
+        'next_position': np.array([29.6, 20]), 'goal': np.array([9, 21])}])
+    etalon_trajs.append([{'workspace': etalon_wss[4], 'position': np.array([1.4, 20]),
+        'next_position': np.array([1.4, 20]), 'goal': np.array([11, 21])}])
 
     for i, trajectory in enumerate(trajs):
         relabeled_traj = relabeler._shift_from_boarder(trajectory=trajectory,
