@@ -47,6 +47,9 @@ class PointroboEnv(gym.Env):
         # Initialize the agent
         self.current_step = 0
         self.create_workspace_buffer()
+
+        # reset. With this the first workspace, agent position, goal position is created.
+        _, _, _, = self.reset()
         
 
     def step(self, action):

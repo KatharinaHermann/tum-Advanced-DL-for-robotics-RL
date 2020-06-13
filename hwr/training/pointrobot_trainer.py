@@ -52,7 +52,7 @@ class PointrobotTrainer:
 
         # Initialize workspace relabeler:
         self._relabeler = PointrobotRelabeler(
-            ws_shape=(self._env.gird_size, self._env.gird_size),
+            ws_shape=(self._env.grid_size, self._env.grid_size),
             mode='random'
             )
 
