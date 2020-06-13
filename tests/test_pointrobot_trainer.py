@@ -69,8 +69,10 @@ def test_evaluation():
     parser = DDPG.get_argument(parser)
     parser.add_argument('--env-name', type=str, default="pointrobo-v0")
     parser.set_defaults(batch_size=100)
-    parser.set_defaults(n_warmup=10000)
+    parser.set_defaults(n_warmup=10)
     args = parser.parse_args()
+
+    args.max_steps = 100
 
     #######
     # possibly set some args attributes to small numbers, so that testing does not last that long.

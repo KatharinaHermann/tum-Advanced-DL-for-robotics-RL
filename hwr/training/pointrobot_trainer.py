@@ -165,7 +165,7 @@ class PointrobotTrainer:
                 # resetting:
                 workspace, goal, obs = self._env.reset()
                 obs_full = np.concatenate((obs, goal, reduced_workspace))
-                trajectory = []
+                self.trajectory = []
 
                 n_episode += 1
                 fps = episode_steps / (time.perf_counter() - episode_start_time)
