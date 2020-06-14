@@ -38,14 +38,12 @@ trainer = CAEtrainer(CAE=model,
 
 trainer()
 
-# Plot results on an unseen workspace: #
-
+# plot loss and accuracy:
 fig = plt.figure(num=1, figsize=(10, 5))
 plt.plot(trainer._train_losses)
 plt.plot(trainer._val_losses)
 
-# check out the model:
-
+# Plot results on an unseen workspace: #
 path = os.path.join('../workspaces/', ('ws_' + str(args.num_workspaces - 1) + '.csv'))
 x = np.expand_dims(np.loadtxt(path), axis=2).astype('float32')
 x = np.expand_dims(x, axis=0)

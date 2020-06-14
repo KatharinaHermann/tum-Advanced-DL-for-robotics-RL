@@ -10,3 +10,4 @@ pseudo_algorithm.txt
 build/
 dist/
 hwr.egg-info/
+**/results
