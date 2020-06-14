@@ -120,8 +120,70 @@ def test_shifting():
             "Workspace did not match at test case {}.".format(i)
         assert (relabeled_traj[0]['position'] == etalon_trajs[i][0]['position']).all(),\
             "Position did not match at test case {}.".format(i)
-        assert (relabeled_traj[0]['goal'] == etalon_trajs[i][0]['goal']).all(),\
-            "Goal did not match at test case {}.".format(i)
+
+
+def test_goal_setting():
+    """Tests the _set_new_goal() method of the PointrobotRelabeler class."""
+
+    workspace = np.zeros((32, 32))
+    env = test_env(radius=0.5)
+
+    traj_0 = [{'workspace': workspace, 'position': np.array([0, 0]), 'next_position': np.array([0, 0]), 'goal': np.array([10, 21])}]
+    
+    traj_1 = [
+        {'workspace': workspace, 'position': np.array([-0.5, 0]), 'next_position': np.array([0, 0]), 'goal': np.array([10, 21])},
+        {'workspace': workspace, 'position': np.array([0, 0]), 'next_position': np.array([0, 0]), 'goal': np.array([10, 21])}
+        ]
+
+    traj_2 = [
+        {'workspace': workspace, 'position': np.array([0.4, 0]), 'next_position': np.array([0, 0]), 'goal': np.array([10, 21])},
+        {'workspace': workspace, 'position': np.array([0, 0.4]), 'next_position': np.array([0, 0]), 'goal': np.array([10, 21])},
+        {'workspace': workspace, 'position': np.array([-0.4, 0]), 'next_position': np.array([0, 0]), 'goal': np.array([10, 21])},
+        {'workspace': workspace, 'position': np.array([0, 0]), 'next_position': np.array([0, 0]), 'goal': np.array([10, 21])}
+    ]
+    
+    traj_3 = [
+        {'workspace': workspace, 'position': np.array([0.4, 0]), 'next_position': np.array([0, 0]), 'goal': np.array([10, 21])},
+        {'workspace': workspace, 'position': np.array([0, 0.4]), 'next_position': np.array([0, 0]), 'goal': np.array([10, 21])},
+        {'workspace': workspace, 'position': np.array([-0.4, 0]), 'next_position': np.array([0, 0]), 'goal': np.array([10, 21])},
+        {'workspace': workspace, 'position': np.array([0, -0.4]), 'next_position': np.array([0, 0]), 'goal': np.array([10, 21])},
+        {'workspace': workspace, 'position': np.array([0, 0]), 'next_position': np.array([0, 0]), 'goal': np.array([10, 21])}
+    ]
+
+    # outputs:
+    relabeler = PointrobotRelabeler(ws_shape=(32, 32), mode='erease')
+    sol_traj_0 = relabeler._set_new_goal(traj_0, env)
+    sol_traj_1 = relabeler._set_new_goal(traj_1, env)
+    sol_traj_2 = relabeler._set_new_goal(traj_2, env)
+    sol_traj_3 = relabeler._set_new_goal(traj_3, env)
+
+    # tests:
+    # traj_0:
+    assert len(sol_traj_0) == len(traj_0)
+    assert (sol_traj_0[0]['position'] == traj_0[0]['position']).all()
+    assert np.linalg.norm(sol_traj_0[0]['goal'] - traj_0[0]['position']) == (env.radius * 0.99)
+
+    # traj_1:
+    assert len(sol_traj_1) == len(traj_1)
+    for i, point in enumerate(sol_traj_1):
+        assert (sol_traj_1[i]['position'] == traj_1[i]['position']).all()
+    
+    pos_0, pos_1 = traj_1[0]['position'], traj_1[1]['position']
+    vect = (pos_1 - pos_0) / np.linalg.norm(pos_1 - pos_0) * env.radius * 0.99
+    new_goal_etalon = pos_1 + vect
+    assert (sol_traj_1[0]['goal'] == new_goal_etalon).all()
+
+    #traj_2:
+    assert len(sol_traj_2) == len(traj_2)
+    for i, point in enumerate(sol_traj_1[ : -1]):
+        assert (sol_traj_2[i]['position'] == traj_2[i]['position']).all()
+        assert np.linalg.norm(sol_traj_2[i]['goal'] - sol_traj_2[i]['position']) > env.radius
+
+    assert (sol_traj_2[-1]['position'] == traj_2[-1]['position']).all()
+    assert np.linalg.norm(sol_traj_2[-1]['goal'] - sol_traj_2[-1]['position']) == env.radius * 0.99
+
+    # traj_3:
+    assert len(sol_traj_3) == 0
 
 
 def test_erease_relabeling():
@@ -167,6 +229,7 @@ if __name__ == '__main__':
     test_remove_obstacle()
     test_find_collision_entries()
     test_shifting()
+    test_goal_setting()
     test_erease_relabeling()
     print('All tests have run successfully!')
 

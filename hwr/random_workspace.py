@@ -129,8 +129,8 @@ if __name__ == '__main__':
     workspace_sample = random_workspace(32, 10, 5)
     start, goal = get_start_goal_for_workspace(workspace_sample)
 
-    workspace_sample[start[0], start[1]] = 2
-    workspace_sample[goal[0], goal[1]] = 3
+    workspace_sample[int(start[0]), int(start[1])] = 2
+    workspace_sample[int(goal[0]), int(goal[1])] = 3
 
     fig1 = visualize_workspace(workspace_sample)
     robot = visualize_robot([3.55555,2.63333333333])
