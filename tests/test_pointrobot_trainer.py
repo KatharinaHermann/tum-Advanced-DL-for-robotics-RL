@@ -43,7 +43,7 @@ def test_state_concatenation():
                 input_shape=(32, 32),
                 conv_filters=[4, 8, 16])
     model.build(input_shape=(1, 32, 32, 1))
-    model.load_weights(filepath='../models/cae/model_num_5_size_8.h5')
+    model.load_weights(filepath='models/cae/model_num_5_size_8.h5')
 
     for layer, _ in model._get_trainable_state().items():
         layer.trainable = False
@@ -63,6 +63,8 @@ def test_evaluation():
     """Possibly a good ide to first test the eval_policy method of the agent.
     If that works, than debugging training may be easier.
     """
+    print('-' * 5 + 'test_evaluation' + '-' * 5)
+    
     total_steps = 10
 
     parser = PointrobotTrainer.get_argument()
@@ -97,12 +99,19 @@ def test_evaluation():
 
 
 def test_training():
+
+    print('-' * 5 + 'test_training' + '-' * 5)
+
     parser = PointrobotTrainer.get_argument()
     parser = DDPG.get_argument(parser)
     parser.add_argument('--env-name', type=str, default="pointrobo-v0")
     parser.set_defaults(batch_size=100)
-    parser.set_defaults(n_warmup=10000)
+    parser.set_defaults(n_warmup=10)
+    parser.set_defaults(update_interval=2)
     args = parser.parse_args()
+
+    args.max_steps = 1000
+    #args.show_progress = True
 
     #######
     # possibly set some args attributes to small numbers, so that testing does not last that long.
@@ -118,6 +127,7 @@ def test_training():
         action_dim=env.action_space.high.size,
         gpu=args.gpu,
         memory_capacity=args.memory_capacity,
+        update_interval=args.update_interval,
         max_action=env.action_space.high[0],
         batch_size=args.batch_size,
         n_warmup=args.n_warmup)
@@ -129,10 +139,9 @@ if __name__ == '__main__':
 
     test_pointrobot_trainer_init()
     test_state_concatenation()
-    #test_evaluation()
-    #test_training()
+    test_evaluation()
+    test_training()
     print('All tests have run successfully!')
-
     
 
     

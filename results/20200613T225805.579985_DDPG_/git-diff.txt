@@ -1,0 +1,52 @@
+diff --git a/gym-pointrobo/gym_pointrobo/envs/__pycache__/pointrobo_env.cpython-37.pyc b/gym-pointrobo/gym_pointrobo/envs/__pycache__/pointrobo_env.cpython-37.pyc
+index 9164020..857bbf5 100644
+Binary files a/gym-pointrobo/gym_pointrobo/envs/__pycache__/pointrobo_env.cpython-37.pyc and b/gym-pointrobo/gym_pointrobo/envs/__pycache__/pointrobo_env.cpython-37.pyc differ
+diff --git a/hwr/training/pointrobot_trainer.py b/hwr/training/pointrobot_trainer.py
+index 1fe8fec..1f2cea9 100644
+--- a/hwr/training/pointrobot_trainer.py
++++ b/hwr/training/pointrobot_trainer.py
+@@ -353,7 +353,7 @@ class PointrobotTrainer:
+                             help='Interval to save model')
+         parser.add_argument('--save-summary-interval', type=int, default=int(1e3),
+                             help='Interval to save summary')
+-        parser.add_argument('--model-dir', type=str, default='../models/agents',
++        parser.add_argument('--model-dir', type=str, default='models/agents',
+                             help='Directory to restore model. default =  ../models/agents')
+         parser.add_argument('--dir-suffix', type=str, default='',
+                             help='Suffix for directory that contains results')
+@@ -393,7 +393,7 @@ class PointrobotTrainer:
+                             help='latent dimension of the CAE. default: 16')
+         parser.add_argument('--cae_conv_filters', type=int, nargs='+', default=[4, 8, 16],
+                             help='number of filters in the conv layers. default: [4, 8, 16]')
+-        parser.add_argument('--cae_weights_path', type=str, default='../models/cae/model_num_5_size_8.h5',
+-                            help='path to saved CAE weights. default: ../models/cae/model_num_5_size_8.h5')
++        parser.add_argument('--cae_weights_path', type=str, default='models/cae/model_num_5_size_8.h5',
++                            help='path to saved CAE weights. default: ../../models/cae/model_num_5_size_8.h5')
+ 
+         return parser
+\ No newline at end of file
+diff --git a/tests/test_pointrobot_trainer.py b/tests/test_pointrobot_trainer.py
+index bc4e4d8..f8dc1cf 100644
+--- a/tests/test_pointrobot_trainer.py
++++ b/tests/test_pointrobot_trainer.py
+@@ -43,7 +43,7 @@ def test_state_concatenation():
+                 input_shape=(32, 32),
+                 conv_filters=[4, 8, 16])
+     model.build(input_shape=(1, 32, 32, 1))
+-    model.load_weights(filepath='../models/cae/model_num_5_size_8.h5')
++    model.load_weights(filepath='models/cae/model_num_5_size_8.h5')
+ 
+     for layer, _ in model._get_trainable_state().items():
+         layer.trainable = False
+@@ -129,10 +129,9 @@ if __name__ == '__main__':
+ 
+     test_pointrobot_trainer_init()
+     test_state_concatenation()
+-    #test_evaluation()
++    test_evaluation()
+     #test_training()
+     print('All tests have run successfully!')
+-
+     
+ 
+     
