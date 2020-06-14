@@ -1,0 +1,38 @@
+diff --git a/gym-pointrobo/gym_pointrobo/__pycache__/__init__.cpython-37.pyc b/gym-pointrobo/gym_pointrobo/__pycache__/__init__.cpython-37.pyc
+index d7142bc..795e9a1 100644
+Binary files a/gym-pointrobo/gym_pointrobo/__pycache__/__init__.cpython-37.pyc and b/gym-pointrobo/gym_pointrobo/__pycache__/__init__.cpython-37.pyc differ
+diff --git a/gym-pointrobo/gym_pointrobo/envs/__pycache__/__init__.cpython-37.pyc b/gym-pointrobo/gym_pointrobo/envs/__pycache__/__init__.cpython-37.pyc
+index f004963..1e62b10 100644
+Binary files a/gym-pointrobo/gym_pointrobo/envs/__pycache__/__init__.cpython-37.pyc and b/gym-pointrobo/gym_pointrobo/envs/__pycache__/__init__.cpython-37.pyc differ
+diff --git a/gym-pointrobo/gym_pointrobo/envs/__pycache__/pointrobo_env.cpython-37.pyc b/gym-pointrobo/gym_pointrobo/envs/__pycache__/pointrobo_env.cpython-37.pyc
+index 191d6e4..ff0cd16 100644
+Binary files a/gym-pointrobo/gym_pointrobo/envs/__pycache__/pointrobo_env.cpython-37.pyc and b/gym-pointrobo/gym_pointrobo/envs/__pycache__/pointrobo_env.cpython-37.pyc differ
+diff --git a/hwr/relabeling/__pycache__/__init__.cpython-37.pyc b/hwr/relabeling/__pycache__/__init__.cpython-37.pyc
+index b5d6aa8..efef074 100644
+Binary files a/hwr/relabeling/__pycache__/__init__.cpython-37.pyc and b/hwr/relabeling/__pycache__/__init__.cpython-37.pyc differ
+diff --git a/hwr/relabeling/__pycache__/pointrobot_relabeling.cpython-37.pyc b/hwr/relabeling/__pycache__/pointrobot_relabeling.cpython-37.pyc
+index 64c31a8..1a41482 100644
+Binary files a/hwr/relabeling/__pycache__/pointrobot_relabeling.cpython-37.pyc and b/hwr/relabeling/__pycache__/pointrobot_relabeling.cpython-37.pyc differ
+diff --git a/src/train_pointrobot.py b/src/train_pointrobot.py
+index 05fb2b0..159a632 100644
+--- a/src/train_pointrobot.py
++++ b/src/train_pointrobot.py
+@@ -17,7 +17,7 @@ parser = DDPG.get_argument(parser)
+ parser.add_argument('--env-name', type=str, default="pointrobo-v0")
+ parser.set_defaults(batch_size=100)
+ parser.set_defaults(n_warmup=1000)
+-parser.set_defaults(update_interval=2)
++parser.set_defaults(update_interval=50)
+ 
+ args = parser.parse_args()
+ 
+@@ -41,4 +41,6 @@ trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
+ 
+ print('-' * 5 + "Let's start training" + '-' * 5)
+ 
+-trainer()
+\ No newline at end of file
++trainer()
++
++print('-' * 5 + "We succeeeeeded!!!!!!!!!!!!!" + '-' * 5)
+\ No newline at end of file

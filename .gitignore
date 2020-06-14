@@ -15,7 +15,8 @@ hwr.egg-info/
 **/__pycache__/
 
 # logs:
-tests/results/
+results
+**/results/
 
 # others:
 pseudo_algorithm.txt
