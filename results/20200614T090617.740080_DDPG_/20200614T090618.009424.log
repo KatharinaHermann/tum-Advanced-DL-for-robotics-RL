@@ -1,0 +1,6 @@
+09:06:18.014 [INFO] (pointrobot_trainer.py:91) Restored None
+09:06:18.070 [INFO] (pointrobot_trainer.py:174) Total Epi:     1 Steps:       2 Episode Steps:     2 Return: -1.0100 FPS: 45.90
+09:06:25.394 [INFO] (pointrobot_trainer.py:174) Total Epi:     2 Steps:      26 Episode Steps:    24 Return: -1.2300 FPS:  3.28
+09:06:25.448 [INFO] (pointrobot_trainer.py:174) Total Epi:     3 Steps:      30 Episode Steps:     4 Return: -1.0300 FPS: 75.77
+09:06:25.471 [INFO] (pointrobot_trainer.py:174) Total Epi:     4 Steps:      31 Episode Steps:     1 Return: -1.0000 FPS: 47.30
+09:06:25.566 [INFO] (pointrobot_trainer.py:174) Total Epi:     5 Steps:      40 Episode Steps:     9 Return: -1.0800 FPS: 98.88

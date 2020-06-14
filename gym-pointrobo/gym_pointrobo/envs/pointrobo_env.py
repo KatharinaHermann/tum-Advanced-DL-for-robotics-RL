@@ -42,7 +42,7 @@ class PointroboEnv(gym.Env):
         #The observation will be the coordinate of the agent 
         #this can be described by Box space
         self.observation_space = spaces.Box(low=0.0, high=self.grid_size,
-                                            shape=(2,), dtype=np.float32)
+                                            shape=(20,), dtype=np.float32)
 
         # Initialize the agent
         self.current_step = 0
@@ -143,7 +143,7 @@ class PointroboEnv(gym.Env):
 
         #print("Distance to the nearest obstacle at the center: ", nearest_dist)
             
-        if nearest_dist <= 1.5:
+        if nearest_dist <= 2:
             collision = True
             #print("Collision is: ", collision)
         

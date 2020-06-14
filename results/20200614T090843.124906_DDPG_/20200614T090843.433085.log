@@ -1,0 +1,16 @@
+09:08:43.439 [INFO] (pointrobot_trainer.py:91) Restored None
+09:08:52.814 [INFO] (pointrobot_trainer.py:174) Total Epi:     1 Steps:      13 Episode Steps:    13 Return: -1.1200 FPS:  1.39
+09:08:52.858 [INFO] (pointrobot_trainer.py:174) Total Epi:     2 Steps:      14 Episode Steps:     1 Return: -1.0000 FPS: 37.75
+09:08:52.878 [INFO] (pointrobot_trainer.py:174) Total Epi:     3 Steps:      15 Episode Steps:     1 Return: -1.0000 FPS: 57.40
+09:08:53.015 [INFO] (pointrobot_trainer.py:174) Total Epi:     4 Steps:      28 Episode Steps:    13 Return: -1.1200 FPS: 100.60
+09:08:53.243 [INFO] (pointrobot_trainer.py:174) Total Epi:     5 Steps:      51 Episode Steps:    23 Return: -1.2200 FPS: 116.07
+09:08:53.330 [INFO] (pointrobot_trainer.py:174) Total Epi:     6 Steps:      60 Episode Steps:     9 Return: -1.0800 FPS: 103.05
+09:08:53.367 [INFO] (pointrobot_trainer.py:174) Total Epi:     7 Steps:      62 Episode Steps:     2 Return: -1.0100 FPS: 67.48
+09:08:53.389 [INFO] (pointrobot_trainer.py:174) Total Epi:     8 Steps:      63 Episode Steps:     1 Return: -1.0000 FPS: 48.20
+09:08:53.443 [INFO] (pointrobot_trainer.py:174) Total Epi:     9 Steps:      67 Episode Steps:     4 Return: -1.0300 FPS: 76.62
+09:08:53.482 [INFO] (pointrobot_trainer.py:174) Total Epi:    10 Steps:      68 Episode Steps:     1 Return: -1.0000 FPS: 32.09
+09:08:53.505 [INFO] (pointrobot_trainer.py:174) Total Epi:    11 Steps:      69 Episode Steps:     1 Return: -1.0000 FPS: 47.15
+09:08:53.546 [INFO] (pointrobot_trainer.py:174) Total Epi:    12 Steps:      71 Episode Steps:     2 Return: -1.0100 FPS: 65.36
+09:08:53.582 [INFO] (pointrobot_trainer.py:174) Total Epi:    13 Steps:      73 Episode Steps:     2 Return: -1.0100 FPS: 58.44
+09:08:53.698 [INFO] (pointrobot_trainer.py:174) Total Epi:    14 Steps:      84 Episode Steps:    11 Return: -1.1000 FPS: 96.19
+09:08:53.776 [INFO] (pointrobot_trainer.py:174) Total Epi:    15 Steps:      93 Episode Steps:     9 Return: -1.0800 FPS: 100.54
