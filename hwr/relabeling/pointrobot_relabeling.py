@@ -75,12 +75,8 @@ class PointrobotRelabeler:
                                      env=env,
                                      shift_distance=shift_distance)
 
-        # filling in the relabeled trajectory with the new goal state:
-        new_goal = trajectory[-1]['position']
-        for data_point in trajectory:
-            data_point['goal'] = new_goal
-        trajectory[-1]['reward'] = 1
-        trajectory[-1]['done'] = True
+        # add new goal state to the trajectory:
+        trajectory = self._set_new_goal(trajectory, env)
 
         return trajectory
 
@@ -222,3 +218,60 @@ class PointrobotRelabeler:
                 trajectory_to_return.append(point)
 
         return trajectory_to_return
+
+
+    def _set_new_goal(self, trajectory, env):
+        """Sets a new goal for the trajectory.
+        The goal is going to be slightly closer to the last state than the radius of the robot.
+        It also has to be assured, that the goal lies closer than the radius only
+        to the last state of the trajectory.
+        If the algorithm can not find a sufficient goal respecting the previous constraint,
+        it will return an empty trajectory.
+        (In this case any goal would be misleading to the agent during learning.)
+        """
+
+        max_iters = 1000
+        current_iter = 0
+        feasible_goal = False
+
+        last_pos = trajectory[-1]['position']
+        # the first goal candidate is in the direction of the last motion:
+        if len(trajectory) >= 2:
+            last_last_pos = trajectory[-2]['position']
+            goal_direction_vect = (last_pos - last_last_pos) / (np.linalg.norm(last_pos - last_last_pos)) * env.radius * 0.99
+        else:
+            goal_direction_vect = np.random.uniform(low=-1, high=1, size=(2,))
+            goal_direction_vect = goal_direction_vect / np.linalg.norm(goal_direction_vect) * env.radius * 0.99
+        new_goal = last_pos + goal_direction_vect
+
+        # matrix containing every state except for the last one for effectively calculate distance from them.
+        every_other_pos = np.zeros((len(trajectory)-1, last_pos.shape[0]))
+        for i, point in enumerate(trajectory[ : -1]):
+            every_other_pos[i, :] = point['position']
+
+        while not feasible_goal:
+            # checking the distance from every goal
+            distances = np.linalg.norm(every_other_pos - new_goal, axis=1)
+
+            if (distances < env.radius).any():
+                # new random goal to try:
+                goal_direction_vect = np.random.uniform(low=-1, high=1, size=(2,))
+                goal_direction_vect = goal_direction_vect / np.linalg.norm(goal_direction_vect) * env.radius * 0.99
+                new_goal = last_pos + goal_direction_vect
+            else:
+                feasible_goal = True
+                break
+
+            if current_iter >= max_iters:
+                break               
+            current_iter += 1
+
+        if feasible_goal:
+            for data_point in trajectory:
+                data_point['goal'] = new_goal
+            trajectory[-1]['reward'] = 1
+            trajectory[-1]['done'] = True
+        else:
+            trajectory = []
+
+        return trajectory
