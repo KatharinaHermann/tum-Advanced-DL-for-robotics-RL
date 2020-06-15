@@ -59,8 +59,8 @@ class PointroboEnv(gym.Env):
         self.current_step += 1        
 
         #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made: Reward=-0.01
-        if (numpy.linalg.norm(self.agent_pos-self.goal_pos)<2).all(): 
-            reward = 1
+        if (np.linalg.norm(self.agent_pos-self.goal_pos)<2): 
+            reward = 10
             done = True
         #Have we hit an obstacle?
         elif self.collision_check():
