@@ -28,14 +28,11 @@ class PointroboEnv(gym.Env):
                  goal_reward=5,
                  collision_reward=-1,
                  step_reward=-0.01,
-<<<<<<< HEAD
                  buffer_size=100,
                  grid_size=32,
                  num_obj_max=5,
-                 obj_size_avg=8): 
-=======
+                 obj_size_avg=8, 
                  robot_radius=1): 
->>>>>>> WS_debugging
 
         super(PointroboEnv, self).__init__()
 
@@ -110,14 +107,9 @@ class PointroboEnv(gym.Env):
             raise NotImplementedError()
     
         # represend environment
-<<<<<<< HEAD
         
         self.workspace[int(np.clip(self.start_pos[0], 0, 31.9)), int(np.clip(self.start_pos[1], 0, 31.9))] = 2
         self.workspace[int(np.clip(self.goal_pos[0], 0, 31.9)), int(np.clip(self.goal_pos[1], 0, 31.9))] = 4
-=======
-        self.workspace[self.start_pos[0], self.start_pos[1]] = 2
-        self.workspace[int(self.goal_pos[0]), int(self.goal_pos[1])] = 4
->>>>>>> WS_debugging
 
         workspace_fig = visualize_workspace(self.workspace)
         robot = visualize_robot(self.agent_pos, self.robot_radius)
