@@ -93,8 +93,8 @@ def visualize_distance_field(workspace, fignum=1):
     fig = plt.figure(fignum)
     
     dm = fig.add_subplot(222)
-    cdm=dm.imshow(dist_img, cmap='Reds')
-    cdm=dm.imshow(workspace, cmap='Blues', alpha=0.3)
+    dm.imshow(dist_img, cmap='Reds')
+    dm.imshow(workspace, cmap='Blues', alpha=0.3)
     
     return fig
 
