@@ -9,39 +9,42 @@ def random_workspace(grid_size, num_obj_max, obj_size_avg):
         Free space are indicated with a 0. 
         The # of objects, the origin and height & width of the objects are generated from uniform and normal distributions.
     """  
-    #Throw number of objects from a uniform distribution.
-    num_objects= np.random.randint(low=1, high=num_obj_max, size=None)
-    #num_objects = tf.random.uniform(shape=[], minval=0, maxval=num_obj_max, dtype=tf.int32, seed=None, name=None)
 
-    #Generate an origin from a uniform distribution for each object
-    origin= np.random.randint(low=0, high=grid_size, size=(num_objects,2))
-    origin=np.asarray(origin, dtype=None, order=None)
-    #origin = tf.random.uniform( 
-    #shape=[num_objects,2], minval=0, maxval=grid_size, dtype=tf.int32, seed=None, name=None)
+    if num_obj_max >= 1:
+        #Throw number of objects from a uniform distribution.
+        num_objects= np.random.randint(low=1, high=num_obj_max, size=None)
+        #num_objects = tf.random.uniform(shape=[], minval=0, maxval=num_obj_max, dtype=tf.int32, seed=None, name=None)
 
-    #Generate a width and height from a Gaussian distribution for each object
-    width =np.random.normal(loc=obj_size_avg, scale=2, size=(num_objects,1))
-    width=np.asarray(width, dtype=int, order=None)
-    #width = tf.random.normal(shape=[num_objects,1], mean=obj_size_avg, stddev=2, dtype=tf.int32)
+        #Generate an origin from a uniform distribution for each object
+        origin= np.random.randint(low=0, high=grid_size, size=(num_objects,2))
+        origin=np.asarray(origin, dtype=None, order=None)
+        #origin = tf.random.uniform( 
+        #shape=[num_objects,2], minval=0, maxval=grid_size, dtype=tf.int32, seed=None, name=None)
 
-    height =np.random.normal(loc=obj_size_avg, scale=2, size=(num_objects,1))
-    height =np.asarray(height, dtype=int, order=None)
-    #height = tf.random.normal(shape=[num_objects,1], mean=obj_size_avg, stddev=2, dtype=tf.int32)
+        #Generate a width and height from a Gaussian distribution for each object
+        width =np.random.normal(loc=obj_size_avg, scale=2, size=(num_objects,1))
+        width=np.asarray(width, dtype=int, order=None)
+        #width = tf.random.normal(shape=[num_objects,1], mean=obj_size_avg, stddev=2, dtype=tf.int32)
 
-    #Initialize workspace
-    workspace=np.zeros((grid_size, grid_size), dtype=int)
+        height =np.random.normal(loc=obj_size_avg, scale=2, size=(num_objects,1))
+        height =np.asarray(height, dtype=int, order=None)
+        #height = tf.random.normal(shape=[num_objects,1], mean=obj_size_avg, stddev=2, dtype=tf.int32)
 
-    #Assign each entry with an object a 1. 
-    for i in range(num_objects):
-        if origin[i,1]+width[i] > grid_size:
-            right_bound=grid_size+1
-        else: right_bound = (origin[i,1]+width[i]).item()
+        #Initialize workspace
+        workspace=np.zeros((grid_size, grid_size), dtype=int)
 
-        if origin[i,0]+height[i] > grid_size:
-            upper_bound=grid_size+1
-        else: upper_bound = (origin[i,0]+height[i]).item()
-        workspace[origin[i,0]:upper_bound, origin[i,1]:right_bound]=1
-        workspace
+        #Assign each entry with an object a 1. 
+        for i in range(num_objects):
+            if origin[i,1]+width[i] > grid_size:
+                right_bound=grid_size+1
+            else: right_bound = (origin[i,1]+width[i]).item()
+
+            if origin[i,0]+height[i] > grid_size:
+                upper_bound=grid_size+1
+            else: upper_bound = (origin[i,0]+height[i]).item()
+            workspace[origin[i,0]:upper_bound, origin[i,1]:right_bound]=1
+    else:
+        workspace = np.zeros((grid_size, grid_size))
 
     return workspace
 
