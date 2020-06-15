@@ -27,7 +27,11 @@ class PointroboEnv(gym.Env):
     def __init__(self, 
                  goal_reward=5,
                  collision_reward=-1,
-                 step_reward=-0.01): 
+                 step_reward=-0.01,
+                 buffer_size=100,
+                 grid_size=32,
+                 num_obj_max=5,
+                 obj_size_avg=8): 
 
         super(PointroboEnv, self).__init__()
 
@@ -37,10 +41,10 @@ class PointroboEnv(gym.Env):
         self.step_reward = step_reward
 
         # workspace related inits:
-        self.buffer_size = 100
-        self.grid_size = 32
-        self.num_obj_max = 10
-        self.obj_size_avg = 5
+        self.buffer_size = buffer_size
+        self.grid_size = grid_size
+        self.num_obj_max = num_obj_max
+        self.obj_size_avg =obj_size_avg
 
         # Define action and observation space
         # They must be gym.spaces objects
