@@ -28,7 +28,12 @@ def test_pointrobot_gym():
             elif reward == -1:
                 print ("OOOOpssss you crashed!!")
             break
+<<<<<<< HEAD
         #env.render()
+=======
+        env.render()
+        
+>>>>>>> WS_debugging
 
 
 if __name__ == '__main__':

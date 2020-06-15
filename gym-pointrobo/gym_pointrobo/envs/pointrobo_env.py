@@ -28,10 +28,14 @@ class PointroboEnv(gym.Env):
                  goal_reward=5,
                  collision_reward=-1,
                  step_reward=-0.01,
+<<<<<<< HEAD
                  buffer_size=100,
                  grid_size=32,
                  num_obj_max=5,
                  obj_size_avg=8): 
+=======
+                 robot_radius=1): 
+>>>>>>> WS_debugging
 
         super(PointroboEnv, self).__init__()
 
@@ -39,6 +43,7 @@ class PointroboEnv(gym.Env):
         self.goal_reward = goal_reward
         self.collision_reward = collision_reward
         self.step_reward = step_reward
+        self.robot_radius = robot_radius
 
         # workspace related inits:
         self.buffer_size = buffer_size
@@ -72,7 +77,8 @@ class PointroboEnv(gym.Env):
         self.current_step += 1        
 
         #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made: Reward=-0.01
-        if (np.linalg.norm(self.agent_pos-self.goal_pos)<2): 
+        # Tolerance of distance 3, that the robot reached the goal!
+        if (np.linalg.norm(self.agent_pos-self.goal_pos)<3): 
             reward = self.goal_reward
             done = True
         #Have we hit an obstacle?
@@ -90,7 +96,7 @@ class PointroboEnv(gym.Env):
     def reset(self):
         """Resets the robot state to the initial state"""        
         self.setup_rndm_workspace_from_buffer()
-        self.agent_pos = self.start_pos
+        self.agent_pos = self.start_pos.astype(np.float32)
    
         return self.workspace.astype(np.float32), self.goal_pos.astype(np.float32), self.agent_pos.astype(np.float32)
 
@@ -104,14 +110,19 @@ class PointroboEnv(gym.Env):
             raise NotImplementedError()
     
         # represend environment
+<<<<<<< HEAD
         
         self.workspace[int(np.clip(self.start_pos[0], 0, 31.9)), int(np.clip(self.start_pos[1], 0, 31.9))] = 2
         self.workspace[int(np.clip(self.goal_pos[0], 0, 31.9)), int(np.clip(self.goal_pos[1], 0, 31.9))] = 4
+=======
+        self.workspace[self.start_pos[0], self.start_pos[1]] = 2
+        self.workspace[int(self.goal_pos[0]), int(self.goal_pos[1])] = 4
+>>>>>>> WS_debugging
 
         workspace_fig = visualize_workspace(self.workspace)
-        robot = visualize_robot(self.agent_pos)
+        robot = visualize_robot(self.agent_pos, self.robot_radius)
         distance_fig= visualize_distance_field(self.workspace)
-        robot = visualize_robot(self.agent_pos)
+        robot = visualize_robot(self.agent_pos, self.robot_radius)
         plt.show()
 
 
@@ -121,7 +132,7 @@ class PointroboEnv(gym.Env):
         """
         t = 1.0
         self.agent_pos += action * t
-        self.agent_pos = np.clip(self.agent_pos, [0.0, 0.0], [float(self.grid_size), float(self.grid_size)])
+        self.agent_pos = np.clip(self.agent_pos, [0.0, 0.0], [float(self.grid_size-1), float(self.grid_size-1)])
 
 
     def create_workspace_buffer(self):
@@ -156,8 +167,8 @@ class PointroboEnv(gym.Env):
         nearest_dist = dist_fun(x=x)
 
         #print("Distance to the nearest obstacle at the center: ", nearest_dist)
-            
-        if nearest_dist <= 2:
+        # With -0.5 we count for the obstacle expansion
+        if nearest_dist - self.robot_radius - 0.5 < 0 :
             collision = True
             #print("Collision is: ", collision)
         
