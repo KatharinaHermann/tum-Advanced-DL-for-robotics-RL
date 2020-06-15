@@ -150,9 +150,9 @@ class PointroboEnv(gym.Env):
         x = self.agent_pos
         nearest_dist = dist_fun(x=x)
 
-        #print("Distance to the nearest obstacle at the center: ", nearest_dist)
+        print("Distance to the nearest obstacle at the center: ", nearest_dist)
             
-        if nearest_dist <= 2:
+        if nearest_dist <= 3:
             collision = True
             #print("Collision is: ", collision)
         

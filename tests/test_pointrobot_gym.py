@@ -23,9 +23,9 @@ def test_pointrobot_gym():
         
         if done:
             print("reward={}".format(reward))
-            if reward == 1:
+            if reward == goal_reward:
                 print ("Goal reached!")
-            elif reward == -1:
+            elif reward == collision_reward:
                 print ("OOOOpssss you crashed!!")
             break
         
