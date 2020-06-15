@@ -104,8 +104,9 @@ class PointroboEnv(gym.Env):
             raise NotImplementedError()
     
         # represend environment
-        self.workspace[int(self.start_pos[0]), int(self.start_pos[1])] = 2
-        self.workspace[int(self.goal_pos[0]), int(self.goal_pos[1])] = 4
+        
+        self.workspace[int(np.clip(self.start_pos[0], 0, 31.9)), int(np.clip(self.start_pos[1], 0, 31.9))] = 2
+        self.workspace[int(np.clip(self.goal_pos[0], 0, 31.9)), int(np.clip(self.goal_pos[1], 0, 31.9))] = 4
 
         workspace_fig = visualize_workspace(self.workspace)
         robot = visualize_robot(self.agent_pos)

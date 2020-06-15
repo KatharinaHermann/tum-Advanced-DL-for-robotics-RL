@@ -20,6 +20,8 @@ def test_pointrobot_trainer_init():
     parser.add_argument('--env-name', type=str, default="pointrobo-v0")
     args = parser.parse_args()
 
+    args.save_test_path_sep = True
+
     #Initialize the environment
     env = gym.make(args.env_name)
     test_env = gym.make(args.env_name)
@@ -43,7 +45,7 @@ def test_state_concatenation():
                 input_shape=(32, 32),
                 conv_filters=[4, 8, 16])
     model.build(input_shape=(1, 32, 32, 1))
-    model.load_weights(filepath='models/cae/model_num_5_size_8.h5')
+    model.load_weights(filepath='../models/cae/model_num_5_size_8.h5')
 
     for layer, _ in model._get_trainable_state().items():
         layer.trainable = False
@@ -60,9 +62,7 @@ def test_state_concatenation():
 
 
 def test_evaluation():
-    """Possibly a good ide to first test the eval_policy method of the agent.
-    If that works, than debugging training may be easier.
-    """
+    """Tests only the evaluation method of the PointrobotTrainer class"""
     print('-' * 5 + 'test_evaluation' + '-' * 5)
     
     total_steps = 10
@@ -75,6 +75,7 @@ def test_evaluation():
     args = parser.parse_args()
 
     args.max_steps = 100
+    args._save_test_path_sep = True
 
     #######
     # possibly set some args attributes to small numbers, so that testing does not last that long.
@@ -111,7 +112,7 @@ def test_training():
     args = parser.parse_args()
 
     args.max_steps = 1000
-    args.show_progress = True
+    args.show_progress = False
 
     #######
     # possibly set some args attributes to small numbers, so that testing does not last that long.
