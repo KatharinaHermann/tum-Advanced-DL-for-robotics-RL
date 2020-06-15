@@ -1,1 +1,0 @@
-/home/hermann_katharina/project/tests/test_pointrobot_trainer.py
