@@ -114,7 +114,12 @@ class PointrobotTrainer:
 
         while total_steps < self._max_steps:
             #Get action randomly for warmup /from Actor-NN otherwise
-            
+           
+            #Visualize environment if "show_progess"
+            if self._show_progress:
+                self._env.render()
+
+
             if total_steps < self._policy.n_warmup:
                 action = self._env.action_space.sample()
                 action_norm = np.linalg.norm(action)
@@ -141,9 +146,7 @@ class PointrobotTrainer:
             obs = next_obs
             obs_full = next_obs_full
 
-            #Visualize environment if "show_progess"
-            if self._show_progress:
-                self._env.render()
+            
             
             episode_steps += 1
             episode_return += reward
