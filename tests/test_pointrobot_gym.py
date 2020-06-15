@@ -28,6 +28,7 @@ def test_pointrobot_gym():
             elif reward == -1:
                 print ("OOOOpssss you crashed!!")
             break
+        
         env.render()
 
 

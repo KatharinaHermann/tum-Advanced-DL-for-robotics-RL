@@ -111,7 +111,7 @@ def test_training():
     args = parser.parse_args()
 
     args.max_steps = 1000
-    #args.show_progress = True
+    args.show_progress = True
 
     #######
     # possibly set some args attributes to small numbers, so that testing does not last that long.
