@@ -26,9 +26,20 @@ args.test_interval = 50
 args.episode_max_steps = 100
 
 #Initialize the environment
-env = gym.make(args.env_name)
-test_env = gym.make(args.env_name)
+env = gym.make(
+    args.env_name,
+    goal_reward=5,
+    collision_reward=-1,
+    step_reward=-0.01
+    )
+test_env = gym.make(
+    args.env_name,
+    goal_reward=5,
+    collision_reward=-1,
+    step_reward=-0.01
+    )
 
+# initialize the agent:
 policy = DDPG(
     state_shape=env.observation_space.shape,
     action_dim=env.action_space.high.size,

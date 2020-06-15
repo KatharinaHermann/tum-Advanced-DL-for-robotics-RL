@@ -269,7 +269,7 @@ class PointrobotRelabeler:
         if feasible_goal:
             for data_point in trajectory:
                 data_point['goal'] = new_goal
-            trajectory[-1]['reward'] = 1
+            trajectory[-1]['reward'] = env.goal_reward
             trajectory[-1]['done'] = True
         else:
             trajectory = []

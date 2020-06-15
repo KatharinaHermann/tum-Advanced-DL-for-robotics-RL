@@ -151,11 +151,8 @@ class PointrobotTrainer:
             tf.summary.experimental.set_step(total_steps)
 
             if done or episode_steps == self._episode_max_steps:
-                if reward == -1:
-                    """This is where the workspace relabeling comes into play!:
-                    If the robot crashed (reward=-1), then the whole trajectory must
-                    be relabeld with a new workspace, a new goal_position, and a reward of 1 for the last element.
-                    """
+                if reward == self._env.collision_reward:
+                    """Workspace relabeling part."""
                     
                     # Create new workspace for the trajectory:
                     relabeled_trajectory = self._relabeler.relabel(trajectory=self.trajectory, env=self._env)
@@ -363,8 +360,8 @@ class PointrobotTrainer:
                             help='Interval to save model')
         parser.add_argument('--save-summary-interval', type=int, default=int(1e3),
                             help='Interval to save summary')
-        parser.add_argument('--model-dir', type=str, default='models/agents',
-                            help='Directory to restore model. default =  models/agents')
+        parser.add_argument('--model-dir', type=str, default='../models/agents',
+                            help='Directory to restore model. default =  ../models/agents')
         parser.add_argument('--dir-suffix', type=str, default='',
                             help='Suffix for directory that contains results')
         parser.add_argument('--normalize-obs', action='store_true',
@@ -403,8 +400,8 @@ class PointrobotTrainer:
                             help='latent dimension of the CAE. default: 16')
         parser.add_argument('--cae_conv_filters', type=int, nargs='+', default=[4, 8, 16],
                             help='number of filters in the conv layers. default: [4, 8, 16]')
-        parser.add_argument('--cae_weights_path', type=str, default='models/cae/model_num_5_size_8.h5',
-                            help='path to saved CAE weights. default: models/cae/model_num_5_size_8.h5')
+        parser.add_argument('--cae_weights_path', type=str, default='../models/cae/model_num_5_size_8.h5',
+                            help='path to saved CAE weights. default: ../models/cae/model_num_5_size_8.h5')
 
         return parser
 

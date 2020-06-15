@@ -6,8 +6,17 @@ from hwr.relabeling.pointrobot_relabeling import PointrobotRelabeler
 class test_env():
     """helping class, that has some values that a real gym environment would have."""
 
-    def __init__(self, radius):
+    def __init__(self,
+        radius,
+        goal_reward=5,
+        collision_reward=-1,
+        step_reward=-0.01
+        ):
+
         self.radius = radius
+        self.goal_reward = goal_reward
+        self.collision_reward = collision_reward
+        self.step_reward = step_reward
 
 
 def test_remove_obstacle():
@@ -201,15 +210,21 @@ def test_erease_relabeling():
                                     mode='erease')
 
     trajectory = []
-    trajectory.append({'workspace': workspace, 'position': np.array([21.0, 5.0]), 'done': False, 'reward': -0.01})
-    trajectory.append({'workspace': workspace, 'position': np.array([21.3, 4.7]), 'done': False, 'reward': -0.01})
-    trajectory.append({'workspace': workspace, 'position': np.array([21.6, 4.4]), 'done': True, 'reward': -1})
+    trajectory.append({'workspace': workspace, 'position': np.array([21.0, 5.0]),
+        'done': False, 'reward': env.step_reward})
+    trajectory.append({'workspace': workspace, 'position': np.array([21.3, 4.7]),
+        'done': False, 'reward': env.step_reward})
+    trajectory.append({'workspace': workspace, 'position': np.array([21.6, 4.4]),
+        'done': True, 'reward': env.collision_reward})
 
     # etalon solutions:
     etalon_relabeled_traj = []
-    etalon_relabeled_traj.append({'workspace': etalon_workspace, 'position': np.array([21.0, 5.0]), 'done': False, 'reward': -0.01})
-    etalon_relabeled_traj.append({'workspace': etalon_workspace, 'position': np.array([21.3, 4.7]), 'done': False, 'reward': -0.01})
-    etalon_relabeled_traj.append({'workspace': etalon_workspace, 'position': np.array([21.6, 4.4]), 'done': True, 'reward': 1})
+    etalon_relabeled_traj.append({'workspace': etalon_workspace, 'position': np.array([21.0, 5.0]),
+        'done': False, 'reward': env.step_reward})
+    etalon_relabeled_traj.append({'workspace': etalon_workspace, 'position': np.array([21.3, 4.7]),
+        'done': False, 'reward': env.step_reward})
+    etalon_relabeled_traj.append({'workspace': etalon_workspace, 'position': np.array([21.6, 4.4]), 
+        'done': True, 'reward': env.goal_reward})
 
     relabeled_traj = relabeler.relabel(trajectory, env)
 

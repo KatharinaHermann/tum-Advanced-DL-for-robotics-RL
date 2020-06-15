@@ -43,7 +43,7 @@ def test_state_concatenation():
                 input_shape=(32, 32),
                 conv_filters=[4, 8, 16])
     model.build(input_shape=(1, 32, 32, 1))
-    model.load_weights(filepath='models/cae/model_num_5_size_8.h5')
+    model.load_weights(filepath='../models/cae/model_num_5_size_8.h5')
 
     for layer, _ in model._get_trainable_state().items():
         layer.trainable = False

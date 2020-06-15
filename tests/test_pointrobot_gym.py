@@ -5,7 +5,10 @@ import gym_pointrobo
 
 
 def test_pointrobot_gym():
-    env = gym.make('pointrobo-v0')
+    env = gym.make('pointrobo-v0', 
+                   goal_reward=5, 
+                   collision_reward=-1,
+                   step_reward=-0.01)
     workspace, goal, obs = env.reset()
     env.render()
 

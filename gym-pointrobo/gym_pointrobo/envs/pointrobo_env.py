@@ -24,8 +24,17 @@ Use it then with:
 class PointroboEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self): 
+    def __init__(self, 
+                 goal_reward=5,
+                 collision_reward=-1,
+                 step_reward=-0.01): 
+
         super(PointroboEnv, self).__init__()
+
+        # rewards
+        self.goal_reward = goal_reward
+        self.collision_reward = collision_reward
+        self.step_reward = step_reward
 
         # workspace related inits:
         self.buffer_size = 100
@@ -60,15 +69,15 @@ class PointroboEnv(gym.Env):
 
         #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made: Reward=-0.01
         if (np.linalg.norm(self.agent_pos-self.goal_pos)<2): 
-            reward = 10
+            reward = self.goal_reward
             done = True
         #Have we hit an obstacle?
         elif self.collision_check():
-            reward = -1
+            reward = self.collision_reward
             done = True
         #We made another step
         else: 
-            reward = -0.01
+            reward = self.step_reward
             done = False 
 
         return self.agent_pos, reward, done, {}
