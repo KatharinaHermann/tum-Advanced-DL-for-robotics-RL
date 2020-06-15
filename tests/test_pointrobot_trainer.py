@@ -75,7 +75,7 @@ def test_evaluation():
     args = parser.parse_args()
 
     args.max_steps = 100
-    args._save_test_path_sep = True
+    args.save_test_path_sep = True
 
     #######
     # possibly set some args attributes to small numbers, so that testing does not last that long.
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     test_pointrobot_trainer_init()
     test_state_concatenation()
     test_evaluation()
-    test_training()
+    #test_training()
     print('All tests have run successfully!')
     
 
