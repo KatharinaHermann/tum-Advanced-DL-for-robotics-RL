@@ -1,6 +1,7 @@
 import numpy as np
 
 from hwr.relabeling.pointrobot_relabeling import PointrobotRelabeler
+from math import isclose
 
 
 class test_env():
@@ -170,7 +171,7 @@ def test_goal_setting():
     # traj_0:
     assert len(sol_traj_0) == len(traj_0)
     assert (sol_traj_0[0]['position'] == traj_0[0]['position']).all()
-    assert np.linalg.norm(sol_traj_0[0]['goal'] - traj_0[0]['position']) == (env.radius * 0.99)
+    assert isclose(np.linalg.norm(sol_traj_0[0]['goal'] - traj_0[0]['position']), (env.radius * 0.99))
 
     # traj_1:
     assert len(sol_traj_1) == len(traj_1)
@@ -189,7 +190,7 @@ def test_goal_setting():
         assert np.linalg.norm(sol_traj_2[i]['goal'] - sol_traj_2[i]['position']) > env.radius
 
     assert (sol_traj_2[-1]['position'] == traj_2[-1]['position']).all()
-    assert np.linalg.norm(sol_traj_2[-1]['goal'] - sol_traj_2[-1]['position']) == env.radius * 0.99
+    assert isclose(np.linalg.norm(sol_traj_2[-1]['goal'] - sol_traj_2[-1]['position']), env.radius * 0.99)
 
     # traj_3:
     assert len(sol_traj_3) == 0

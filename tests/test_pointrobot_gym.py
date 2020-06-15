@@ -10,7 +10,7 @@ def test_pointrobot_gym():
                    collision_reward=-1,
                    step_reward=-0.01)
     workspace, goal, obs = env.reset()
-    env.render()
+    #env.render()
 
     # Hardcoded agent: always go diagonal
     action=np.array([0.5, 0.5])
@@ -28,8 +28,7 @@ def test_pointrobot_gym():
             elif reward == -1:
                 print ("OOOOpssss you crashed!!")
             break
-        
-        env.render()
+        #env.render()
 
 
 if __name__ == '__main__':
