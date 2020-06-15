@@ -381,6 +381,13 @@ class PointrobotTrainer:
     def get_argument(parser=None):
         if parser is None:
             parser = argparse.ArgumentParser(conflict_handler='resolve')
+
+        # environment seettings:
+        parser.add_argument('--num-obj-max', type=int, default=int(5),
+                            help='Maximum number of obstacles in the environment. default: 5')
+        parser.add_argument('--obj-size-avg', type=int, default=int(8),
+                            help='Average size of the obstacles. default: 8')
+
         # experiment settings
         parser.add_argument('--max-steps', type=int, default=int(1e6),
                             help='Maximum number steps to interact with env.')
@@ -430,6 +437,7 @@ class PointrobotTrainer:
         # others
         parser.add_argument('--logging-level', choices=['DEBUG', 'INFO', 'WARNING'],
                             default='INFO', help='Logging level')
+                            
         # autoencoder related
         parser.add_argument('--cae_pooling', type=str, default='max',
                             help='pooling type of the CAE. default: max')
