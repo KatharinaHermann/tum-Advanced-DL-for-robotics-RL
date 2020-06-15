@@ -29,7 +29,7 @@ def random_workspace(grid_size, num_obj_max, obj_size_avg):
     #height = tf.random.normal(shape=[num_objects,1], mean=obj_size_avg, stddev=2, dtype=tf.int32)
 
     #Initialize workspace
-    workspace=np.zeros((grid_size,grid_size), dtype=int)
+    workspace=np.zeros((grid_size, grid_size), dtype=int)
 
     #Assign each entry with an object a 1. 
     for i in range(num_objects):
@@ -46,34 +46,29 @@ def random_workspace(grid_size, num_obj_max, obj_size_avg):
     return workspace
 
 
-def get_star_goal_for_workspace(workspace):
-    """generates a start and goal point for a given workspace. 
-    It throws in randomply points until the points are in free space.
+def get_start_goal_for_workspace(workspace):
+    """generates a discrete start and goal point for a given workspace. 
+    It throws in randomply points from a uniform distribution until the points are in free space.
     """
 
     grid_size = workspace.shape[0]
 
     #Generate start point (repeat until point is found where no object ist placed)
-    start_blocked = 1
-    while (start_blocked == 1):
-        start = np.random.randint(low=0, high=grid_size, size=(1,2))
-        start = np.asarray(start, dtype=None, order=None)
-        y = start[0,0]
-        x = start[0,1]
-        start_blocked = workspace[y, x]
-        #start = tf.random.uniform( 
-        #shape=[1,2], minval=0, maxval=grid_size, dtype=tf.int32, seed=None, name=None)
+    start_blocked = True
+    while start_blocked:
+        
+        start = np.random.uniform(low=0.0, high=float(grid_size), size=(2,))
+        y = int(start[0])
+        x = int(start[1])
+        start_blocked = (workspace[y, x] == 1)
 
     #Generate goal point (repeat until point is found where no object ist placed) and assign goal point with a 1
-    goal_blocked = 1
-    while (goal_blocked == 1):
-        goal = np.random.randint(low=0, high=grid_size, size=(1,2))
-        goal = np.asarray(goal, dtype=None, order=None)
-        y = goal[0,0]
-        x = goal[0,1]
-        goal_blocked = workspace[y, x]
-        #goal = tf.random.uniform( 
-        #shape=[1,2], minval=0, maxval=grid_size, dtype=tf.int32, seed=None, name=None)
+    goal_blocked = True
+    while goal_blocked:
+        goal = np.random.uniform(low=0.0, high=float(grid_size), size=(2,))
+        y = int(goal[0])
+        x = int(goal[1])
+        goal_blocked = (workspace[y, x] == 1)
 
     return start, goal
 
@@ -100,6 +95,14 @@ def visualize_distance_field(workspace, fignum=1):
     
     return fig
 
+def visualize_robot(current_position, color='#d347a8'):
+    """for nicely visualizing the distance field to the obstacles. The robot's position is described in the workspace matrix (with indices). Therefore, the x-coordinate is the second element of the array. The y-coordinate is the first element"""
+    robot = plt.Circle((current_position[1], current_position[0]), 1, color=color)
+    ax = plt.gca()
+    ax.add_artist(robot)
+
+    return robot
+
 def image_interpolation(*, img, pixel_size=1, order=1, mode='nearest'):
 
     factor = 1 / pixel_size
@@ -117,6 +120,8 @@ def image_interpolation(*, img, pixel_size=1, order=1, mode='nearest'):
 
     return interp_fun
 
+
+
     
 ############# TEST SAMPLE WORKSPACE #########################
 
@@ -124,11 +129,15 @@ if __name__ == '__main__':
     workspace_sample = random_workspace(32, 10, 5)
     start, goal = get_start_goal_for_workspace(workspace_sample)
 
-    workspace_sample[start[0, 0], start[0, 1]] = 2
-    workspace_sample[goal[0, 0], goal[0, 1]] = 3
+    workspace_sample[int(start[0]), int(start[1])] = 2
+    workspace_sample[int(goal[0]), int(goal[1])] = 3
 
     fig1 = visualize_workspace(workspace_sample)
-    fig2= visualize_distance_field(workspace_sample)
+    robot = visualize_robot([3.55555,2.63333333333])
+
+    fig2 = visualize_distance_field(workspace_sample)
+    
+    
     plt.show()
 
     
@@ -136,7 +145,7 @@ if __name__ == '__main__':
     pixel_size=1 #10/32
     dist_img = ndimage.distance_transform_edt(-workspace_sample + 1)  # Excpects blocks as 0 and free space as 1
     dist_fun = image_interpolation(img=dist_img, pixel_size=pixel_size)
-    x=np.array([float(start[0,0]),float(start[0,1])])
+    x=np.array([float(start[0]),float(start[1])])
     dist= dist_fun(x=x)
     
     print("Distance to the nearest obstacle at the center: ",
