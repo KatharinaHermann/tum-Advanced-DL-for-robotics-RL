@@ -10,6 +10,7 @@ workspaces/
 build/
 dist/
 hwr.egg-info/
+gym-pointrobo/gym-pointrobo.egg-info
 
 # cache:
 **/__pycache__/
