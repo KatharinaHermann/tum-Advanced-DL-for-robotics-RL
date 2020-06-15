@@ -23,6 +23,7 @@ args = parser.parse_args()
 
 args.max_steps = 1e6
 args.test_interval = 50
+args.episode_max_steps = 100
 
 #Initialize the environment
 env = gym.make(args.env_name)

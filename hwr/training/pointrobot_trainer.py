@@ -117,8 +117,14 @@ class PointrobotTrainer:
             
             if total_steps < self._policy.n_warmup:
                 action = self._env.action_space.sample()
+                action_norm = np.linalg.norm(action)
+                if action_norm != 0: 
+                    action = action / action_norm
             else:
                 action = self._policy.get_action(obs_full)
+                action_norm = np.linalg.norm(action)
+                if action_norm != 0: 
+                    action = action / action_norm
 
             #Take action and get next_obs, reward and done_flag from environment
             next_obs, reward, done, _ = self._env.step(action)
@@ -170,8 +176,8 @@ class PointrobotTrainer:
 
                 n_episode += 1
                 fps = episode_steps / (time.perf_counter() - episode_start_time)
-                self.logger.info("Total Epi: {0: 5} Steps: {1: 7} Episode Steps: {2: 5} Return: {3: 5.4f} FPS: {4:5.2f}".format(
-                    n_episode, total_steps, episode_steps, episode_return, fps))
+                self.logger.info("Total Epi: {0: 5} Steps: {1: 7} Episode Steps: {2: 5} Return: {3: 5.4f} Last reward: {4: 5.4f} FPS: {5: 5.2f}".format(
+                    n_episode, total_steps, episode_steps, episode_return, reward, fps))
                 tf.summary.scalar(
                     name="Common/training_return", data=episode_return)
 
@@ -260,6 +266,9 @@ class PointrobotTrainer:
 
             for _ in range(self._episode_max_steps):
                 action = self._policy.get_action(obs_full, test=True)
+                action_norm = np.linalg.norm(action)
+                if action_norm != 0: 
+                    action = action / action_norm
 
                 next_obs, reward, done, _ = self._test_env.step(action)
                 #Concatenate position observation with start, goal, and reduced workspace!!
