@@ -3,6 +3,7 @@ import sys
 import time
 import logging
 import argparse
+import joblib
 
 import numpy as np
 import tensorflow as tf
@@ -68,6 +69,11 @@ class PointrobotTrainer:
         self.logger = initialize_logger(
             logging_level=logging.getLevelName(args.logging_level),
             output_dir=self._output_dir)
+        if self._save_test_path_sep:
+            sep_logdirs = ['successful_trajs', 'unsuccessful_trajs', 'unfinished_trajs']
+            for logdir in sep_logdirs:
+                if not os.path.exists(os.path.join(self._logdir, logdir)):
+                    os.makedirs(os.path.join(self._logdir, logdir))
 
         if args.evaluate:
             assert args.model_dir is not None
@@ -114,7 +120,12 @@ class PointrobotTrainer:
 
         while total_steps < self._max_steps:
             #Get action randomly for warmup /from Actor-NN otherwise
-            
+           
+            #Visualize environment if "show_progess"
+            if self._show_progress:
+                self._env.render()
+
+
             if total_steps < self._policy.n_warmup:
                 action = self._env.action_space.sample()
                 action_norm = np.linalg.norm(action)
@@ -141,9 +152,7 @@ class PointrobotTrainer:
             obs = next_obs
             obs_full = next_obs_full
 
-            #Visualize environment if "show_progess"
-            if self._show_progress:
-                self._env.render()
+            
             
             episode_steps += 1
             episode_return += reward
@@ -151,8 +160,11 @@ class PointrobotTrainer:
             tf.summary.experimental.set_step(total_steps)
 
             if done or episode_steps == self._episode_max_steps:
-                if reward == self._env.collision_reward:
-                    """Workspace relabeling part."""
+                if (reward == self._env.collision_reward) and\
+                    total_steps > self._policy.n_warmup:
+                    """Workspace relabeling part.
+                    The workspace will not be relabeled, if we are only in the warmup phase.
+                    """
                     
                     # Create new workspace for the trajectory:
                     relabeled_trajectory = self._relabeler.relabel(trajectory=self.trajectory, env=self._env)
@@ -183,7 +195,7 @@ class PointrobotTrainer:
                 episode_start_time = time.perf_counter()
 
             #While warmup, we only produce experiences without training 
-            if total_steps < self._policy.n_warmup:
+            if total_steps <= self._policy.n_warmup:
                 continue
             
             # After every Update_interval we want to train/update the Actor-NN, Critic-NN, 
@@ -303,8 +315,14 @@ class PointrobotTrainer:
 
             if self._save_test_movie:
                 frames_to_gif(frames, prefix, self._output_dir)
+
+            if self._save_test_path_sep:
+                self._save_traj_separately(prefix)
             
             avg_test_return += episode_return
+
+            # empty trajectory:
+            self.trajectory = []
 
         if self._show_test_images:
             images = tf.cast(
@@ -312,6 +330,24 @@ class PointrobotTrainer:
                 tf.uint8)
             tf.summary.image('train/input_img', images,)
         return avg_test_return / self._test_episodes
+
+
+    def _save_traj_separately(self, prefix):
+        """Saves the test trajectories into separate folders under the logdir
+        based on the ending of the trajectory.
+        """
+        last_reward = self.trajectory[-1]['reward']
+
+        if last_reward == self._env.goal_reward:
+            log_dir = os.path.join(self._logdir, 'successful_trajs')
+        elif last_reward == self._env.collision_reward:
+            log_dir = os.path.join(self._logdir, 'unsuccessful_trajs')
+        else:
+            log_dir = os.path.join(self._logdir, 'unfinished_trajs')
+
+        file_name = os.path.join(log_dir, prefix + '.pkl')
+        joblib.dump(self.trajectory, file_name)
+
 
     def _set_from_args(self, args):
         # experiment settings
@@ -335,6 +371,7 @@ class PointrobotTrainer:
         self._show_test_progress = args.show_test_progress
         self._test_episodes = args.test_episodes
         self._save_test_path = args.save_test_path
+        self._save_test_path_sep = args.save_test_path_sep
         self._save_test_movie = args.save_test_movie
         self._show_test_images = args.show_test_images
         # autoencoder settings
@@ -347,6 +384,13 @@ class PointrobotTrainer:
     def get_argument(parser=None):
         if parser is None:
             parser = argparse.ArgumentParser(conflict_handler='resolve')
+
+        # environment seettings:
+        parser.add_argument('--num-obj-max', type=int, default=int(5),
+                            help='Maximum number of obstacles in the environment. default: 5')
+        parser.add_argument('--obj-size-avg', type=int, default=int(8),
+                            help='Average size of the obstacles. default: 8')
+
         # experiment settings
         parser.add_argument('--max-steps', type=int, default=int(1e6),
                             help='Maximum number steps to interact with env.')
@@ -379,10 +423,13 @@ class PointrobotTrainer:
                             help='Number of episodes to evaluate at once')
         parser.add_argument('--save-test-path', action='store_true',
                             help='Save trajectories of evaluation')
+        parser.add_argument('--save-test-path-sep', action='store_true',
+                            help='Save successful, collision and simply unsuccessful trajectories of evaluation separately')
         parser.add_argument('--show-test-images', action='store_true',
                             help='Show input images to neural networks when an episode finishes')
         parser.add_argument('--save-test-movie', action='store_true',
                             help='Save rendering results')
+
         # replay buffer
         parser.add_argument('--use-prioritized-rb', action='store_true',
                             help='Flag to use prioritized experience replay')
@@ -393,6 +440,7 @@ class PointrobotTrainer:
         # others
         parser.add_argument('--logging-level', choices=['DEBUG', 'INFO', 'WARNING'],
                             default='INFO', help='Logging level')
+                            
         # autoencoder related
         parser.add_argument('--cae_pooling', type=str, default='max',
                             help='pooling type of the CAE. default: max')

@@ -28,7 +28,8 @@ def test_pointrobot_gym():
             elif reward == collision_reward:
                 print ("OOOOpssss you crashed!!")
             break
-        #env.render()
+        env.render()
+        
 
 
 if __name__ == '__main__':

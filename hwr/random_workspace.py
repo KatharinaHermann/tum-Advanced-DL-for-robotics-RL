@@ -60,15 +60,19 @@ def get_start_goal_for_workspace(workspace):
     start_blocked = True
     while start_blocked:
         
-        start = np.random.uniform(low=0.0, high=float(grid_size), size=(2,))
-        y = int(start[0])
-        x = int(start[1])
-        start_blocked = (workspace[y, x] == 1)
+        start = np.random.uniform(low=1.0, high=float(grid_size-2), size=(2,)).astype(int)
+        y = start[0]
+        x = start[1]
+
+        #Check if there is an obsrtacle near the start position
+        start_blocked = (workspace[y+1, x+1] == 1 or workspace[y+1, x-1] == 1 
+                        or workspace[y-1, x-1] == 1 or workspace[y-1, x+1] == 1)
+        
 
     #Generate goal point (repeat until point is found where no object ist placed) and assign goal point with a 1
     goal_blocked = True
     while goal_blocked:
-        goal = np.random.uniform(low=0.0, high=float(grid_size), size=(2,))
+        goal = np.random.uniform(low=0.0, high=float(grid_size-1), size=(2,))
         y = int(goal[0])
         x = int(goal[1])
         goal_blocked = (workspace[y, x] == 1)
@@ -98,9 +102,9 @@ def visualize_distance_field(workspace, fignum=1):
     
     return fig
 
-def visualize_robot(current_position, color='#d347a8'):
+def visualize_robot(current_position, robot_radius, color='#d347a8'):
     """for nicely visualizing the distance field to the obstacles. The robot's position is described in the workspace matrix (with indices). Therefore, the x-coordinate is the second element of the array. The y-coordinate is the first element"""
-    robot = plt.Circle((current_position[1], current_position[0]), 1, color=color)
+    robot = plt.Circle((current_position[1], current_position[0]), robot_radius, color=color)
     ax = plt.gca()
     ax.add_artist(robot)
 
@@ -117,7 +121,7 @@ def image_interpolation(*, img, pixel_size=1, order=1, mode='nearest'):
             x2 = x2[np.newaxis, :]
         # Transform physical coordinates to image coordinates 
         x2 *= factor
-        x2 -= 0.5
+        x2 += 1
 
         return ndimage.map_coordinates(input=img, coordinates=x2.T, order=order, mode=mode).T
 
