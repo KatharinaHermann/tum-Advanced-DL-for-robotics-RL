@@ -182,6 +182,7 @@ class PointrobotTrainer:
 
                 # resetting:
                 workspace, goal, obs = self._env.reset()
+                reduced_workspace = self._CAE.evaluate(workspace)
                 obs_full = np.concatenate((obs, goal, reduced_workspace))
                 self.trajectory = []
 
