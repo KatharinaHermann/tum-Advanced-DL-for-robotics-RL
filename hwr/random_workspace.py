@@ -88,7 +88,7 @@ def visualize_workspace(workspace, fignum=1):
     cax = ax.matshow(workspace)
     fig.colorbar(cax)
 
-    return fig
+    return ax
 
 def visualize_distance_field(workspace, fignum=1):
     """for nicely visualizing the distance field to the obstacles."""

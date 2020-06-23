@@ -65,6 +65,13 @@ class PointroboEnv(gym.Env):
 
         # reset. With this the first workspace, agent position, goal position is created.
         _, _, _, = self.reset()
+
+        # Visulaization initializations:
+        self._fig = None
+        self._ax = None
+        self._robo_artist = None
+        self._goal_artist = None
+
         
 
     def step(self, action):
@@ -98,24 +105,27 @@ class PointroboEnv(gym.Env):
         return self.workspace.astype(np.float32), self.goal_pos.astype(np.float32), self.agent_pos.astype(np.float32)
 
 
-    def render(self, mode='console', close=False):
+    def render(self, mode='plot', close=False):
         """"The x-axis of the environment is pointing from left to right. 
             The y-axis is pointing downwards. 
             The origin of the KOSY is in the top left corner."""
         # Render the environment to the screen
-        if mode != 'console':
+        if mode != 'plot':
             raise NotImplementedError()
-    
-        # represend environment
+            
+        if self._fig is None:
+            self._fig = plt.figure(1)
+            self._ax = plt.gca()
+            self._robo_artist = plt.Circle((self.agent_pos[0], self.agent_pos[1]), self.robot_radius, color='m') 
+            self._ax.add_artist(self._robo_artist)
+            self._goal_artist = plt.Circle((self.goal_pos[0], self.goal_pos[1]), self.robot_radius, color='b')
+            self._ax.add_artist(self._goal_artist)
         
-        self.workspace[int(np.clip(self.start_pos[0], 0, 31.9)), int(np.clip(self.start_pos[1], 0, 31.9))] = 2
-        self.workspace[int(np.clip(self.goal_pos[0], 0, 31.9)), int(np.clip(self.goal_pos[1], 0, 31.9))] = 4
+        self._ax.matshow(self.workspace)
+        self._robo_artist.set_center((self.agent_pos[0], self.agent_pos[1]))
+        self._goal_artist.set_center((self.goal_pos[0], self.goal_pos[1]))
 
-        workspace_fig = visualize_workspace(self.workspace)
-        robot = visualize_robot(self.agent_pos, self.robot_radius)
-        distance_fig= visualize_distance_field(self.workspace)
-        robot = visualize_robot(self.agent_pos, self.robot_radius)
-        plt.show()
+        plt.pause(0.1)
 
 
     def take_action(self, action):

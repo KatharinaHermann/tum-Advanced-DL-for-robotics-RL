@@ -23,12 +23,14 @@ def test_pointrobot_gym():
         
         if done:
             print("reward={}".format(reward))
-            if reward == goal_reward:
+            if reward == env.goal_reward:
                 print ("Goal reached!")
-            elif reward == collision_reward:
+            elif reward == env.collision_reward:
                 print ("OOOOpssss you crashed!!")
             break
         env.render()
+    
+    #plt.show()
         
 
 
