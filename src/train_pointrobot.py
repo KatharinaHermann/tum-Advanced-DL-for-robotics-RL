@@ -33,8 +33,8 @@ env = gym.make(
     step_reward=-0.01,
     buffer_size=100,
     grid_size=32,
-    num_obj_max=5,
-    obj_size_avg=8,
+    num_obj_max=args.num_obj_max,
+    obj_size_avg=args.obj_size_avg,
     )
 test_env = gym.make(
     args.env_name,
@@ -43,8 +43,8 @@ test_env = gym.make(
     step_reward=-0.01,
     buffer_size=100,
     grid_size=32,
-    num_obj_max=5,
-    obj_size_avg=8,
+    num_obj_max=args.num_obj_max,
+    obj_size_avg=args.obj_size_avg,
     )
 
 # initialize the agent:

@@ -5,10 +5,10 @@ from hwr.utils import visualize_trajectory
 
 
 # trajectory specification:
-outcome = 'unsuccessful'  #['successful', 'unsuccessful', 'unfinished']
+outcome = 'successful'  #['successful', 'unsuccessful', 'unfinished']
 assert outcome in ['successful', 'unsuccessful', 'unfinished']
-step = 10
-epi = 1
+step = 320000
+epi = 2
 
 dirname = os.path.join('results', outcome + '_trajs')
 prefix = "step_{0:08d}_epi_{1:02d}*".format(step, epi)
