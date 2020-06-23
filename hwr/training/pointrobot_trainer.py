@@ -103,6 +103,7 @@ class PointrobotTrainer:
         episode_return = 0
         episode_start_time = time.perf_counter()
         n_episode = 0
+        success_traj_train = 0.
 
         #Initialize replay buffer
         replay_buffer = get_replay_buffer(
@@ -162,6 +163,7 @@ class PointrobotTrainer:
             tf.summary.experimental.set_step(total_steps)
 
             if done or episode_steps == self._episode_max_steps:
+                
                 if (reward == self._env.collision_reward) and\
                     total_steps > self._policy.n_warmup:
                     """Workspace relabeling part.
@@ -179,6 +181,9 @@ class PointrobotTrainer:
                         relabeled_next_obs_full = np.concatenate((point['next_position'], point['goal'], relabeled_reduced_ws))
                         replay_buffer.add(obs=relabeled_obs_full, act=point['action'],
                                 next_obs=relabeled_next_obs_full, rew=point['reward'], done=point['done'])
+                
+                if reward == self._env.goal_reward:
+                    success_traj_train += 1
 
                 # resetting:
                 workspace, goal, obs = self._env.reset()
@@ -186,11 +191,15 @@ class PointrobotTrainer:
                 self.trajectory = []
 
                 n_episode += 1
+                train_sucess_rate = success_traj_train / n_episode
+
                 fps = episode_steps / (time.perf_counter() - episode_start_time)
-                self.logger.info("Total Epi: {0: 5} Steps: {1: 7} Episode Steps: {2: 5} Return: {3: 5.4f} Last reward: {4: 5.4f} FPS: {5: 5.2f}".format(
-                    n_episode, total_steps, episode_steps, episode_return, reward, fps))
+                self.logger.info("Total Epi: {0: 5} Train sucess rate: {1: 5.4f} Total Steps: {2: 7} Episode Steps: {3: 5} Return: {4: 5.4f} Last reward: {5: 5.4f} FPS: {6: 5.2f}".format(
+                    n_episode, train_sucess_rate, total_steps, episode_steps, episode_return, reward, fps))
                 tf.summary.scalar(
                     name="Common/training_return", data=episode_return)
+                tf.summary.scalar(
+                    name="Common/training_success_rate", data=train_sucess_rate)
 
                 episode_steps = 0
                 episode_return = 0
@@ -225,11 +234,13 @@ class PointrobotTrainer:
             # Every test_interval we want to test our agent 
             if total_steps % self._test_interval == 0:
                 #Here we evaluate the policy
-                avg_test_return = self.evaluate_policy(total_steps)
-                self.logger.info("Evaluation Total Steps: {0: 7} Average Reward {1: 5.4f} over {2: 2} episodes".format(
-                    total_steps, avg_test_return, self._test_episodes))
+                avg_test_return, success_rate = self.evaluate_policy(total_steps)
+                self.logger.info("Evaluation: Total Steps: {0: 7} Average Reward {1: 5.4f} and Sucess rate: {2: 5.4f} for {3: 2} episodes".format(
+                    total_steps, avg_test_return, success_rate, self._test_episodes))
                 tf.summary.scalar(
                     name="Common/average_test_return", data=avg_test_return)
+                tf.summary.scalar(
+                    name="Common/test_success_rate", data=success_rate)
                 tf.summary.scalar(name="Common/fps", data=fps)
                 self.writer.flush()
 
@@ -262,7 +273,8 @@ class PointrobotTrainer:
             self._test_env.normalizer.set_params(
                 *self._env.normalizer.get_params())
         
-        avg_test_return = 0.
+        total_test_return = 0.
+        success_traj = 0.
         if self._save_test_path:
             replay_buffer = get_replay_buffer(
                 self._policy, self._test_env, size=self._episode_max_steps)
@@ -320,18 +332,25 @@ class PointrobotTrainer:
 
             if self._save_test_path_sep:
                 self._save_traj_separately(prefix)
-            
-            avg_test_return += episode_return
+                   
+            total_test_return += episode_return
+
+            if reward == self._env.goal_reward:
+                success_traj += 1
 
             # empty trajectory:
             self.trajectory = []
 
         if self._show_test_images:
             images = tf.cast(
-                tf.expand_dims(np.array(obs).transpose(2, 0, 1), axis=3),
+                tf.expand_dims(np.array(obs).transpose(2, 0, 1), axis=2),
                 tf.uint8)
             tf.summary.image('train/input_img', images,)
-        return avg_test_return / self._test_episodes
+
+        avg_test_return = total_test_return / self._test_episodes
+        success_rate = success_traj / self._test_episodes
+
+        return avg_test_return , success_rate
 
 
     def _save_traj_separately(self, prefix):

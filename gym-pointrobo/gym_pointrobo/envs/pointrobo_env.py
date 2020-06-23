@@ -158,15 +158,9 @@ class PointroboEnv(gym.Env):
         x = self.agent_pos
         nearest_dist = dist_fun(x=x)
 
-<<<<<<< HEAD
-        print("Distance to the nearest obstacle at the center: ", nearest_dist)
-            
-        if nearest_dist <= 3:
-=======
         #print("Distance to the nearest obstacle at the center: ", nearest_dist)
         # With -0.5 we count for the obstacle expansion
         if nearest_dist - self.robot_radius - 0.5 < 0 :
->>>>>>> 798d0ea9d185a182dc18148c84bb4812ec95e716
             collision = True
             #print("Collision is: ", collision)
         
