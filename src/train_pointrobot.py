@@ -16,8 +16,8 @@ parser = PointrobotTrainer.get_argument()
 parser = DDPG.get_argument(parser)
 parser.add_argument('--env-name', type=str, default="pointrobo-v0")
 parser.set_defaults(batch_size=100)
-parser.set_defaults(n_warmup=1000)
-parser.set_defaults(update_interval=50)
+parser.set_defaults(n_warmup=10000)
+parser.set_defaults(update_interval=1)
 
 args = parser.parse_args()
 
