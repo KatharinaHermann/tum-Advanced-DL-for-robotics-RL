@@ -1,6 +1,7 @@
 import numpy as np
 import gym
 import gym_pointrobo
+import matplotlib.pyplot as plt
 
 
 
@@ -15,7 +16,7 @@ def test_pointrobot_gym():
     # Hardcoded agent: always go diagonal
     action=np.array([0.5, 0.5])
 
-    n_steps = 20
+    n_steps = 40
     for step in range(n_steps):
         print("Step {}".format(step + 1))
         obs, reward, done, info = env.step(action)
@@ -28,9 +29,12 @@ def test_pointrobot_gym():
             elif reward == env.collision_reward:
                 print ("OOOOpssss you crashed!!")
             break
+        #env.workspace = np.zeros((32, 32))
+        #env.workspace[0:4, 0:4] = 1
+        #env.agent_pos = np.array([29.0, 29.0])
         env.render()
     
-    #plt.show()
+    plt.show()
         
 
 

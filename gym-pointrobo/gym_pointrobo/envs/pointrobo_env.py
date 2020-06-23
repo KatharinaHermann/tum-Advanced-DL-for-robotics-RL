@@ -82,7 +82,7 @@ class PointroboEnv(gym.Env):
 
         #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made: Reward=-0.01
         # Tolerance of distance 3, that the robot reached the goal!
-        if (np.linalg.norm(self.agent_pos-self.goal_pos)<3): 
+        if (np.linalg.norm(self.agent_pos-self.goal_pos) < self.robot_radius): 
             reward = self.goal_reward
             done = True
         #Have we hit an obstacle?
@@ -164,7 +164,7 @@ class PointroboEnv(gym.Env):
         pixel_size = 1 #10/32
         
         #Compute distance to the nearest obstacle at the center
-        dist_fun = image_interpolation(img=dist_img, pixel_size=pixel_size)
+        dist_fun = image_interpolation(img=dist_img.T, pixel_size=pixel_size)
         x = self.agent_pos
         nearest_dist = dist_fun(x=x)
 
