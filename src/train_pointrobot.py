@@ -21,21 +21,13 @@ parser.set_defaults(update_interval=1)
 
 args = parser.parse_args()
 
-<<<<<<< HEAD
-#args.max_steps = 1e6
-#args.test_interval = 50
-#args.episode_max_steps = 100
-=======
 args.max_steps = 1e6
 args.test_interval = 10000
 args.episode_max_steps = 100
 args.test_episodes = 100
-#args.save_test_path_sep = True
+args.save_test_path_sep = True
 #args.save_test_movie = True
 #args.show_progress = True
-
-
->>>>>>> accuracy
 
 #Initialize the environment
 env = gym.make(
@@ -66,8 +58,14 @@ policy = DDPG(
     gpu=args.gpu,
     memory_capacity=args.memory_capacity,
     update_interval=args.update_interval,
-    max_action=env.action_space.high[0],
+    max_action=env.action_space.high[0], #max action =1
+    lr_actor=0.001, #hyperparamter learning rate actor network
+    lr_critic=0.001, #hyperparamter learning rate critic network
+    actor_units=[400, 300],
+    critic_units=[400, 300],
     batch_size=args.batch_size,
+    sigma=0.1,# hyperparamter: standard deviation for nrmal distributed for randomization of action with my action = 1
+    tau = 0.005, #weight used to gate the update. The permitted range is 0 < tau <= 1, with small tau representing an incremental update, and tau == 1 representing a full update (that is, a straight copy).
     n_warmup=args.n_warmup)
 trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
 

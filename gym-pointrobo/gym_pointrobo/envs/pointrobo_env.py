@@ -1,3 +1,4 @@
+from PIL import Image
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
@@ -127,6 +128,8 @@ class PointroboEnv(gym.Env):
 
         plt.pause(0.1)
 
+        # draw the renderer
+        #plt.savefig("/results/workspace_img.png")
 
     def take_action(self, action):
         """The action is encoded like a real velocity vector with the first element 
