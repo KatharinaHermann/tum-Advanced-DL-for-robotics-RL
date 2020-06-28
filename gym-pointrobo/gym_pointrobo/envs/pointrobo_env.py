@@ -82,7 +82,7 @@ class PointroboEnv(gym.Env):
 
         #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made: Reward=-0.01
         # Tolerance of distance 3, that the robot reached the goal!
-        if (np.linalg.norm(self.agent_pos-self.goal_pos) < self.robot_radius): 
+        if (np.linalg.norm(self.agent_pos-self.goal_pos) < 2*self.robot_radius): 
             reward = self.goal_reward
             done = True
         #Have we hit an obstacle?

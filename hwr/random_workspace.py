@@ -65,13 +65,13 @@ def get_start_goal_for_workspace(workspace):
         y = int(start[1])
 
         #Check if there is an obsrtacle near the start position
-        start_blocked = workspace[x-1: x+1, y-1: y+1].any()
+        start_blocked = (workspace[x-1: x+1, y-1: y+1].any() ==1)
         
 
     #Generate goal point (repeat until point is found where no object ist placed) and assign goal point with a 1
     goal_blocked = True
     while goal_blocked:
-        goal = np.random.uniform(low=0.0, high=float(grid_size-1), size=(2,))
+        goal = np.random.uniform(low=1.0, high=float(grid_size-2), size=(2,))
         x = int(goal[0])
         y = int(goal[1])
         goal_blocked = (workspace[y, x] == 1)
