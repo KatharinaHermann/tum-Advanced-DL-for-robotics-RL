@@ -16,7 +16,7 @@ parser = PointrobotTrainer.get_argument()
 parser = DDPG.get_argument(parser)
 parser.add_argument('--env-name', type=str, default="pointrobo-v0")
 parser.set_defaults(batch_size=100)
-parser.set_defaults(n_warmup=100)
+parser.set_defaults(n_warmup=10000)
 parser.set_defaults(update_interval=1)
 
 args = parser.parse_args()
@@ -27,15 +27,15 @@ args.episode_max_steps = 100
 args.test_episodes = 100
 args.save_test_path_sep = True
 #args.save_test_movie = True
-args.show_progress = True
+#args.show_progress = True
 
 #Initialize the environment
 env = gym.make(
     args.env_name,
-    goal_reward=5,
+    goal_reward=10,
     collision_reward=-1,
-    step_reward=-0.01,
-    buffer_size=100,
+    step_reward=-0.05,
+    buffer_size=1000,
     grid_size=32,
     num_obj_max=args.num_obj_max,
     obj_size_avg=args.obj_size_avg,
@@ -44,8 +44,8 @@ test_env = gym.make(
     args.env_name,
     goal_reward=10,
     collision_reward=-1,
-    step_reward=-0.01,
-    buffer_size=100,
+    step_reward=-0.05,
+    buffer_size=1000,
     grid_size=32,
     num_obj_max=args.num_obj_max,
     obj_size_avg=args.obj_size_avg,
@@ -53,9 +53,9 @@ test_env = gym.make(
 
 # Hyperparameter grid search
 
-for lr in [0.0001, 0.001, 0.1]:
-    for sig in [ 0.1, 0.5, 0.8, 1]:
-        for tau in [0.005, 0.05, 0.5, 1]:
+for lr in [3e-6, 8e-6, 1e-5]:
+    for sig in [ 0.01, 0.1, 0.5]:
+        for tau in [0.5, 0.05, 0.005, 1]:
             print("Learning rate: {0: 5.6f} Sigma_action: {1: 5.6f} Tau_Target_update: {2: 5.6f} ".format(
                         lr, sig, tau))
 
