@@ -65,8 +65,9 @@ policy = DDPG(
     critic_units=[400, 300],
     batch_size=args.batch_size,
     sigma=0.1,# hyperparamter: standard deviation for nrmal distributed for randomization of action with my action = 1
-    tau = 0.005, #weight used to gate the update. The permitted range is 0 < tau <= 1, with small tau representing an incremental update, and tau == 1 representing a full update (that is, a straight copy).
+    tau = 1.,#0.005, #weight used to gate the update. The permitted range is 0 < tau <= 1, with small tau representing an incremental update, and tau == 1 representing a full update (that is, a straight copy).
     n_warmup=args.n_warmup)
+
 trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
 
 print('-' * 5 + "Let's start training" + '-' * 5)
