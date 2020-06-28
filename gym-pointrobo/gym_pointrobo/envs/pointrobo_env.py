@@ -125,7 +125,7 @@ class PointroboEnv(gym.Env):
         self._robo_artist.set_center((self.agent_pos[0], self.agent_pos[1]))
         self._goal_artist.set_center((self.goal_pos[0], self.goal_pos[1]))
 
-        plt.pause(0.1)
+        plt.pause(0.01)
 
         # draw the renderer
         #plt.savefig("/results/workspace_img.png")
