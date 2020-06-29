@@ -122,13 +122,13 @@ class PointrobotTrainer:
         while total_steps < self._max_steps:
             if episode_steps == 0:
                 assert len(self.trajectory) == 0, 'trajectory at the beginning of an episode is not empty!'
-            #Get action randomly for warmup /from Actor-NN otherwise
            
             #Visualize environment if "show_progess"
-            if self._show_progress:
+            if self._show_progress and \
+                total_steps > 200000:
                 self._env.render()
 
-
+            #Get action randomly for warmup /from Actor-NN otherwise
             if total_steps < self._policy.n_warmup:
                 action = self._env.action_space.sample()
                 action_norm = np.linalg.norm(action)

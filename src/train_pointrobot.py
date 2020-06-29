@@ -21,21 +21,17 @@ parser.set_defaults(update_interval=1)
 
 args = parser.parse_args()
 
-<<<<<<< HEAD
-#args.max_steps = 1e6
-#args.test_interval = 50
-#args.episode_max_steps = 100
-=======
 args.max_steps = 1e6
 args.test_interval = 10000
-args.episode_max_steps = 100
+args.episode_max_steps = 50
 args.test_episodes = 100
 #args.save_test_path_sep = True
 #args.save_test_movie = True
-#args.show_progress = True
+args.show_progress = True
+args.num_obj_max = 5
+#args.n_warmup = 0
 
 
->>>>>>> accuracy
 
 #Initialize the environment
 env = gym.make(
