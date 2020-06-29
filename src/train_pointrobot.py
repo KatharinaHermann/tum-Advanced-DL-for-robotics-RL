@@ -53,9 +53,9 @@ test_env = gym.make(
 
 # Hyperparameter grid search
 
-for lr in [3e-6, 8e-6, 1e-5]:
+for lr in [2e-6, 8e-6, 1e-5]:
     for sig in [ 0.01, 0.1, 0.5]:
-        for tau in [0.5, 0.05, 0.005, 1]:
+        for tau in [0.05, 0.005, 0.0005]:
             print("Learning rate: {0: 5.6f} Sigma_action: {1: 5.6f} Tau_Target_update: {2: 5.6f} ".format(
                         lr, sig, tau))
 
