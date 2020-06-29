@@ -106,7 +106,7 @@ class PointrobotTrainer:
         success_traj_train = 0.
 
         #Initialize replay buffer
-        replay_buffer = get_replay_buffer(
+        self._replay_buffer = get_replay_buffer(
             self._policy, self._env, self._use_prioritized_rb,
             self._use_nstep_rb, self._n_step)
 
@@ -125,7 +125,8 @@ class PointrobotTrainer:
             #Get action randomly for warmup /from Actor-NN otherwise
            
             #Visualize environment if "show_progess"
-            if self._show_progress:
+            if self._show_progress and \
+                total_steps > self._policy.n_warmup:
                 self._env.render()
 
 
@@ -145,17 +146,14 @@ class PointrobotTrainer:
             next_obs_full = np.concatenate((next_obs, goal, reduced_workspace))
 
             # add observation to replay buffer
-            replay_buffer.add(obs=obs_full, act=action,
-                              next_obs=next_obs_full, rew=reward, done=done)
+            self._push_to_replay_buffer(obs_full, action, next_obs_full, reward, done)
 
             #Add obersvation to the trajectory storage
             self.trajectory.append({'workspace': workspace,'position': obs,
                 'next_position': next_obs,'goal': goal, 'action': action, 'reward': reward, 'done': done})
 
             obs = next_obs
-            obs_full = next_obs_full
-
-            
+            obs_full = next_obs_full        
             
             episode_steps += 1
             episode_return += reward
@@ -179,8 +177,7 @@ class PointrobotTrainer:
                     for point in relabeled_trajectory:
                         relabeled_obs_full = np.concatenate((point['position'], point['goal'], relabeled_reduced_ws))
                         relabeled_next_obs_full = np.concatenate((point['next_position'], point['goal'], relabeled_reduced_ws))
-                        replay_buffer.add(obs=relabeled_obs_full, act=point['action'],
-                                next_obs=relabeled_next_obs_full, rew=point['reward'], done=point['done'])
+                        self._push_to_replay_buffer(obs_full, action, next_obs_full, reward, done)
                 
                 if reward == self._env.goal_reward:
                     success_traj_train += 1
@@ -214,7 +211,7 @@ class PointrobotTrainer:
             # and the Target-Actor-NN & Target-Critic-NN
             if total_steps % self._policy.update_interval == 0:
                 #Sample a new batch of experiences from the replay buffer for training
-                samples = replay_buffer.sample(self._policy.batch_size)
+                samples = self._replay_buffer.sample(self._policy.batch_size)
                 
                 with tf.summary.record_if(total_steps % self._save_summary_interval == 0):
                     # Here we update the Actor-NN, Critic-NN, and the Target-Actor-NN & Target-Critic-NN 
@@ -229,7 +226,7 @@ class PointrobotTrainer:
                     td_error = self._policy.compute_td_error(
                         samples["obs"], samples["act"], samples["next_obs"],
                         samples["rew"], np.array(samples["done"], dtype=np.float32))
-                    replay_buffer.update_priorities(
+                    self._replay_buffer.update_priorities(
                         samples["indexes"], np.abs(td_error) + 1e-6)
 
             # Every test_interval we want to test our agent 
@@ -369,6 +366,19 @@ class PointrobotTrainer:
 
         file_name = os.path.join(log_dir, prefix + '.pkl')
         joblib.dump(self.trajectory, file_name)
+
+
+    def _push_to_replay_buffer(self, obs_full, action, next_obs_full, reward, done):
+        """pushes a training point into the replay buffer. 
+        Firts the coordinates of the position and the goal and the actions are normalized.
+        """
+        # normalization:
+        obs_full[0:4] = obs_full[0:4] / self._env.grid_size - 0.5
+        next_obs_full[0:4] = next_obs_full[0:4] / self._env.grid_size - 0.5
+        action = action / self._env.action_space.high - 0.5
+        # adding to the replay buffer:
+        self._replay_buffer.add(obs=obs_full, act=action,
+                            next_obs=next_obs_full, rew=reward, done=done)
 
 
     def _set_from_args(self, args):
