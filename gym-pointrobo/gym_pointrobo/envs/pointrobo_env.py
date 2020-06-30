@@ -82,7 +82,7 @@ class PointroboEnv(gym.Env):
 
         #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made: Reward=-0.01
         # Tolerance of distance 3, that the robot reached the goal!
-        if (np.linalg.norm(self.agent_pos-self.goal_pos) < self.robot_radius): 
+        if (np.linalg.norm(self.agent_pos-self.goal_pos) < 2*self.robot_radius): 
             reward = self.goal_reward
             done = True
         #Have we hit an obstacle?
@@ -125,8 +125,10 @@ class PointroboEnv(gym.Env):
         self._robo_artist.set_center((self.agent_pos[0], self.agent_pos[1]))
         self._goal_artist.set_center((self.goal_pos[0], self.goal_pos[1]))
 
-        plt.pause(0.1)
+        plt.pause(0.01)
 
+        # draw the renderer
+        #plt.savefig("/results/workspace_img.png")
 
     def take_action(self, action):
         """The action is encoded like a real velocity vector with the first element 

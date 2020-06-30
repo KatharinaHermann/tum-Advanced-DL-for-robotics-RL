@@ -25,48 +25,61 @@ args.max_steps = 1e6
 args.test_interval = 10000
 args.episode_max_steps = 100
 args.test_episodes = 100
-#args.save_test_path_sep = True
+args.save_test_path_sep = True
 #args.save_test_movie = True
 #args.show_progress = True
-
-
 
 #Initialize the environment
 env = gym.make(
     args.env_name,
-    goal_reward=5,
+    goal_reward=10,
     collision_reward=-1,
-    step_reward=-0.01,
-    buffer_size=100,
+    step_reward=-0.05,
+    buffer_size=1000,
     grid_size=32,
     num_obj_max=args.num_obj_max,
     obj_size_avg=args.obj_size_avg,
     )
 test_env = gym.make(
     args.env_name,
-    goal_reward=5,
+    goal_reward=10,
     collision_reward=-1,
-    step_reward=-0.01,
-    buffer_size=100,
+    step_reward=-0.05,
+    buffer_size=1000,
     grid_size=32,
     num_obj_max=args.num_obj_max,
     obj_size_avg=args.obj_size_avg,
     )
 
-# initialize the agent:
-policy = DDPG(
-    state_shape=env.observation_space.shape,
-    action_dim=env.action_space.high.size,
-    gpu=args.gpu,
-    memory_capacity=args.memory_capacity,
-    update_interval=args.update_interval,
-    max_action=env.action_space.high[0],
-    batch_size=args.batch_size,
-    n_warmup=args.n_warmup)
-trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
+# Hyperparameter grid search
 
-print('-' * 5 + "Let's start training" + '-' * 5)
+for lr in [2e-6, 8e-6, 1e-5]:
+    for sig in [ 0.01, 0.1, 0.5]:
+        for tau in [0.05, 0.005, 0.0005]:
+            print("Learning rate: {0: 5.6f} Sigma_action: {1: 5.6f} Tau_Target_update: {2: 5.6f} ".format(
+                        lr, sig, tau))
 
-trainer()
+            # initialize the agent:
+            policy = DDPG(
+                state_shape=env.observation_space.shape,
+                action_dim=env.action_space.high.size,
+                gpu=args.gpu,
+                memory_capacity=args.memory_capacity,
+                update_interval=args.update_interval,
+                max_action=env.action_space.high[0], #max action =1
+                lr_actor=lr, #0.001 hyperparamter learning rate actor network
+                lr_critic=lr, #hyperparamter learning rate critic network
+                actor_units=[400, 300],
+                critic_units=[400, 300],
+                batch_size=args.batch_size,
+                sigma=sig,#0.1 hyperparamter: standard deviation for nrmal distributed for randomization of action with my action = 1
+                tau = tau, #0.005, #weight used to gate the update. The permitted range is 0 < tau <= 1, with small tau representing an incremental update, and tau == 1 representing a full update (that is, a straight copy).
+                n_warmup=args.n_warmup)
 
-print('-' * 5 + "We succeeeeeded!!!!!!!!!!!!!" + '-' * 5)
+            trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
+
+            print('-' * 5 + "Let's start training" + '-' * 5)
+
+            trainer()
+
+            print('-' * 5 + "We succeeeeeded!!!!!!!!!!!!!" + '-' * 5)

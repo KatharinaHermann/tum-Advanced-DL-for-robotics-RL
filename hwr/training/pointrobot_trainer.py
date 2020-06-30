@@ -4,6 +4,7 @@ import time
 import logging
 import argparse
 import joblib
+from matplotlib import animation
 
 import numpy as np
 import tensorflow as tf
@@ -87,7 +88,7 @@ class PointrobotTrainer:
         # Save and restore model
         self._checkpoint = tf.train.Checkpoint(policy=self._policy)
         self.checkpoint_manager = tf.train.CheckpointManager(
-            self._checkpoint, directory=self._output_dir, max_to_keep=5)
+            self._checkpoint, directory=model_dir, max_to_keep=5)
 
         if model_dir is not None:
             if not os.path.isdir(model_dir):
@@ -188,16 +189,20 @@ class PointrobotTrainer:
                 obs_full = np.concatenate((obs, goal, reduced_workspace))
                 self.trajectory = []
 
+                #Print out test accuracy
                 n_episode += 1
-                train_sucess_rate = success_traj_train / n_episode
+                if n_episode % self._test_episodes == 0:
+                    train_sucess_rate = success_traj_train / self._test_episodes
 
-                fps = episode_steps / (time.perf_counter() - episode_start_time)
-                self.logger.info("Total Epi: {0: 5} Train sucess rate: {1: 5.4f} Total Steps: {2: 7} Episode Steps: {3: 5} Return: {4: 5.4f} Last reward: {5: 5.4f} FPS: {6: 5.2f}".format(
-                    n_episode, train_sucess_rate, total_steps, episode_steps, episode_return, reward, fps))
-                tf.summary.scalar(
-                    name="Common/training_return", data=episode_return)
-                tf.summary.scalar(
-                    name="Common/training_success_rate", data=train_sucess_rate)
+                    fps = episode_steps / (time.perf_counter() - episode_start_time)
+                    self.logger.info("Total Epi: {0: 5} Train sucess rate: {1: 5.4f} Total Steps: {2: 7} Episode Steps: {3: 5} Return: {4: 5.4f} Last reward: {5: 5.4f} FPS: {6: 5.2f}".format(
+                        n_episode, train_sucess_rate, total_steps, episode_steps, episode_return, reward, fps))
+                    tf.summary.scalar(
+                        name="Common/training_return", data=episode_return)
+                    tf.summary.scalar(
+                        name="Common/training_success_rate", data=train_sucess_rate)
+                    
+                    success_traj_train = 0
 
                 episode_steps = 0
                 episode_return = 0
@@ -231,6 +236,8 @@ class PointrobotTrainer:
 
             # Every test_interval we want to test our agent 
             if total_steps % self._test_interval == 0:
+
+
                 #Here we evaluate the policy
                 avg_test_return, success_rate = self.evaluate_policy(total_steps)
                 self.logger.info("Evaluation: Total Steps: {0: 7} Average Reward {1: 5.4f} and Sucess rate: {2: 5.4f} for {3: 2} episodes".format(
@@ -272,7 +279,7 @@ class PointrobotTrainer:
                 *self._env.normalizer.get_params())
         
         total_test_return = 0.
-        success_traj = 0.
+        success_traj = 0
         if self._save_test_path:
             replay_buffer = get_replay_buffer(
                 self._policy, self._test_env, size=self._episode_max_steps)
@@ -304,7 +311,7 @@ class PointrobotTrainer:
                                 next_obs=next_obs_full, rew=reward, done=done)
 
                 if self._save_test_movie:
-                    frames.append(self._test_env.render(mode='rgb_array'))
+                    frames.append(self._test_env.render(mode='plot'))
 
                 elif self._show_test_progress:
                     self._test_env.render()
@@ -333,8 +340,11 @@ class PointrobotTrainer:
                    
             total_test_return += episode_return
 
-            if reward == self._env.goal_reward:
+            print("reward_{0:5}_goal reward_{1:5}".format(reward, self._test_env.goal_reward))
+            if reward == self._test_env.goal_reward:
+                
                 success_traj += 1
+                print(success_traj)
 
             # empty trajectory:
             self.trajectory = []
@@ -348,7 +358,7 @@ class PointrobotTrainer:
         avg_test_return = total_test_return / self._test_episodes
         success_rate = success_traj / self._test_episodes
 
-        return avg_test_return , success_rate
+        return avg_test_return, success_rate
 
 
     def _save_traj_separately(self, prefix):
@@ -436,8 +446,8 @@ class PointrobotTrainer:
                             help='Interval to save model')
         parser.add_argument('--save-summary-interval', type=int, default=int(1e3),
                             help='Interval to save summary')
-        parser.add_argument('--model-dir', type=str, default='../models/agents',
-                            help='Directory to restore model. default =  ../models/agents')
+        parser.add_argument('--model-dir', type=str, default='models/agents',
+                            help='Directory to restore model. default =  /models/agents')
         parser.add_argument('--dir-suffix', type=str, default='',
                             help='Suffix for directory that contains results')
         parser.add_argument('--normalize-obs', action='store_true',
@@ -480,8 +490,8 @@ class PointrobotTrainer:
                             help='latent dimension of the CAE. default: 16')
         parser.add_argument('--cae_conv_filters', type=int, nargs='+', default=[4, 8, 16],
                             help='number of filters in the conv layers. default: [4, 8, 16]')
-        parser.add_argument('--cae_weights_path', type=str, default='../models/cae/model_num_5_size_8.h5',
-                            help='path to saved CAE weights. default: ../models/cae/model_num_5_size_8.h5')
+        parser.add_argument('--cae_weights_path', type=str, default='models/cae/model_num_5_size_8.h5',
+                            help='path to saved CAE weights. default: /models/cae/model_num_5_size_8.h5')
 
         return parser
 
