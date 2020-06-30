@@ -178,7 +178,7 @@ class PointrobotTrainer:
                     for point in relabeled_trajectory:
                         relabeled_obs_full = np.concatenate((point['position'], point['goal'], relabeled_reduced_ws))
                         relabeled_next_obs_full = np.concatenate((point['next_position'], point['goal'], relabeled_reduced_ws))
-                        self._push_to_replay_buffer(obs_full, action, next_obs_full, reward, done)
+                        self._push_to_replay_buffer(relabeled_obs_full, point['action'], relabeled_next_obs_full, point['reward'], point['done'])
                 
                 if reward == self._env.goal_reward:
                     success_traj_train += 1
