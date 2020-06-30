@@ -133,14 +133,10 @@ class PointrobotTrainer:
 
             if total_steps < self._policy.n_warmup:
                 action = self._env.action_space.sample()
-                action_norm = np.linalg.norm(action)
-                if action_norm != 0: 
-                    action = action / action_norm
             else:
-                action = self._policy.get_action(obs_full)
-                action_norm = np.linalg.norm(action)
-                if action_norm != 0: 
-                    action = action / action_norm
+                normalized_obs_full = obs_full
+                normalized_obs_full[0: 4] = normalized_obs_full[0: 4] / self._env.grid_size - 0.5
+                action = self._policy.get_action(normalized_obs_full)
 
             #Take action and get next_obs, reward and done_flag from environment
             next_obs, reward, done, _ = self._env.step(action)
