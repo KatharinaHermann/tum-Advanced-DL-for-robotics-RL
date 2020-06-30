@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 install_requires = [
     "tf2rl>=0.1.12",
-    "tensorflow-cpu>=2.2.0",
+    #"tensorflow-cpu>=2.2.0",
     "gym",
     "numpy",
     "jupyter",

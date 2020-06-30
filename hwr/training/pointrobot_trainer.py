@@ -452,7 +452,7 @@ class PointrobotTrainer:
                             help='Suffix for directory that contains results')
         parser.add_argument('--normalize-obs', action='store_true',
                             help='Normalize observation')
-        parser.add_argument('--logdir', type=str, default='results',
+        parser.add_argument('--logdir', type=str, default='src/results',
                             help='Output directory')
         # test settings
         parser.add_argument('--evaluate', action='store_true',
