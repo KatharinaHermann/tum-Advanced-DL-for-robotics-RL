@@ -139,7 +139,7 @@ if __name__ == '__main__':
     workspace_sample[int(goal[0]), int(goal[1])] = 3
 
     fig1 = visualize_workspace(workspace_sample)
-    robot = visualize_robot([3.55555,2.63333333333])
+    robot = visualize_robot([3.55555,2.63333333333],1)
 
     fig2 = visualize_distance_field(workspace_sample)
     
