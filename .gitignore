@@ -19,6 +19,9 @@ gym-pointrobo/gym-pointrobo.egg-info
 results
 **/results/
 
+# models:
+models/agents
+
 # others:
 pseudo_algorithm.txt
 
