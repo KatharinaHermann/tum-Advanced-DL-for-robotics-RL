@@ -101,6 +101,9 @@ class PointroboEnv(gym.Env):
         """Resets the robot state to the initial state"""        
         self.setup_rndm_workspace_from_buffer()
         self.agent_pos = self.start_pos.astype(np.float32)
+
+        #self.agent_pos = np.array([5., 5.])
+        #self.goal_pos = np.array([10., 10.])
    
         return self.workspace.astype(np.float32), self.goal_pos.astype(np.float32), self.agent_pos.astype(np.float32)
 
