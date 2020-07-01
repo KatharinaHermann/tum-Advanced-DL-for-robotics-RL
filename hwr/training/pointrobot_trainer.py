@@ -299,10 +299,9 @@ class PointrobotTrainer:
             obs_full = np.concatenate((obs, goal, reduced_workspace))
 
             for _ in range(self._episode_max_steps):
-                action = self._policy.get_action(obs_full, test=True)
-                action_norm = np.linalg.norm(action)
-                if action_norm != 0: 
-                    action = action / action_norm
+                normalized_obs_full = obs_full
+                normalized_obs_full[0: 4] = normalized_obs_full[0: 4] / self._env.grid_size - 0.5
+                action = self._policy.get_action(normalized_obs_full)
 
                 next_obs, reward, done, _ = self._test_env.step(action)
                 #Concatenate position observation with start, goal, and reduced workspace!!
@@ -346,11 +345,8 @@ class PointrobotTrainer:
                    
             total_test_return += episode_return
 
-            print("reward_{0:5}_goal reward_{1:5}".format(reward, self._test_env.goal_reward))
-            if reward == self._test_env.goal_reward:
-                
+            if reward == self._test_env.goal_reward:        
                 success_traj += 1
-                print(success_traj)
 
             # empty trajectory:
             self.trajectory = []
