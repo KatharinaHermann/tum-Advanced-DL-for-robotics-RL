@@ -106,6 +106,8 @@ class PointrobotTrainer:
         n_episode = 0
         success_traj_train = 0.
 
+        relabeling_times, training_times = [], []
+
         #Initialize replay buffer
         self._replay_buffer = get_replay_buffer(
             self._policy, self._env, self._use_prioritized_rb,
@@ -163,7 +165,7 @@ class PointrobotTrainer:
                     """Workspace relabeling part.
                     The workspace will not be relabeled, if we are only in the warmup phase.
                     """
-                    
+                    relabeling_begin = time.time()
                     # Create new workspace for the trajectory:
                     relabeled_trajectory = self._relabeler.relabel(trajectory=self.trajectory, env=self._env)
                     relabeled_ws = relabeled_trajectory[0]['workspace']
@@ -174,6 +176,8 @@ class PointrobotTrainer:
                         relabeled_obs_full = np.concatenate((point['position'], point['goal'], relabeled_reduced_ws))
                         relabeled_next_obs_full = np.concatenate((point['next_position'], point['goal'], relabeled_reduced_ws))
                         self._push_to_replay_buffer(relabeled_obs_full, point['action'], relabeled_next_obs_full, point['reward'], point['done'])
+
+                    relabeling_times.append(time.time() - relabeling_begin)
                 
                 if reward == self._env.goal_reward:
                     success_traj_train += 1
@@ -184,7 +188,7 @@ class PointrobotTrainer:
                 obs_full = np.concatenate((obs, goal, reduced_workspace))
                 self.trajectory = []
 
-                #Print out test accuracy
+                #Print out train accuracy
                 n_episode += 1
                 if n_episode % self._test_episodes == 0:
                     train_sucess_rate = success_traj_train / self._test_episodes
@@ -196,8 +200,14 @@ class PointrobotTrainer:
                         name="Common/training_return", data=episode_return)
                     tf.summary.scalar(
                         name="Common/training_success_rate", data=train_sucess_rate)
-                    
                     success_traj_train = 0
+
+                    if len(relabeling_times) != 0:
+                        print('average relabeling time: {}'.format(sum(relabeling_times) / len(relabeling_times)))
+                        relabeling_times = []
+                    if len(training_times) != 0:
+                        print('average training time: {}'.format(sum(training_times) / len(training_times)))
+                        training_times = []
 
                 episode_steps = 0
                 episode_return = 0
@@ -210,6 +220,7 @@ class PointrobotTrainer:
             # After every Update_interval we want to train/update the Actor-NN, Critic-NN, 
             # and the Target-Actor-NN & Target-Critic-NN
             if total_steps % self._policy.update_interval == 0:
+                training_begin = time.time()
                 #Sample a new batch of experiences from the replay buffer for training
                 samples = self._replay_buffer.sample(self._policy.batch_size)
                 
@@ -229,10 +240,10 @@ class PointrobotTrainer:
                     self._replay_buffer.update_priorities(
                         samples["indexes"], np.abs(td_error) + 1e-6)
 
+                training_times.append(time.time() - training_begin)
+
             # Every test_interval we want to test our agent 
             if total_steps % self._test_interval == 0:
-
-
                 #Here we evaluate the policy
                 avg_test_return, success_rate = self.evaluate_policy(total_steps)
                 self.logger.info("Evaluation: Total Steps: {0: 7} Average Reward {1: 5.4f} and Sucess rate: {2: 5.4f} for {3: 2} episodes".format(

@@ -27,11 +27,10 @@ args.max_steps = 1e6
 args.test_interval = 10000
 args.episode_max_steps = 50
 args.test_episodes = 100
-args.save_test_path_sep = True
-#args.save_test_movie = True
-args.show_progress = True
+args.save_test_path_sep = False
+args.save_test_movie = False
+args.show_progress = False
 args.num_obj_max = 5
-#args.n_warmup = 0
 
 lr_actor = 1e-4
 lr_critic = 1e-4
