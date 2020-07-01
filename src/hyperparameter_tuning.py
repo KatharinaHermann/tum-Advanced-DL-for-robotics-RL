@@ -17,13 +17,13 @@ from hwr.training.pointrobot_trainer import PointrobotTrainer
 parser = PointrobotTrainer.get_argument()
 parser = DDPG.get_argument(parser)
 parser.add_argument('--env-name', type=str, default="pointrobo-v0")
-parser.set_defaults(batch_size=10)
-parser.set_defaults(n_warmup=100)
+parser.set_defaults(batch_size=1024)
+parser.set_defaults(n_warmup=10000)
 parser.set_defaults(update_interval=1)
 
 args = parser.parse_args()
 
-args.max_steps = 2e2
+args.max_steps = 2e5
 args.test_interval = 10000
 args.episode_max_steps = 50
 args.test_episodes = 100
