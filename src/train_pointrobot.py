@@ -21,8 +21,6 @@ parser.set_defaults(update_interval=1)
 
 args = parser.parse_args()
 
-hyperparameter_search = False
-
 args.max_steps = 1e6
 args.test_interval = 10000
 args.episode_max_steps = 50
@@ -57,59 +55,25 @@ test_env = gym.make(
     obj_size_avg=args.obj_size_avg,
     )
 
+# initialize the agent:
+policy = DDPG(
+    state_shape=env.observation_space.shape,
+    action_dim=env.action_space.high.size,
+    gpu=args.gpu,
+    memory_capacity=args.memory_capacity,
+    update_interval=args.update_interval,
+    max_action=env.action_space.high[0], #max action =1
+    lr_actor=lr_actor, #0.001 hyperparamter learning rate actor network
+    lr_critic=lr_critic, #hyperparamter learning rate critic network
+    actor_units=[400, 300],
+    critic_units=[400, 300],
+    batch_size=args.batch_size,
+    n_warmup=args.n_warmup)
 
-if hyperparameter_search:
-    # Hyperparameter grid search
-    for lr in [2e-6, 8e-6, 1e-5]:
-        for sig in [ 0.01, 0.1, 0.5]:
-            for tau in [0.05, 0.005, 0.0005]:
-                print("Learning rate: {0: 5.6f} Sigma_action: {1: 5.6f} Tau_Target_update: {2: 5.6f} ".format(
-                            lr, sig, tau))
+trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
 
-                # initialize the agent:
-                policy = DDPG(
-                    state_shape=env.observation_space.shape,
-                    action_dim=env.action_space.high.size,
-                    gpu=args.gpu,
-                    memory_capacity=args.memory_capacity,
-                    update_interval=args.update_interval,
-                    max_action=env.action_space.high[0], #max action =1
-                    lr_actor=lr, #0.001 hyperparamter learning rate actor network
-                    lr_critic=lr, #hyperparamter learning rate critic network
-                    actor_units=[400, 300],
-                    critic_units=[400, 300],
-                    batch_size=args.batch_size,
-                    sigma=sig,#0.1 hyperparamter: standard deviation for nrmal distributed for randomization of action with my action = 1
-                    tau = tau, #0.005, #weight used to gate the update. The permitted range is 0 < tau <= 1, with small tau representing an incremental update, and tau == 1 representing a full update (that is, a straight copy).
-                    n_warmup=args.n_warmup)
+print('-' * 5 + "Let's start training" + '-' * 5)
 
-                trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
+trainer()
 
-                print('-' * 5 + "Let's start training" + '-' * 5)
-
-                trainer()
-
-                print('-' * 5 + "We succeeeeeded!!!!!!!!!!!!!" + '-' * 5)
-else:
-    # initialize the agent:
-    policy = DDPG(
-        state_shape=env.observation_space.shape,
-        action_dim=env.action_space.high.size,
-        gpu=args.gpu,
-        memory_capacity=args.memory_capacity,
-        update_interval=args.update_interval,
-        max_action=env.action_space.high[0], #max action =1
-        lr_actor=lr_actor, #0.001 hyperparamter learning rate actor network
-        lr_critic=lr_critic, #hyperparamter learning rate critic network
-        actor_units=[400, 300],
-        critic_units=[400, 300],
-        batch_size=args.batch_size,
-        n_warmup=args.n_warmup)
-
-    trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
-
-    print('-' * 5 + "Let's start training" + '-' * 5)
-
-    trainer()
-
-    print('-' * 5 + "We succeeeeeded!!!!!!!!!!!!!" + '-' * 5)
+print('-' * 5 + "We succeeeeeded!!!!!!!!!!!!!" + '-' * 5)
