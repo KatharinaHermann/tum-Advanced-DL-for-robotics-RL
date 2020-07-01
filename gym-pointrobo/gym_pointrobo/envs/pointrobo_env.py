@@ -137,6 +137,10 @@ class PointroboEnv(gym.Env):
         """The action is encoded like a real velocity vector with the first element 
         pointing in x-direction and the second element pointing in y-direction
         """
+        # normalizing action:
+        epsilon = 1e-8
+        action /= (np.linalg.norm(action) + epsilon)
+        
         t = 1.0
         self.agent_pos += action * t
         self.agent_pos = np.clip(self.agent_pos, [0.0, 0.0], [float(self.grid_size-1), float(self.grid_size-1)])
