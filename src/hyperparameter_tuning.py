@@ -27,7 +27,7 @@ args.max_steps = 2e5
 args.test_interval = 10000
 args.episode_max_steps = 50
 args.test_episodes = 100
-args.num_obj_max = 5
+args.num_obj_max = 0
 
 
 #Initialize the environment
@@ -55,10 +55,10 @@ test_env = gym.make(
 
 
 # Hyperparameter grid search
-for lr_i, lr in enumerate([2e-7, 5e-7, 8e-7, 1e-6]):
-    for max_grad_i, max_grad in enumerate([0.1, 1, 10]):
-        for tau_i, tau in enumerate([0.1, 0.01, 0.001]):
-            for batch_size_i, batch_size in enumerate([1024, 5000]):
+for lr_i, lr in enumerate([2e-7, 3e-6]):
+    for max_grad_i, max_grad in enumerate([10,1]):
+        for tau_i, tau in enumerate([0.05, 0.5]):
+            for batch_size_i, batch_size in enumerate([5000]):
                 print("Learning rate: {0: 1.8f} max_grad: {1: 3.2f} Tau_Target_update: {2: 1.3f}  Batch size: {3: 4}".format(
                             lr, max_grad, tau, batch_size))
                 
