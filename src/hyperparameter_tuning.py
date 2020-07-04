@@ -19,7 +19,7 @@ parser = DDPG.get_argument(parser)
 parser.add_argument('--env-name', type=str, default="pointrobo-v0")
 parser.set_defaults(batch_size=1024)
 parser.set_defaults(n_warmup=10000)
-parser.set_defaults(update_interval=1)
+parser.set_defaults(update_interval=100)
 
 args = parser.parse_args()
 
@@ -100,10 +100,11 @@ for lr_i, lr in enumerate([2e-7, 3e-6]):
                     lr_actor=lr, 
                     lr_critic=lr,
                     max_grad=max_grad,
-                    actor_units=[400, 300],
-                    critic_units=[400, 300],
+                    actor_units=[800, 600],
+                    critic_units=[800, 600],
                     batch_size=args.batch_size,
                     tau = tau,
+                    sigma = 0.01,
                     n_warmup=args.n_warmup)
 
                 trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
