@@ -387,8 +387,8 @@ class PointrobotTrainer:
         obs_full[0:4] = obs_full[0:4] / self._env.grid_size - 0.5
         next_obs_full[0:4] = next_obs_full[0:4] / self._env.grid_size - 0.5
         # normalizing action:
-        epsilon = 1e-8
-        action /= (np.linalg.norm(action) + epsilon)
+        #epsilon = 1e-8
+        #action /= (np.linalg.norm(action) + epsilon)
         #action = action / self._env.action_space.high 
 
         # adding to the replay buffer:
