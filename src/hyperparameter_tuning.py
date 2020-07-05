@@ -19,7 +19,7 @@ parser = DDPG.get_argument(parser)
 parser.add_argument('--env-name', type=str, default="pointrobo-v0")
 parser.set_defaults(batch_size=1024)
 parser.set_defaults(n_warmup=10000)
-parser.set_defaults(update_interval=100)
+parser.set_defaults(update_interval=10)
 parser.set_defaults(memory_capacity = 1e6)
 
 args = parser.parse_args()
@@ -56,10 +56,10 @@ test_env = gym.make(
 
 
 # Hyperparameter grid search
-for lr_i, lr in enumerate([3e-7, 2e-7, 1e-7]):
+for lr_i, lr in enumerate([1e-7]):
     for max_grad_i, max_grad in enumerate([3]):
         for tau_i, tau in enumerate([0.05]):
-            for memory_capacity_i, memory_capacity in enumerate([1e6]):
+            for memory_capacity_i, memory_capacity in enumerate([5e4, 51e5, 1e6]):
                 print("Learning rate: {0: 1.8f} max_grad: {1: 3.2f} Tau_Target_update: {2: 1.3f}  memory_capacity: {3: 4}".format(
                             lr, max_grad, tau, memory_capacity))
                 
@@ -101,8 +101,8 @@ for lr_i, lr in enumerate([3e-7, 2e-7, 1e-7]):
                     lr_actor=lr, 
                     lr_critic=lr,
                     max_grad=max_grad,
-                    actor_units=[800, 600],
-                    critic_units=[800, 600],
+                    actor_units=[1000, 900],
+                    critic_units=[1000, 900],
                     batch_size=5000,
                     tau = tau,  
                     sigma = 0.1,
