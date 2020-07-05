@@ -30,8 +30,8 @@ args.save_test_movie = False
 args.show_progress = True
 args.num_obj_max = 5
 
-lr_actor = 1e-4
-lr_critic = 1e-4
+lr_actor = 3e-7
+lr_critic = 3e-7
 
 #Initialize the environment
 env = gym.make(

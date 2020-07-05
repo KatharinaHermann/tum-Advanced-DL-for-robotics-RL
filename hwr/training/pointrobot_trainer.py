@@ -302,7 +302,6 @@ class PointrobotTrainer:
                 normalized_obs_full = obs_full
                 normalized_obs_full[0: 4] = normalized_obs_full[0: 4] / self._env.grid_size - 0.5
                 action = self._policy.get_action(normalized_obs_full)
-
                 next_obs, reward, done, _ = self._test_env.step(action)
                 #Concatenate position observation with start, goal, and reduced workspace!!
                 next_obs_full = np.concatenate((obs, goal, reduced_workspace))
@@ -387,7 +386,7 @@ class PointrobotTrainer:
         # normalization:
         obs_full[0:4] = obs_full[0:4] / self._env.grid_size - 0.5
         next_obs_full[0:4] = next_obs_full[0:4] / self._env.grid_size - 0.5
-        action = action / self._env.action_space.high - 0.5
+        action = action / self._env.action_space.high #- 0.5
         # adding to the replay buffer:
         self._replay_buffer.add(obs=obs_full, act=action,
                             next_obs=next_obs_full, rew=reward, done=done)
