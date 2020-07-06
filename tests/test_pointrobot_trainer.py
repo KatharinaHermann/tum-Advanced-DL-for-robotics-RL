@@ -31,7 +31,7 @@ def test_pointrobot_trainer_init():
         action_dim=env.action_space.high.size,
         gpu=args.gpu,
         memory_capacity=args.memory_capacity,
-        max_action=env.action_space.high[0],
+        #max_action=env.action_space.high[0],
         batch_size=args.batch_size,
         n_warmup=args.n_warmup)
     trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
@@ -91,7 +91,7 @@ def test_evaluation():
         action_dim=env.action_space.high.size,
         gpu=args.gpu,
         memory_capacity=args.memory_capacity,
-        max_action=env.action_space.high[0],
+        #max_action=env.action_space.high[0],
         batch_size=args.batch_size,
         n_warmup=args.n_warmup)
     trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
@@ -147,7 +147,7 @@ def test_training():
         gpu=args.gpu,
         memory_capacity=args.memory_capacity,
         update_interval=args.update_interval,
-        max_action=env.action_space.high[0],
+        #max_action=env.action_space.high[0],
         batch_size=args.batch_size,
         n_warmup=args.n_warmup)
     trainer = PointrobotTrainer(policy, env, args, test_env=test_env)

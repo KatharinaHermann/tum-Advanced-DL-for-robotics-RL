@@ -26,6 +26,7 @@ args = parser.parse_args()
 
 # workspace args:
 args.num_obj_max = 0
+max_goal_dist = 4
 # training args:
 args.max_steps = 5e5
 args.test_interval = 10000
@@ -33,7 +34,7 @@ args.episode_max_steps = 5
 args.test_episodes = 100
 args.save_test_path_sep = False
 args.save_test_movie = False
-args.show_progress = False
+args.show_progress = True
 # agent args:
 args.max_grad = 1
 args.memory_capacity = 1e5
@@ -57,6 +58,7 @@ env = gym.make(
     grid_size=32,
     num_obj_max=args.num_obj_max,
     obj_size_avg=args.obj_size_avg,
+    max_goal_dist=max_goal_dist,
     )
 test_env = gym.make(
     args.env_name,
@@ -67,6 +69,7 @@ test_env = gym.make(
     grid_size=32,
     num_obj_max=args.num_obj_max,
     obj_size_avg=args.obj_size_avg,
+    max_goal_dist=max_goal_dist,
     )
 
 # initialize the agent:
