@@ -27,11 +27,12 @@ args.episode_max_steps = 50
 args.test_episodes = 100
 args.save_test_path_sep = False
 args.save_test_movie = False
-args.show_progress = True
+args.show_progress = False
 args.num_obj_max = 5
+args.max_grad = 1
 
-lr_actor = 1e-7
-lr_critic = 1e-7
+lr_actor = 1e-4
+lr_critic = 1e-4
 
 #Initialize the environment
 env = gym.make(
@@ -65,6 +66,7 @@ policy = DDPG(
     #max_action=env.action_space.high[0], #max action =1
     lr_actor=lr_actor, #0.001 hyperparamter learning rate actor network
     lr_critic=lr_critic, #hyperparamter learning rate critic network
+    max_grad=args.max_grad,
     actor_units=[400, 300],
     critic_units=[400, 300],
     batch_size=args.batch_size,
