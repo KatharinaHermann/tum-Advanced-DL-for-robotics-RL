@@ -8,7 +8,7 @@ import tensorflow as tf
 import gym
 import gym_pointrobo
 
-from tf2rl.algos.ddpg import DDPG
+from hwr.agents.pointrobo_ddpg import DDPG
 
 from hwr.cae.cae import CAE
 from hwr.training.pointrobot_trainer import PointrobotTrainer
@@ -97,7 +97,7 @@ for lr_i, lr in enumerate([1e-7]):
                     gpu=args.gpu,
                     memory_capacity=args.memory_capacity,
                     update_interval=args.update_interval,
-                    max_action=env.action_space.high[0],
+                    #max_action=env.action_space.high[0],
                     lr_actor=lr, 
                     lr_critic=lr,
                     max_grad=max_grad,

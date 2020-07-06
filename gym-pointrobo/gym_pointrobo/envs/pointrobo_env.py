@@ -82,7 +82,7 @@ class PointroboEnv(gym.Env):
 
         #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made: Reward=-0.01
         # Tolerance of distance 3, that the robot reached the goal!
-        if (np.linalg.norm(self.agent_pos-self.goal_pos) < 2*self.robot_radius+5): 
+        if (np.linalg.norm(self.agent_pos-self.goal_pos) < 3 * self.robot_radius): 
             reward = self.goal_reward
             done = True
         #Have we hit an obstacle?
@@ -138,9 +138,11 @@ class PointroboEnv(gym.Env):
         pointing in x-direction and the second element pointing in y-direction
         """
         # normalizing action:
-        epsilon = 1e-8
-        action /= (np.linalg.norm(action) + epsilon)
+        #epsilon = 1e-8
+        #action /= (np.linalg.norm(action) + epsilon)
         
+        action *= self.action_space.high
+
         t = 1.0
         self.agent_pos += action * t
         self.agent_pos = np.clip(self.agent_pos, [0.0, 0.0], [float(self.grid_size-1), float(self.grid_size-1)])

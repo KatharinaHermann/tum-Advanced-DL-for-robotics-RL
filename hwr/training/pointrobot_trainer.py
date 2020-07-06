@@ -133,7 +133,7 @@ class PointrobotTrainer:
 
             #Get action randomly for warmup /from Actor-NN otherwise
             if total_steps < self._policy.n_warmup:
-                action = self._env.action_space.sample()
+                action = self._env.action_space.sample() / self._env.action_space.high
             else:
                 normalized_obs_full = obs_full
                 normalized_obs_full[0: 4] = normalized_obs_full[0: 4] / self._env.grid_size - 0.5
@@ -389,7 +389,6 @@ class PointrobotTrainer:
         # normalizing action:
         #epsilon = 1e-8
         #action /= (np.linalg.norm(action) + epsilon)
-        #action = action / self._env.action_space.high 
 
         # adding to the replay buffer:
         self._replay_buffer.add(obs=obs_full, act=action,
@@ -451,13 +450,13 @@ class PointrobotTrainer:
                             help='Interval to save model')
         parser.add_argument('--save-summary-interval', type=int, default=int(1e3),
                             help='Interval to save summary')
-        parser.add_argument('--model-dir', type=str, default='models/agents',
-                            help='Directory to restore model. default =  /models/agents')
+        parser.add_argument('--model-dir', type=str, default='../models/agents',
+                            help='Directory to restore model. default =  ../models/agents')
         parser.add_argument('--dir-suffix', type=str, default='',
                             help='Suffix for directory that contains results')
         parser.add_argument('--normalize-obs', action='store_true',
                             help='Normalize observation')
-        parser.add_argument('--logdir', type=str, default='src/results',
+        parser.add_argument('--logdir', type=str, default='results',
                             help='Output directory')
         # test settings
         parser.add_argument('--evaluate', action='store_true',
@@ -495,8 +494,8 @@ class PointrobotTrainer:
                             help='latent dimension of the CAE. default: 16')
         parser.add_argument('--cae_conv_filters', type=int, nargs='+', default=[4, 8, 16],
                             help='number of filters in the conv layers. default: [4, 8, 16]')
-        parser.add_argument('--cae_weights_path', type=str, default='models/cae/model_num_5_size_8.h5',
-                            help='path to saved CAE weights. default: /models/cae/model_num_5_size_8.h5')
+        parser.add_argument('--cae_weights_path', type=str, default='../models/cae/model_num_5_size_8.h5',
+                            help='path to saved CAE weights. default: ../models/cae/model_num_5_size_8.h5')
 
         return parser
 

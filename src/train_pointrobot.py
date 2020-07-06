@@ -6,7 +6,7 @@ import tensorflow as tf
 import gym
 import gym_pointrobo
 
-from tf2rl.algos.ddpg import DDPG
+from hwr.agents.pointrobo_ddpg import DDPG
 
 from hwr.cae.cae import CAE
 from hwr.training.pointrobot_trainer import PointrobotTrainer
@@ -62,7 +62,7 @@ policy = DDPG(
     gpu=args.gpu,
     memory_capacity=args.memory_capacity,
     update_interval=args.update_interval,
-    max_action=env.action_space.high[0], #max action =1
+    #max_action=env.action_space.high[0], #max action =1
     lr_actor=lr_actor, #0.001 hyperparamter learning rate actor network
     lr_critic=lr_critic, #hyperparamter learning rate critic network
     actor_units=[400, 300],
