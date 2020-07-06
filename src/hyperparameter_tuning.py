@@ -37,7 +37,7 @@ env = gym.make(
     goal_reward=10,
     collision_reward=-1,
     step_reward=-0.05,
-    buffer_size=1000,
+    buffer_size=4,
     grid_size=32,
     num_obj_max=args.num_obj_max,
     obj_size_avg=args.obj_size_avg,
@@ -47,7 +47,7 @@ test_env = gym.make(
     goal_reward=10,
     collision_reward=-1,
     step_reward=-0.05,
-    buffer_size=1000,
+    buffer_size=4,
     grid_size=32,
     num_obj_max=args.num_obj_max,
     obj_size_avg=args.obj_size_avg,
@@ -59,7 +59,7 @@ test_env = gym.make(
 for lr_i, lr in enumerate([1e-7]):
     for max_grad_i, max_grad in enumerate([3]):
         for tau_i, tau in enumerate([0.05]):
-            for memory_capacity_i, memory_capacity in enumerate([5e4, 51e5, 1e6]):
+            for memory_capacity_i, memory_capacity in enumerate([5e4, 1e5, 1e6]):
                 print("Learning rate: {0: 1.8f} max_grad: {1: 3.2f} Tau_Target_update: {2: 1.3f}  memory_capacity: {3: 4}".format(
                             lr, max_grad, tau, memory_capacity))
                 
