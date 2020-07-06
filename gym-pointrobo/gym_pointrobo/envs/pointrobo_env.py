@@ -76,13 +76,13 @@ class PointroboEnv(gym.Env):
 
     def step(self, action):
         """Implements the step function for taking an action and evaluating it"""
-
-        self.take_action(action)
+        
+        self.take_action(np.copy(action))
         self.current_step += 1        
 
         #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made: Reward=-0.01
         # Tolerance of distance 3, that the robot reached the goal!
-        if (np.linalg.norm(self.agent_pos-self.goal_pos) < 2*self.robot_radius): 
+        if (np.linalg.norm(self.agent_pos-self.goal_pos) < 2*self.robot_radius+5): 
             reward = self.goal_reward
             done = True
         #Have we hit an obstacle?
