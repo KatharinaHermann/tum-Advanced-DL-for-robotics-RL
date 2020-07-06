@@ -57,7 +57,7 @@ class DDPG(OffPolicyAgent):
             state_shape,
             action_dim,
             name="DDPG",
-            max_action=1.,
+            #max_action=1.,
             lr_actor=0.001,
             lr_critic=0.001,
             actor_units=[400, 300],
@@ -70,9 +70,9 @@ class DDPG(OffPolicyAgent):
         super().__init__(name=name, memory_capacity=memory_capacity, n_warmup=n_warmup, **kwargs)
 
         # Define and initialize Actor network
-        self.actor = Actor(state_shape, action_dim, max_action, actor_units)
+        self.actor = Actor(state_shape, action_dim, actor_units)
         self.actor_target = Actor(
-            state_shape, action_dim, max_action, actor_units)
+            state_shape, action_dim, actor_units)
         self.actor_optimizer = tf.keras.optimizers.Adam(learning_rate=lr_actor)
         update_target_variables(self.actor_target.weights,
                                 self.actor.weights, tau=1.)
@@ -95,21 +95,19 @@ class DDPG(OffPolicyAgent):
             assert isinstance(state, np.ndarray)
         state = np.expand_dims(state, axis=0).astype(
             np.float32) if is_single_state else state
-        action = self._get_action_body(
-            tf.constant(state), self.sigma * (1. - test),
-            tf.constant(self.actor.max_action, dtype=tf.float32))
+        action = self._get_action_body(tf.constant(state), self.sigma * (1. - test))
         if tensor:
             return action
         else:
             return action.numpy()[0] if is_single_state else action.numpy()
 
     @tf.function
-    def _get_action_body(self, state, sigma, max_action):
+    def _get_action_body(self, state, sigma):
         with tf.device(self.device):
             action = self.actor(state)
             action += tf.random.normal(shape=action.shape,
                                        mean=0., stddev=sigma, dtype=tf.float32)
-            return tf.clip_by_value(action, -max_action, max_action)
+            return tf.clip_by_value(action, tf.constant(-1, dtype=tf.float32), tf.constant(1, dtype=tf.float32))
 
     def train(self, states, actions, next_states, rewards, done, weights=None):
         if weights is None:

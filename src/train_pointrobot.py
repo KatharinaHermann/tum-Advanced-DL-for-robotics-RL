@@ -17,7 +17,7 @@ parser = DDPG.get_argument(parser)
 parser.add_argument('--env-name', type=str, default="pointrobo-v0")
 parser.set_defaults(batch_size=1024)
 parser.set_defaults(n_warmup=10000)
-parser.set_defaults(update_interval=1)
+parser.set_defaults(update_interval=10)
 
 args = parser.parse_args()
 
@@ -30,8 +30,8 @@ args.save_test_movie = False
 args.show_progress = True
 args.num_obj_max = 5
 
-lr_actor = 3e-7
-lr_critic = 3e-7
+lr_actor = 1e-7
+lr_critic = 1e-7
 
 #Initialize the environment
 env = gym.make(
