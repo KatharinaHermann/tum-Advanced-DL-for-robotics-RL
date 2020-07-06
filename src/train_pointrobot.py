@@ -11,6 +11,7 @@ from hwr.agents.pointrobo_ddpg import DDPG
 from hwr.cae.cae import CAE
 from hwr.training.pointrobot_trainer import PointrobotTrainer
 
+train_from_scratch = True
 
 parser = PointrobotTrainer.get_argument()
 parser = DDPG.get_argument(parser)
@@ -33,6 +34,12 @@ args.max_grad = 1
 
 lr_actor = 1e-4
 lr_critic = 1e-4
+
+if train_from_scratch:
+    # deleting the previous checkpoints:
+    ckp_files = glob.glob('models/agents/*')
+    for f in ckp_files:
+        os.remove(f)
 
 #Initialize the environment
 env = gym.make(
