@@ -12,6 +12,7 @@ from hwr.agents.pointrobo_ddpg import DDPG
 from hwr.cae.cae import CAE
 from hwr.training.pointrobot_trainer import PointrobotTrainer
 
+
 train_from_scratch = True
 
 parser = PointrobotTrainer.get_argument()
@@ -23,22 +24,25 @@ parser.set_defaults(update_interval=10)
 
 args = parser.parse_args()
 
-args.max_steps = 1e6
+# workspace args:
+args.num_obj_max = 5
+# training args:
+args.max_steps = 5e6
 args.test_interval = 10000
 args.episode_max_steps = 50
 args.test_episodes = 100
 args.save_test_path_sep = False
 args.save_test_movie = False
 args.show_progress = False
-args.num_obj_max = 5
+# agent args:
 args.max_grad = 1
-
+args.memory_capacity = 1e5
 lr_actor = 1e-4
 lr_critic = 1e-4
 
 if train_from_scratch:
     # deleting the previous checkpoints:
-    ckp_files = glob.glob('models/agents/*')
+    ckp_files = glob.glob('../models/agents/*')
     for f in ckp_files:
         os.remove(f)
     print('-' * 5 + 'TRAINING FROM SCRATCH!! --> DELETED CHECKPOINTS!' + '-' * 5)
