@@ -8,7 +8,7 @@ import tensorflow as tf
 import gym
 import gym_pointrobo
 
-from tf2rl.algos.ddpg import DDPG
+from hwr.agents.pointrobo_ddpg import DDPG
 
 from hwr.cae.cae import CAE
 from hwr.training.pointrobot_trainer import PointrobotTrainer
@@ -24,7 +24,7 @@ parser.set_defaults(memory_capacity = 1e6)
 
 args = parser.parse_args()
 
-args.max_steps = 7e5
+args.max_steps = 4e5
 args.test_interval = 10000
 args.episode_max_steps = 100
 args.test_episodes = 100
@@ -53,18 +53,25 @@ test_env = gym.make(
     obj_size_avg=args.obj_size_avg,
     )
 
+# deleting the previous runs logs:
+logdir_files = glob.glob('results/hyperparam_tuning/')
+for f in logdir_files:
+    if os.path.isdir(f):
+        shutil.rmtree(f)
+    else:
+        os.remove(f)
 
 
 # Hyperparameter grid search
-for lr_i, lr in enumerate([1e-7]):
-    for max_grad_i, max_grad in enumerate([3]):
+for lr_i, lr in enumerate([1e-5, 1e-4, 5e-4, 1e-3]):
+    for max_grad_i, max_grad in enumerate([1]):
         for tau_i, tau in enumerate([0.05]):
-            for memory_capacity_i, memory_capacity in enumerate([5e4, 1e5, 1e6]):
+            for memory_capacity_i, memory_capacity in enumerate([5e4]):
                 print("Learning rate: {0: 1.8f} max_grad: {1: 3.2f} Tau_Target_update: {2: 1.3f}  memory_capacity: {3: 4}".format(
                             lr, max_grad, tau, memory_capacity))
                 
                 # setting up logdir for the current hyperparams:
-                logdir = os.path.join('src/results/hyperparam_tuning',
+                logdir = os.path.join('results/hyperparam_tuning',
                     str(lr_i)+str(max_grad_i)+str(tau_i)+str(memory_capacity_i))
                 if not os.path.exists(logdir):
                     os.makedirs(logdir)
@@ -84,7 +91,7 @@ for lr_i, lr in enumerate([1e-7]):
                     f.write('batch size: {0: 4}'.format(memory_capacity) + '\n')
 
                 # deleting the previous checkpoints:
-                ckp_files = glob.glob('models/agents/*')
+                ckp_files = glob.glob('../models/agents/*')
                 for f in ckp_files:
                     os.remove(f)
 
@@ -97,7 +104,7 @@ for lr_i, lr in enumerate([1e-7]):
                     gpu=args.gpu,
                     memory_capacity=args.memory_capacity,
                     update_interval=args.update_interval,
-                    max_action=env.action_space.high[0],
+                    #max_action=env.action_space.high[0],
                     lr_actor=lr, 
                     lr_critic=lr,
                     max_grad=max_grad,

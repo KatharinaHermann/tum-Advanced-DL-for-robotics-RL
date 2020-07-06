@@ -2,36 +2,50 @@ import os
 import sys
 import numpy as np
 import tensorflow as tf
+import glob
 
 import gym
 import gym_pointrobo
 
-from tf2rl.algos.ddpg import DDPG
+from hwr.agents.pointrobo_ddpg import DDPG
 
 from hwr.cae.cae import CAE
 from hwr.training.pointrobot_trainer import PointrobotTrainer
 
+
+train_from_scratch = True
 
 parser = PointrobotTrainer.get_argument()
 parser = DDPG.get_argument(parser)
 parser.add_argument('--env-name', type=str, default="pointrobo-v0")
 parser.set_defaults(batch_size=1024)
 parser.set_defaults(n_warmup=10000)
-parser.set_defaults(update_interval=1)
+parser.set_defaults(update_interval=10)
 
 args = parser.parse_args()
 
-args.max_steps = 1e6
+# workspace args:
+args.num_obj_max = 5
+# training args:
+args.max_steps = 5e6
 args.test_interval = 10000
 args.episode_max_steps = 50
 args.test_episodes = 100
 args.save_test_path_sep = False
 args.save_test_movie = False
-args.show_progress = True
-args.num_obj_max = 5
+args.show_progress = False
+# agent args:
+args.max_grad = 1
+args.memory_capacity = 1e5
+lr_actor = 1e-4
+lr_critic = 1e-4
 
-lr_actor = 3e-7
-lr_critic = 3e-7
+if train_from_scratch:
+    # deleting the previous checkpoints:
+    ckp_files = glob.glob('../models/agents/*')
+    for f in ckp_files:
+        os.remove(f)
+    print('-' * 5 + 'TRAINING FROM SCRATCH!! --> DELETED CHECKPOINTS!' + '-' * 5)
 
 #Initialize the environment
 env = gym.make(
@@ -62,9 +76,10 @@ policy = DDPG(
     gpu=args.gpu,
     memory_capacity=args.memory_capacity,
     update_interval=args.update_interval,
-    max_action=env.action_space.high[0], #max action =1
+    #max_action=env.action_space.high[0], #max action =1
     lr_actor=lr_actor, #0.001 hyperparamter learning rate actor network
     lr_critic=lr_critic, #hyperparamter learning rate critic network
+    max_grad=args.max_grad,
     actor_units=[400, 300],
     critic_units=[400, 300],
     batch_size=args.batch_size,
