@@ -24,3 +24,6 @@ The environment can be installed with the following commands:
 * With CPU:
     * create environment and install all packages: `conda env create --name <name> -f environment_cpu.yml`
     * activate environment: `conda activate <name>`
+* Installing the custon gym and the 'hwr' package in development mode:
+    * `pip install -e gym-pointrobo/`
+    * `python setup.py develop`
