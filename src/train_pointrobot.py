@@ -2,6 +2,7 @@ import os
 import sys
 import numpy as np
 import tensorflow as tf
+import glob
 
 import gym
 import gym_pointrobo
@@ -40,6 +41,7 @@ if train_from_scratch:
     ckp_files = glob.glob('models/agents/*')
     for f in ckp_files:
         os.remove(f)
+    print('-' * 5 + 'TRAINING FROM SCRATCH!! --> DELETED CHECKPOINTS!' + '-' * 5)
 
 #Initialize the environment
 env = gym.make(
