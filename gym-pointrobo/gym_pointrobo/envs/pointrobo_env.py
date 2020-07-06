@@ -82,7 +82,7 @@ class PointroboEnv(gym.Env):
 
         #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made: Reward=-0.01
         # Tolerance of distance 3, that the robot reached the goal!
-        if (np.linalg.norm(self.agent_pos-self.goal_pos) < 3 * self.robot_radius): 
+        if (np.linalg.norm(self.agent_pos-self.goal_pos) < self.robot_radius): 
             reward = self.goal_reward
             done = True
         #Have we hit an obstacle?
@@ -102,8 +102,8 @@ class PointroboEnv(gym.Env):
         self.setup_rndm_workspace_from_buffer()
         self.agent_pos = self.start_pos.astype(np.float32)
 
-        #self.agent_pos = np.array([5., 5.])
-        #self.goal_pos = np.array([10., 10.])
+        self.agent_pos = np.array([12., 12.])
+        self.goal_pos = np.array([14., 14.])
    
         return self.workspace.astype(np.float32), self.goal_pos.astype(np.float32), self.agent_pos.astype(np.float32)
 
