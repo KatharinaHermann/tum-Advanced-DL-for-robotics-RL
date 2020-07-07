@@ -18,8 +18,8 @@ train_from_scratch = True
 parser = PointrobotTrainer.get_argument()
 parser = DDPG.get_argument(parser)
 parser.add_argument('--env-name', type=str, default="pointrobo-v0")
-parser.set_defaults(batch_size=100)
-parser.set_defaults(n_warmup=1000)
+parser.set_defaults(batch_size=1024)
+parser.set_defaults(n_warmup=10000)
 parser.set_defaults(update_interval=10)
 
 args = parser.parse_args()
@@ -28,13 +28,13 @@ args = parser.parse_args()
 args.num_obj_max = 0
 max_goal_dist = 4
 # training args:
-args.max_steps = 5e5
+args.max_steps = 1e6
 args.test_interval = 10000
 args.episode_max_steps = 5
 args.test_episodes = 100
 args.save_test_path_sep = False
 args.save_test_movie = False
-args.show_progress = True
+args.show_progress = False
 # agent args:
 args.max_grad = 1
 args.memory_capacity = 1e5

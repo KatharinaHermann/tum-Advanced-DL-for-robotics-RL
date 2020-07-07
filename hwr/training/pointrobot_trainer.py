@@ -128,6 +128,7 @@ class PointrobotTrainer:
            
             #Visualize environment if "show_progess"
             if self._show_progress and \
+                (total_steps % 10000 = 0) and \
                 total_steps > self._policy.n_warmup:
                 self._env.render()
 
