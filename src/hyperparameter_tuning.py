@@ -25,7 +25,7 @@ parser.set_defaults(memory_capacity = 1e6)
 args = parser.parse_args()
 
 # workspace args:
-args.num_obj_max = 5
+args.num_obj_max = 0
 max_goal_dist = 4
 # training args:
 args.max_steps = 5e5
@@ -74,10 +74,10 @@ for f in logdir_files:
 
 
 # Hyperparameter grid search
-for lr_i, lr in enumerate([1e-5, 1e-4, 5e-4, 1e-3]):
+for lr_i, lr in enumerate([1e-3]):
     for max_grad_i, max_grad in enumerate([1]):
-        for tau_i, tau in enumerate([0.05]):
-            for memory_capacity_i, memory_capacity in enumerate([5e4]):
+        for tau_i, tau in enumerate([0.05, 0.01, 0.001]):
+            for memory_capacity_i, memory_capacity in enumerate([1e5]):
                 print("Learning rate: {0: 1.8f} max_grad: {1: 3.2f} Tau_Target_update: {2: 1.3f}  memory_capacity: {3: 4}".format(
                             lr, max_grad, tau, memory_capacity))
                 
