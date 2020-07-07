@@ -49,7 +49,7 @@ def random_workspace(grid_size, num_obj_max, obj_size_avg):
     return workspace
 
 
-def get_start_goal_for_workspace(workspace):
+def get_start_goal_for_workspace(workspace, max_goal_dist=None):
     """generates a discrete start and goal point for a given workspace. 
     It throws in randomply points from a uniform distribution until the points are in free space.
     """
@@ -68,14 +68,23 @@ def get_start_goal_for_workspace(workspace):
         start_blocked = workspace[y-1: y+2, x-1: x+2].any()
         
 
-    #Generate goal point (repeat until point is found where no object ist placed) and assign goal point with a 1
-    goal_blocked = True
-    while goal_blocked:
+    # Generate goal point (repeat until point is found where no object ist placed) and assign goal point with a 1
+    # if a maximum goal distance is specified, Points are only generated within that range.
+    goal_found = False
+    while not goal_found:
+        
+        if max_goal_dist is None:
+            low = 1.
+            high = float(grid_size-2)
+        else:
+            low = np.clip(start - max_goal_dist, a_min=1., a_max=float(grid_size-2))
+            high = np.clip(start + max_goal_dist, a_min=1., a_max=float(grid_size-2))    
+        
+        goal = np.random.uniform(low=low, high=high, size=(2,))
 
-        goal = np.random.uniform(low=1.0, high=float(grid_size-2), size=(2,))
         x = int(goal[0])
         y = int(goal[1])
-        goal_blocked = workspace[y-1: y+2, x-1: x+2].any()
+        goal_found = not workspace[y-1: y+2, x-1: x+2].any()
 
     return start, goal
 

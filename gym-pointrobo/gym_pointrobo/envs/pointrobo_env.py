@@ -32,7 +32,8 @@ class PointroboEnv(gym.Env):
                  grid_size=32,
                  num_obj_max=5,
                  obj_size_avg=8, 
-                 robot_radius=1): 
+                 robot_radius=1,
+                 max_goal_dist=None): 
 
         super(PointroboEnv, self).__init__()
 
@@ -47,6 +48,7 @@ class PointroboEnv(gym.Env):
         self.grid_size = grid_size
         self.num_obj_max = num_obj_max
         self.obj_size_avg =obj_size_avg
+        self.max_goal_dist = max_goal_dist
 
         # Define action and observation space
         # They must be gym.spaces objects
@@ -82,7 +84,7 @@ class PointroboEnv(gym.Env):
 
         #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made: Reward=-0.01
         # Tolerance of distance 3, that the robot reached the goal!
-        if (np.linalg.norm(self.agent_pos-self.goal_pos) < 3 * self.robot_radius): 
+        if (np.linalg.norm(self.agent_pos-self.goal_pos) < self.robot_radius): 
             reward = self.goal_reward
             done = True
         #Have we hit an obstacle?
@@ -102,8 +104,8 @@ class PointroboEnv(gym.Env):
         self.setup_rndm_workspace_from_buffer()
         self.agent_pos = self.start_pos.astype(np.float32)
 
-        #self.agent_pos = np.array([5., 5.])
-        #self.goal_pos = np.array([10., 10.])
+        #self.agent_pos = np.array([12., 12.])
+        #self.goal_pos = np.array([14., 14.])
    
         return self.workspace.astype(np.float32), self.goal_pos.astype(np.float32), self.agent_pos.astype(np.float32)
 
@@ -158,7 +160,8 @@ class PointroboEnv(gym.Env):
         """Choose random workspace from buffer"""
         buffer_index = np.random.randint(low=0, high=self.buffer_size - 1)
         self.workspace = self.workspace_buffer[buffer_index]
-        self.start_pos, self.goal_pos = get_start_goal_for_workspace(self.workspace)
+        self.start_pos, self.goal_pos = get_start_goal_for_workspace(self.workspace,
+            max_goal_dist=self.max_goal_dist)
 
 
     def collision_check(self):

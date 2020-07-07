@@ -24,11 +24,20 @@ parser.set_defaults(memory_capacity = 1e6)
 
 args = parser.parse_args()
 
-args.max_steps = 4e5
-args.test_interval = 10000
-args.episode_max_steps = 100
-args.test_episodes = 100
+# workspace args:
 args.num_obj_max = 0
+max_goal_dist = 4
+# training args:
+args.max_steps = 5e5
+args.test_interval = 10000
+args.episode_max_steps = 5
+args.test_episodes = 100
+args.save_test_path_sep = False
+args.save_test_movie = False
+args.show_progress = False
+# agent args:
+args.max_grad = 1
+args.memory_capacity = 1e5
 
 
 #Initialize the environment
@@ -41,6 +50,7 @@ env = gym.make(
     grid_size=32,
     num_obj_max=args.num_obj_max,
     obj_size_avg=args.obj_size_avg,
+    max_goal_dist=max_goal_dist,
     )
 test_env = gym.make(
     args.env_name,
@@ -51,6 +61,7 @@ test_env = gym.make(
     grid_size=32,
     num_obj_max=args.num_obj_max,
     obj_size_avg=args.obj_size_avg,
+    max_goal_dist=max_goal_dist,
     )
 
 # deleting the previous runs logs:
@@ -63,10 +74,10 @@ for f in logdir_files:
 
 
 # Hyperparameter grid search
-for lr_i, lr in enumerate([1e-5, 1e-4, 5e-4, 1e-3]):
+for lr_i, lr in enumerate([1e-3]):
     for max_grad_i, max_grad in enumerate([1]):
-        for tau_i, tau in enumerate([0.05]):
-            for memory_capacity_i, memory_capacity in enumerate([5e4]):
+        for tau_i, tau in enumerate([0.05, 0.01, 0.001]):
+            for memory_capacity_i, memory_capacity in enumerate([1e5]):
                 print("Learning rate: {0: 1.8f} max_grad: {1: 3.2f} Tau_Target_update: {2: 1.3f}  memory_capacity: {3: 4}".format(
                             lr, max_grad, tau, memory_capacity))
                 

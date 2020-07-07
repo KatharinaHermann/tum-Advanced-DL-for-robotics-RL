@@ -20,16 +20,17 @@ parser = DDPG.get_argument(parser)
 parser.add_argument('--env-name', type=str, default="pointrobo-v0")
 parser.set_defaults(batch_size=1024)
 parser.set_defaults(n_warmup=10000)
-parser.set_defaults(update_interval=10)
+parser.set_defaults(update_interval=1)
 
 args = parser.parse_args()
 
 # workspace args:
-args.num_obj_max = 5
+args.num_obj_max = 0
+max_goal_dist = 4
 # training args:
-args.max_steps = 5e6
+args.max_steps = 1e6
 args.test_interval = 10000
-args.episode_max_steps = 50
+args.episode_max_steps = 5
 args.test_episodes = 100
 args.save_test_path_sep = False
 args.save_test_movie = False
@@ -57,6 +58,7 @@ env = gym.make(
     grid_size=32,
     num_obj_max=args.num_obj_max,
     obj_size_avg=args.obj_size_avg,
+    max_goal_dist=max_goal_dist,
     )
 test_env = gym.make(
     args.env_name,
@@ -67,6 +69,7 @@ test_env = gym.make(
     grid_size=32,
     num_obj_max=args.num_obj_max,
     obj_size_avg=args.obj_size_avg,
+    max_goal_dist=max_goal_dist,
     )
 
 # initialize the agent:

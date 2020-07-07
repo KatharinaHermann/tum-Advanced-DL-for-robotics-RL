@@ -135,8 +135,7 @@ class DDPG(OffPolicyAgent):
             critic_grad = tape.gradient(
                 critic_loss, self.critic.trainable_variables)
             critic_grad = [(tf.clip_by_value(grad, tf.constant(-self.max_grad, dtype=tf.float32), 
-                tf.constant(self.max_grad, dtype=tf.float32)))
-                            for grad in critic_grad]
+                tf.constant(self.max_grad, dtype=tf.float32))) for grad in critic_grad]
             self.critic_optimizer.apply_gradients(
                 zip(critic_grad, self.critic.trainable_variables))
 
