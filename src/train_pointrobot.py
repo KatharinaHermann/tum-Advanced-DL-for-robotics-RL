@@ -34,7 +34,7 @@ args.episode_max_steps = 5
 args.test_episodes = 100
 args.save_test_path_sep = False
 args.save_test_movie = False
-args.show_progress = False
+args.show_progress = True
 # agent args:
 args.max_grad = 1
 args.memory_capacity = 1e5
