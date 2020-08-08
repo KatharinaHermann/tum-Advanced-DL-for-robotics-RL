@@ -20,3 +20,4 @@ dependencies:
       - matplotlib
       - argparse
       - pylint
+      - unittest2

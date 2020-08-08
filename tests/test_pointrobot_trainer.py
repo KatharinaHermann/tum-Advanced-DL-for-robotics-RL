@@ -7,14 +7,15 @@ import gym
 import gym_pointrobo
 
 from hwr.agents.pointrobo_ddpg import DDPG
-
 from hwr.cae.cae import CAE
 from hwr.training.pointrobot_trainer import PointrobotTrainer
+from hwr.utils import load_params
 
 
 def test_pointrobot_trainer_init():
     print('-' * 5 + 'test_pointrobot_trainer_init' + '-' * 5)
 
+    params = load_params('params/test_params.json')
     parser = PointrobotTrainer.get_argument()
     parser = DDPG.get_argument(parser)
     parser.add_argument('--env-name', type=str, default="pointrobo-v0")
@@ -23,8 +24,14 @@ def test_pointrobot_trainer_init():
     args.save_test_path_sep = True
 
     #Initialize the environment
-    env = gym.make(args.env_name)
-    test_env = gym.make(args.env_name)
+    env = gym.make(
+        args.env_name,
+        params=params
+        )
+    test_env = gym.make(
+        args.env_name,
+        params=params
+        )
 
     policy = DDPG(
         state_shape=env.observation_space.shape,
@@ -50,7 +57,8 @@ def test_state_concatenation():
     for layer, _ in model._get_trainable_state().items():
         layer.trainable = False
 
-    env = gym.make("pointrobo-v0")
+    env = gym.make("pointrobo-v0",
+        params=params)
     workspace, goal, obs = env.reset()
     print('ws type: {}, dtype: {}, shape: {}'.format(type(workspace), workspace.dtype, workspace.shape))
     print('goal type: {}, dtype: {}, shape: {}'.format(type(goal), goal.dtype, goal.shape))
