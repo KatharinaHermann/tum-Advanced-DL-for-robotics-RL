@@ -21,16 +21,15 @@ class PointrobotTrainerTests(unittest.TestCase):
         self.params = load_params('params/test_params.json')
         self.parser = PointrobotTrainer.get_argument()
         self.parser = DDPG.get_argument(self.parser)
-        self.parser.add_argument('--env-name', type=str, default="pointrobo-v0")
         self.args = self.parser.parse_args()
         self.args.save_test_path_sep = False
 
         self.env = gym.make(
-            self.args.env_name,
+            params["env"]["name"],
             params=self.params
             )
         self.test_env = gym.make(
-            self.args.env_name,
+            params["env"]["name"],
             params=self.params
             )
 
@@ -57,7 +56,8 @@ class PointrobotTrainerTests(unittest.TestCase):
             self.policy,
             self.env,
             self.args,
-            test_env=self.test_env)
+            test_env=self.test_env
+            )
     
 
     def test_evaluation(self):

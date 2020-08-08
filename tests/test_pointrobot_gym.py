@@ -8,7 +8,7 @@ from hwr.utils import load_params
 
 def test_pointrobot_gym():
     params = load_params("params/test_params.json")
-    env = gym.make('pointrobo-v0', 
+    env = gym.make(params["env"]["name"], 
                    params=params)
     workspace, goal, obs = env.reset()
 

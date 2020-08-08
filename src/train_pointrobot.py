@@ -8,12 +8,14 @@ import gym
 import gym_pointrobo
 
 from hwr.agents.pointrobo_ddpg import DDPG
-
 from hwr.cae.cae import CAE
 from hwr.training.pointrobot_trainer import PointrobotTrainer
+from hwr.utils import load_params
 
 
 train_from_scratch = True
+
+params = load_params('params/pointrobot_training_params.json')
 
 parser = PointrobotTrainer.get_argument()
 parser = DDPG.get_argument(parser)
@@ -50,26 +52,12 @@ if train_from_scratch:
 
 #Initialize the environment
 env = gym.make(
-    args.env_name,
-    goal_reward=10,
-    collision_reward=-1,
-    step_reward=-0.05,
-    buffer_size=1000,
-    grid_size=32,
-    num_obj_max=args.num_obj_max,
-    obj_size_avg=args.obj_size_avg,
-    max_goal_dist=max_goal_dist,
+    params["env"]["name"],
+    params=params,
     )
 test_env = gym.make(
-    args.env_name,
-    goal_reward=10,
-    collision_reward=-1,
-    step_reward=-0.05,
-    buffer_size=1000,
-    grid_size=32,
-    num_obj_max=args.num_obj_max,
-    obj_size_avg=args.obj_size_avg,
-    max_goal_dist=max_goal_dist,
+    params["env"]["name"],
+    params=params
     )
 
 # initialize the agent:
