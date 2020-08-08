@@ -3,15 +3,14 @@ import gym
 import gym_pointrobo
 import matplotlib.pyplot as plt
 
+from hwr.utils import load_params
 
 
 def test_pointrobot_gym():
+    params = load_params("params/test_params.json")
     env = gym.make('pointrobo-v0', 
-                   goal_reward=5, 
-                   collision_reward=-1,
-                   step_reward=-0.01)
+                   params=params)
     workspace, goal, obs = env.reset()
-    #env.render()
 
     # Hardcoded agent: always go diagonal
     action=np.array([0.5, 0.5])
@@ -29,9 +28,6 @@ def test_pointrobot_gym():
             elif reward == env.collision_reward:
                 print ("OOOOpssss you crashed!!")
             break
-        #env.workspace = np.zeros((32, 32))
-        #env.workspace[0:4, 0:4] = 1
-        #env.agent_pos = np.array([29.0, 29.0])
         env.render()
     
     plt.show()
