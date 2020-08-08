@@ -41,15 +41,15 @@ class PointrobotTrainer:
         self._policy = policy
         self._env = env
         self._test_env = self._env if test_env is None else test_env
-        args = get_args_from_params()
+        args = self._get_args_from_params()
 
         # Convolutional Autoencoder:
-        self._CAE = CAE(pooling=self._cae_pooling,
-                        latent_dim=self._cae_latent_dim,
+        self._CAE = CAE(pooling=self._params["cae"]["pooling"],
+                        latent_dim=self._params["cae"]["latent_dim"],
                         input_shape=self._env.workspace.shape,
-                        conv_filters=self._cae_conv_filters)
+                        conv_filters=self._params["cae"]["conv_filters"])
         self._CAE.build(input_shape=(1, self._env.workspace.shape[0], self._env.workspace.shape[1], 1))
-        self._CAE.load_weights(filepath=self._cae_weights_path)
+        self._CAE.load_weights(filepath=self._params["cae"]["weights_path"])
         for layer, _ in self._CAE._get_trainable_state().items():
             layer.trainable = False
 
@@ -70,9 +70,9 @@ class PointrobotTrainer:
         # prepare log directory
         self._output_dir = prepare_output_dir(
             args=args, user_specified_dir=self._logdir,
-            suffix="{}_{}".format(self._policy.policy_name, args.dir_suffix))
+            suffix="{}_{}".format(self._policy.policy_name, params["trainer"]["dir_suffix"]))
         self.logger = initialize_logger(
-            logging_level=logging.getLevelName(args.logging_level),
+            logging_level=logging.getLevelName(params["trainer"]["logging_level"]),
             output_dir=self._output_dir)
         if self._save_test_path_sep:
             sep_logdirs = ['successful_trajs', 'unsuccessful_trajs', 'unfinished_trajs']
@@ -80,9 +80,9 @@ class PointrobotTrainer:
                 if not os.path.exists(os.path.join(self._logdir, logdir)):
                     os.makedirs(os.path.join(self._logdir, logdir))
 
-        if args.evaluate:
-            assert args.model_dir is not None
-        self._set_check_point(args.model_dir)
+        if params["trainer"]["evaluate"]:
+            assert params["trainer"]["model_dir"] is not None
+        self._set_check_point(params["trainer"]["model_dir"])
 
         # prepare TensorBoard output
         self.writer = tf.summary.create_file_writer(self._output_dir)
@@ -425,14 +425,9 @@ class PointrobotTrainer:
         self._save_test_path_sep = self._params["trainer"]["save_test_path_sep"]
         self._save_test_movie = self._params["trainer"]["save_test_movie"]
         self._show_test_images = self._params["trainer"]["show_test_images"]
-        # autoencoder settings
-        self._cae_pooling = self._params["trainer"]["cae_pooling"]
-        self._cae_latent_dim = self._params["trainer"]["cae_latent_dim"]
-        self._cae_conv_filters = self._params["trainer"]["cae_conv_filters"]
-        self._cae_weights_path = self._params["trainer"]["cae_weights_path"]
 
 
-    def get_args_from_params(self):
+    def _get_args_from_params(self):
         """creates an argparse Namespace object from params for the tf2rl based classes."""
 
         args = {}

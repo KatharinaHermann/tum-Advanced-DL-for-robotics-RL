@@ -14,33 +14,8 @@ from hwr.training.pointrobot_trainer import PointrobotTrainer
 from hwr.utils import load_params
 
 
-params = load_params('params/pointrobot_training_params.json')
-
-parser = PointrobotTrainer.get_argument()
-parser = DDPG.get_argument(parser)
-parser.add_argument('--env-name', type=str, default="pointrobo-v0")
-parser.set_defaults(batch_size=1024)
-parser.set_defaults(n_warmup=10000)
-parser.set_defaults(update_interval=10)
-parser.set_defaults(memory_capacity = 1e6)
-
-args = parser.parse_args()
-
-# workspace args:
-args.num_obj_max = 0
-max_goal_dist = 4
-# training args:
-args.max_steps = 5e5
-args.test_interval = 10000
-args.episode_max_steps = 5
-args.test_episodes = 100
-args.save_test_path_sep = False
-args.save_test_movie = False
-args.show_progress = False
-# agent args:
-args.max_grad = 1
-args.memory_capacity = 1e5
-
+# loading params:
+params = load_params('params/hyperparam_tuning_params.json')
 
 #Initialize the environment
 env = gym.make(
@@ -53,7 +28,7 @@ test_env = gym.make(
     )
 
 # deleting the previous runs logs:
-logdir_files = glob.glob('results/hyperparam_tuning/')
+logdir_files = glob.glob(params["trainer"]["logdir"])
 for f in logdir_files:
     if os.path.isdir(f):
         shutil.rmtree(f)
@@ -68,6 +43,13 @@ for lr_i, lr in enumerate([1e-3]):
             for memory_capacity_i, memory_capacity in enumerate([1e5]):
                 print("Learning rate: {0: 1.8f} max_grad: {1: 3.2f} Tau_Target_update: {2: 1.3f}  memory_capacity: {3: 4}".format(
                             lr, max_grad, tau, memory_capacity))
+
+                # the actual parameters:
+                params["agent"]["lr_actor"] = lr
+                params["agent"]["lr_critic"] = lr
+                params["agent"]["max_grad"] = max_grad
+                params["agent"]["tau"] = tau
+                params["agent"]["memory_capacity"] = memory_capacity
                 
                 # setting up logdir for the current hyperparams:
                 logdir = os.path.join('results/hyperparam_tuning',
@@ -94,27 +76,22 @@ for lr_i, lr in enumerate([1e-3]):
                 for f in ckp_files:
                     os.remove(f)
 
-                args.memory_capacity = memory_capacity
-                args.logdir = logdir
+                params["trainer"]["logdir"] = logdir
+
                 # initialize the agent:
                 policy = DDPG(
                     state_shape=env.observation_space.shape,
                     action_dim=env.action_space.high.size,
-                    gpu=args.gpu,
-                    memory_capacity=args.memory_capacity,
-                    update_interval=args.update_interval,
-                    #max_action=env.action_space.high[0],
-                    lr_actor=lr, 
-                    lr_critic=lr,
-                    max_grad=max_grad,
-                    actor_units=[1000, 900],
-                    critic_units=[1000, 900],
-                    batch_size=5000,
-                    tau = tau,  
-                    sigma = 0.1,
-                    n_warmup=args.n_warmup)
-
-                trainer = PointrobotTrainer(policy, env, args, test_env=test_env)
+                    params=params
+                    )
+                
+                # initialize the trainer:
+                trainer = PointrobotTrainer(
+                    policy,
+                    env,
+                    params,
+                    test_env=test_env
+                    )
 
                 print('-' * 5 + "Let's start training" + '-' * 5)
 

@@ -19,28 +19,21 @@ class PointrobotTrainerTests(unittest.TestCase):
     def setUp(self):
         """setup"""
         self.params = load_params('params/test_params.json')
-        self.parser = PointrobotTrainer.get_argument()
-        self.parser = DDPG.get_argument(self.parser)
-        self.args = self.parser.parse_args()
-        self.args.save_test_path_sep = False
 
         self.env = gym.make(
-            params["env"]["name"],
+            self.params["env"]["name"],
             params=self.params
             )
         self.test_env = gym.make(
-            params["env"]["name"],
+            self.params["env"]["name"],
             params=self.params
             )
 
         self.policy = DDPG(
             state_shape=self.env.observation_space.shape,
             action_dim=self.env.action_space.high.size,
-            gpu=self.args.gpu,
-            memory_capacity=self.args.memory_capacity,
-            #max_action=env.action_space.high[0],
-            batch_size=self.args.batch_size,
-            n_warmup=self.args.n_warmup)
+            params=self.params
+            )
 
         self.cae = CAE(pooling='max',
                     latent_dim=16,
@@ -55,7 +48,7 @@ class PointrobotTrainerTests(unittest.TestCase):
         trainer = PointrobotTrainer(
             self.policy,
             self.env,
-            self.args,
+            self.params,
             test_env=self.test_env
             )
     
@@ -65,15 +58,10 @@ class PointrobotTrainerTests(unittest.TestCase):
         
         total_steps = 10
 
-        self.args.batch_size = 100
-        self.args.n_warmup = 10
-        self.args.max_steps = 100
-        self.args.save_test_path_sep = False
-
         trainer = PointrobotTrainer(
             self.policy,
             self.env,
-            self.args,
+            self.params,
             test_env=self.test_env)
 
         avg_return = trainer.evaluate_policy(total_steps=total_steps)
@@ -82,17 +70,12 @@ class PointrobotTrainerTests(unittest.TestCase):
     def test_training(self):
         """sanity check of the training method."""
 
-        self.args.batch_size = 100
-        self.args.n_warmup = 10
-        self.args.max_steps = 1000
-        self.args.save_test_path_sep = False
-        self.args.update_interval = 2
-        self.args.show_progress = False
+        self.params["trainer"]["max_steps"] = 12000
 
         trainer = PointrobotTrainer(
             self.policy,
             self.env,
-            self.args,
+            self.params,
             test_env=self.test_env)
         trainer()
 
