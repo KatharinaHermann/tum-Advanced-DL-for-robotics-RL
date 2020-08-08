@@ -6,13 +6,7 @@ import matplotlib.pyplot as plt
 from hwr.utils import load_params
 
 
-def test_pointrobot_gym_goal():
-    params = load_params("params/test_params.json")
-    params["env"]["grid_size"] = 20
-    params["env"]["goal_reward"] = -0.01
-    params["env"]["collision_reward"] = -1
-    params["env"]["step_reward"] = -0.01
-    params["env"]["max_goal_dist"] = 5
+def test_pointrobot_gym_goal(params):
 
     env = gym.make(
         params["env"]["name"], 
@@ -54,18 +48,13 @@ def test_pointrobot_gym_goal():
     plt.show()
 
 
-def test_pointrobot_gym_obstacle():
-    params = load_params("params/test_params.json")
-    params["env"]["grid_size"] = 20
-    params["env"]["goal_reward"] = -0.01
-    params["env"]["collision_reward"] = -1
-    params["env"]["step_reward"] = -0.01
-    params["env"]["max_goal_dist"] = 5
+def test_pointrobot_gym_obstacle(params):
 
     env = gym.make(
         params["env"]["name"], 
         params=params
         )
+    
     workspace, goal, obs = env.reset()
     env.render()        
     env.workspace = np.zeros((20, 20))
@@ -107,18 +96,13 @@ def test_pointrobot_gym_obstacle():
     
     plt.show()
 
-def test_pointrobot_gym_boundaries():
-    params = load_params("params/test_params.json")
-    params["env"]["grid_size"] = 20
-    params["env"]["goal_reward"] = -0.01
-    params["env"]["collision_reward"] = -1
-    params["env"]["step_reward"] = -0.01
-    params["env"]["max_goal_dist"] = 5
-    
+def test_pointrobot_gym_boundaries(params):
+
     env = gym.make(
         params["env"]["name"], 
         params=params
         )
+
     workspace, goal, obs = env.reset()
     print(goal, obs)
     env.render()        
@@ -160,7 +144,14 @@ def test_pointrobot_gym_boundaries():
 
 if __name__ == '__main__':
 
-    test_pointrobot_gym_goal()
-    test_pointrobot_gym_obstacle()
-    test_pointrobot_gym_boundaries()
+    params = load_params("params/test_params.json")
+    params["env"]["grid_size"] = 20
+    params["env"]["goal_reward"] = -0.01
+    params["env"]["collision_reward"] = -1
+    params["env"]["step_reward"] = -0.01
+    params["env"]["max_goal_dist"] = 5
+
+    test_pointrobot_gym_goal(params)
+    test_pointrobot_gym_obstacle(params)
+    test_pointrobot_gym_boundaries(params)
     print('All tests have run successfully!')
