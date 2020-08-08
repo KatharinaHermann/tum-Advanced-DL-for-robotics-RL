@@ -137,7 +137,7 @@ class PointroboEnv(gym.Env):
         action *= self.action_space.high
 
         self.agent_pos += action 
-        self.agent_pos = np.clip(self.agent_pos, [0.0, 0.0], [float(self.grid_size-1-self.robot_radius), float(self.grid_size-1-self.robot_radius)])
+        self.agent_pos = np.clip(self.agent_pos, [0.0, 0.0], [float(self.grid_size-1), float(self.grid_size-1)])
 
 
     def create_workspace_buffer(self):
