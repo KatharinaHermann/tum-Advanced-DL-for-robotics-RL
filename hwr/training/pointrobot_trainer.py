@@ -32,12 +32,16 @@ class PointrobotTrainer:
             self,
             policy,
             env,
-            args,
+            params,
             test_env=None):
-        self._set_from_args(args)
+        """Initializing the training instance."""
+
+        self._params = params
+        self._set_from_params()
         self._policy = policy
         self._env = env
         self._test_env = self._env if test_env is None else test_env
+        args = get_args_from_params()
 
         # Convolutional Autoencoder:
         self._CAE = CAE(pooling=self._cae_pooling,
@@ -396,107 +400,44 @@ class PointrobotTrainer:
                             next_obs=next_obs_full, rew=reward, done=done)
 
 
-    def _set_from_args(self, args):
+    def _set_from_params(self):
         # experiment settings
-        self._max_steps = args.max_steps
-        self._episode_max_steps = args.episode_max_steps \
-            if args.episode_max_steps is not None \
-            else args.max_steps
-        self._n_experiments = args.n_experiments
-        self._show_progress = args.show_progress
-        self._save_model_interval = args.save_model_interval
-        self._save_summary_interval = args.save_summary_interval
-        self._normalize_obs = args.normalize_obs
-        self._logdir = args.logdir
-        self._model_dir = args.model_dir
+        self._max_steps = self._params["trainer"]["max_steps"]
+        self._episode_max_steps = self._params["trainer"]["episode_max_steps"] \
+            if self._params["trainer"]["episode_max_steps"] is not None \
+            else self._params["trainer"]["max_steps"]
+        self._n_experiments = self._params["trainer"]["n_experiments"]
+        self._show_progress = self._params["trainer"]["show_progress"]
+        self._save_model_interval = self._params["trainer"]["save_model_interval"]
+        self._save_summary_interval = self._params["trainer"]["save_summary_interval"]
+        self._normalize_obs = self._params["trainer"]["normalize_obs"]
+        self._logdir = self._params["trainer"]["logdir"]
+        self._model_dir = self._params["trainer"]["model_dir"]
         # replay buffer
-        self._use_prioritized_rb = args.use_prioritized_rb
-        self._use_nstep_rb = args.use_nstep_rb
-        self._n_step = args.n_step
+        self._use_prioritized_rb = self._params["trainer"]["use_prioritized_rb"]
+        self._use_nstep_rb = self._params["trainer"]["use_nstep_rb"]
+        self._n_step = self._params["trainer"]["n_step"]
         # test settings
-        self._test_interval = args.test_interval
-        self._show_test_progress = args.show_test_progress
-        self._test_episodes = args.test_episodes
-        self._save_test_path = args.save_test_path
-        self._save_test_path_sep = args.save_test_path_sep
-        self._save_test_movie = args.save_test_movie
-        self._show_test_images = args.show_test_images
+        self._test_interval = self._params["trainer"]["test_interval"]
+        self._show_test_progress = self._params["trainer"]["show_test_progress"]
+        self._test_episodes = self._params["trainer"]["test_episodes"]
+        self._save_test_path = self._params["trainer"]["save_test_path"]
+        self._save_test_path_sep = self._params["trainer"]["save_test_path_sep"]
+        self._save_test_movie = self._params["trainer"]["save_test_movie"]
+        self._show_test_images = self._params["trainer"]["show_test_images"]
         # autoencoder settings
-        self._cae_pooling = args.cae_pooling
-        self._cae_latent_dim = args.cae_latent_dim
-        self._cae_conv_filters = args.cae_conv_filters
-        self._cae_weights_path = args.cae_weights_path
+        self._cae_pooling = self._params["trainer"]["cae_pooling"]
+        self._cae_latent_dim = self._params["trainer"]["cae_latent_dim"]
+        self._cae_conv_filters = self._params["trainer"]["cae_conv_filters"]
+        self._cae_weights_path = self._params["trainer"]["cae_weights_path"]
 
-    @staticmethod
-    def get_argument(parser=None):
-        if parser is None:
-            parser = argparse.ArgumentParser(conflict_handler='resolve')
 
-        # environment seettings:
-        parser.add_argument('--num-obj-max', type=int, default=int(5),
-                            help='Maximum number of obstacles in the environment. default: 5')
-        parser.add_argument('--obj-size-avg', type=int, default=int(8),
-                            help='Average size of the obstacles. default: 8')
+    def get_args_from_params(self):
+        """creates an argparse Namespace object from params for the tf2rl based classes."""
 
-        # experiment settings
-        parser.add_argument('--max-steps', type=int, default=int(1e6),
-                            help='Maximum number steps to interact with env.')
-        parser.add_argument('--episode-max-steps', type=int, default=int(1e3),
-                            help='Maximum steps in an episode')
-        parser.add_argument('--n-experiments', type=int, default=1,
-                            help='Number of experiments')
-        parser.add_argument('--show-progress', action='store_true',
-                            help='Call `render` in training process')
-        parser.add_argument('--save-model-interval', type=int, default=int(1e4),
-                            help='Interval to save model')
-        parser.add_argument('--save-summary-interval', type=int, default=int(1e3),
-                            help='Interval to save summary')
-        parser.add_argument('--model-dir', type=str, default='../models/agents',
-                            help='Directory to restore model. default =  ../models/agents')
-        parser.add_argument('--dir-suffix', type=str, default='',
-                            help='Suffix for directory that contains results')
-        parser.add_argument('--normalize-obs', action='store_true',
-                            help='Normalize observation')
-        parser.add_argument('--logdir', type=str, default='results',
-                            help='Output directory')
-        # test settings
-        parser.add_argument('--evaluate', action='store_true',
-                            help='Evaluate trained model')
-        parser.add_argument('--test-interval', type=int, default=int(1e4),
-                            help='Interval to evaluate trained model')
-        parser.add_argument('--show-test-progress', action='store_true',
-                            help='Call `render` in evaluation process')
-        parser.add_argument('--test-episodes', type=int, default=5,
-                            help='Number of episodes to evaluate at once')
-        parser.add_argument('--save-test-path', action='store_true',
-                            help='Save trajectories of evaluation')
-        parser.add_argument('--save-test-path-sep', action='store_true',
-                            help='Save successful, collision and simply unsuccessful trajectories of evaluation separately')
-        parser.add_argument('--show-test-images', action='store_true',
-                            help='Show input images to neural networks when an episode finishes')
-        parser.add_argument('--save-test-movie', action='store_true',
-                            help='Save rendering results')
+        args = {}
+        for key in self._params["trainer"]:
+            args[key] = self._params["trainer"][key]
 
-        # replay buffer
-        parser.add_argument('--use-prioritized-rb', action='store_true',
-                            help='Flag to use prioritized experience replay')
-        parser.add_argument('--use-nstep-rb', action='store_true',
-                            help='Flag to use nstep experience replay')
-        parser.add_argument('--n-step', type=int, default=4,
-                            help='Number of steps to look over')
-        # others
-        parser.add_argument('--logging-level', choices=['DEBUG', 'INFO', 'WARNING'],
-                            default='INFO', help='Logging level')
-                            
-        # autoencoder related
-        parser.add_argument('--cae_pooling', type=str, default='max',
-                            help='pooling type of the CAE. default: max')
-        parser.add_argument('--cae_latent_dim', type=int, default=16,
-                            help='latent dimension of the CAE. default: 16')
-        parser.add_argument('--cae_conv_filters', type=int, nargs='+', default=[4, 8, 16],
-                            help='number of filters in the conv layers. default: [4, 8, 16]')
-        parser.add_argument('--cae_weights_path', type=str, default='../models/cae/model_num_5_size_8.h5',
-                            help='path to saved CAE weights. default: ../models/cae/model_num_5_size_8.h5')
-
-        return parser
+        return argparse.Namespace(**args)
 

@@ -11,7 +11,34 @@
         "robot_radius": 1,
         "max_goal_dist": null
     },
-    "agent": {
-        
+    "trainer": {
+        "evaluate": false,
+        "normalize_obs": true,
+        "max_steps": 1e6,
+        "episode_max_steps": 50,
+        "n_experiments": 1,
+        "show_progress": false,
+        "save_model_interval": 1e4,
+        "save_summary_interval": 1e3,
+        "logdir": "results",
+        "logging_level": "INFO",
+        "model_dir": "../models/agents",
+        "dir_suffix": "",
+        "use_prioritized_rb": false,
+        "use_nstep_rb": false,
+        "n_step": 4,
+        "test_interval": 1e4,
+        "show_test_progress": false,
+        "test_episodes": 5,
+        "save_test_path": false,
+        "save_test_path_sep": false,
+        "save_test_movie": false,
+        "show_test_images": false
+    },
+    "cae": {
+        "pooling": "max",
+        "latent_dim": 16,
+        "conv_filters": [4, 8, 16],
+        "weights_path": "../models/cae//model_num_5_size_8.h5"
     }
 }
