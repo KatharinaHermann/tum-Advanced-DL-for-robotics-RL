@@ -134,10 +134,7 @@ def test_pointrobot_gym_boundaries():
                 print ("Wrong!Robot has not crashed!")
           
             break
-        
-        #env.workspace = np.zeros((32, 32))
-        #env.workspace[0:4, 0:4] = 1
-        #env.agent_pos = np.array([29.0, 29.0])
+
         env.render()
     
     plt.show()
