@@ -24,31 +24,22 @@ Use it then with:
 class PointroboEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, 
-                 goal_reward=5,
-                 collision_reward=-1,
-                 step_reward=-0.01,
-                 buffer_size=100,
-                 grid_size=32,
-                 num_obj_max=5,
-                 obj_size_avg=8, 
-                 robot_radius=1,
-                 max_goal_dist=None): 
+    def __init__(self, params): 
 
         super(PointroboEnv, self).__init__()
 
         # rewards
-        self.goal_reward = goal_reward
-        self.collision_reward = collision_reward
-        self.step_reward = step_reward
-        self.robot_radius = robot_radius
+        self.goal_reward = params["env"]["goal_reward"]
+        self.collision_reward = params["env"]["collision_reward"]
+        self.step_reward = params["env"]["step_reward"]
+        self.robot_radius = params["env"]["robot_radius"]
 
         # workspace related inits:
-        self.buffer_size = buffer_size
-        self.grid_size = grid_size
-        self.num_obj_max = num_obj_max
-        self.obj_size_avg =obj_size_avg
-        self.max_goal_dist = max_goal_dist
+        self.buffer_size = params["env"]["buffer_size"]
+        self.grid_size = params["env"]["grid_size"]
+        self.num_obj_max = params["env"]["num_obj_max"]
+        self.obj_size_avg = params["env"]["obj_size_avg"]
+        self.max_goal_dist = params["env"]["max_goal_dist"]
 
         # Define action and observation space
         # They must be gym.spaces objects
@@ -66,7 +57,7 @@ class PointroboEnv(gym.Env):
         self.create_workspace_buffer()
 
         # reset. With this the first workspace, agent position, goal position is created.
-        _, _, _, = self.reset()
+        self.reset()
 
         # Visulaization initializations:
         self._fig = None

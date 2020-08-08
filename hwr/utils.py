@@ -2,6 +2,13 @@ import numpy
 import joblib
 import os
 import matplotlib.pyplot as plt
+import json
+
+
+def load_params(param_file):
+    """loads a json parameter file."""
+    with open(param_file) as json_file:
+        return json.load(json_file)
 
 
 def visualize_trajectory(filename):

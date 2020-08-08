@@ -56,38 +56,41 @@ class DDPG(OffPolicyAgent):
             self,
             state_shape,
             action_dim,
-            name="DDPG",
-            #max_action=1.,
-            lr_actor=0.001,
-            lr_critic=0.001,
-            actor_units=[400, 300],
-            critic_units=[400, 300],
-            sigma=0.1,
-            tau=0.005,
-            n_warmup=int(1e4),
-            memory_capacity=int(1e6),
+            params,
             **kwargs):
-        super().__init__(name=name, memory_capacity=memory_capacity, n_warmup=n_warmup, **kwargs)
+        """Initializes a DDPG agent"""
+
+        super().__init__(
+            name=params["agent"]["name"],
+            memory_capacity=params["agent"]["memory_capacity"],
+            n_warmup=params["agent"]["n_warmup"],
+            gpu=params["agent"]["gpu"],
+            batch_size=params["agent"]["batch_size"],
+            update_interval=params["agent"]["update_interval"],
+            **kwargs
+            )
+
 
         # Define and initialize Actor network
-        self.actor = Actor(state_shape, action_dim, actor_units)
+        self.actor = Actor(state_shape, action_dim, params["agent"]["actor_units"])
         self.actor_target = Actor(
-            state_shape, action_dim, actor_units)
-        self.actor_optimizer = tf.keras.optimizers.Adam(learning_rate=lr_actor)
+            state_shape, action_dim, params["agent"]["actor_units"])
+        self.actor_optimizer = tf.keras.optimizers.Adam(learning_rate=params["agent"]["lr_actor"])
         update_target_variables(self.actor_target.weights,
                                 self.actor.weights, tau=1.)
 
         # Define and initialize Critic network
-        self.critic = Critic(state_shape, action_dim, critic_units)
-        self.critic_target = Critic(state_shape, action_dim, critic_units)
+        self.critic = Critic(state_shape, action_dim, params["agent"]["critic_units"])
+        self.critic_target = Critic(state_shape, action_dim, params["agent"]["critic_units"])
         self.critic_optimizer = tf.keras.optimizers.Adam(
-            learning_rate=lr_critic)
+            learning_rate=params["agent"]["lr_critic"])
         update_target_variables(
             self.critic_target.weights, self.critic.weights, tau=1.)
 
         # Set hyperparameters
-        self.sigma = sigma
-        self.tau = tau
+        self.sigma = params["agent"]["sigma"]
+        self.tau = params["agent"]["tau"]
+
 
     def get_action(self, state, test=False, tensor=False):
         is_single_state = len(state.shape) == 1
