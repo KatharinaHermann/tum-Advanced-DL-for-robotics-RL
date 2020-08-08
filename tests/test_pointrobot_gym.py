@@ -146,7 +146,7 @@ def test_pointrobot_gym_boundaries():
 
 if __name__ == '__main__':
 
-    #test_pointrobot_gym_goal()
+    test_pointrobot_gym_goal()
     test_pointrobot_gym_obstacle()
-    #test_pointrobot_gym_boundaries()
+    test_pointrobot_gym_boundaries()
     print('All tests have run successfully!')
