@@ -80,8 +80,7 @@ for lr_i, lr in enumerate([1e-3]):
 
                 # initialize the agent:
                 policy = DDPG(
-                    state_shape=env.observation_space.shape,
-                    action_dim=env.action_space.high.size,
+                    env=env,
                     params=params
                     )
                 

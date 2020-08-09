@@ -39,6 +39,7 @@
         "episode_max_steps": 50,
         "n_experiments": 1,
         "show_progress": false,
+        "show_progress_interval": 100,
         "save_model_interval": 1e4,
         "save_summary_interval": 1e3,
         "logdir": "results",
