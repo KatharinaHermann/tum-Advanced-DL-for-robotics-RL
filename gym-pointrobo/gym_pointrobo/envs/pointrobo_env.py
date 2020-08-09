@@ -45,7 +45,7 @@ class PointroboEnv(gym.Env):
         # They must be gym.spaces objects
         
         # Continuous action space with velocities up to 10m/s in x- & y- direction
-        self.action_space = spaces.Box(low=0, high=1, shape=(2,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)
         
         #The observation will be the coordinate of the agent 
         #this can be described by Box space
@@ -75,7 +75,7 @@ class PointroboEnv(gym.Env):
 
         #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made: Reward=-0.01
         # Tolerance of distance 3, that the robot reached the goal!
-        if (np.linalg.norm(self.agent_pos-self.goal_pos) <= self.robot_radius*2): 
+        if (np.linalg.norm(self.agent_pos-self.goal_pos) <= self.robot_radius*2+1): 
             reward = self.goal_reward
             done = True
         #Have we hit an obstacle?
@@ -133,9 +133,9 @@ class PointroboEnv(gym.Env):
         # normalizing action:
         #epsilon = 1e-8
         #action /= (np.linalg.norm(action) + epsilon)
-        
-        action *= self.action_space.high
 
+        action *= self.action_space.high
+        
         self.agent_pos += action 
         self.agent_pos = np.clip(self.agent_pos, [0.0, 0.0], [float(self.grid_size-1), float(self.grid_size-1)])
 

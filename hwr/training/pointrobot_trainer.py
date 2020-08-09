@@ -138,16 +138,20 @@ class PointrobotTrainer:
 
             #Get action randomly for warmup /from Actor-NN otherwise
             if total_steps < self._policy.n_warmup:
-                action = self._env.action_space.sample() / self._env.action_space.high
+                action = self._env.action_space.sample() #/ self._env.action_space.high
+                epsilon = 1e-8
+                action /= (np.linalg.norm(action) + epsilon)
+
             else:
-                normalized_obs_full = obs_full
-                normalized_obs_full[0: 4] = normalized_obs_full[0: 4] / self._env.grid_size - 0.5
+                normalized_obs_full = obs_full.copy()
+                normalized_obs_full[0: 4] = (normalized_obs_full[0: 4] + 0.5)/ self._env.grid_size
                 action = self._policy.get_action(normalized_obs_full)
 
             #Take action and get next_obs, reward and done_flag from environment
             next_obs, reward, done, _ = self._env.step(action)
-            next_obs_full = np.concatenate((next_obs, goal, reduced_workspace))
 
+            next_obs_full = np.concatenate((next_obs, goal, reduced_workspace))
+            
             # add observation to replay buffer
             self._push_to_replay_buffer(obs_full, action, next_obs_full, reward, done)
 
@@ -155,8 +159,8 @@ class PointrobotTrainer:
             self.trajectory.append({'workspace': workspace,'position': obs,
                 'next_position': next_obs,'goal': goal, 'action': action, 'reward': reward, 'done': done})
 
-            obs = next_obs
-            obs_full = next_obs_full        
+            obs = next_obs.copy()
+            obs_full = next_obs_full.copy()   
             
             episode_steps += 1
             episode_return += reward
@@ -304,8 +308,8 @@ class PointrobotTrainer:
             obs_full = np.concatenate((obs, goal, reduced_workspace))
 
             for _ in range(self._episode_max_steps):
-                normalized_obs_full = obs_full
-                normalized_obs_full[0: 4] = normalized_obs_full[0: 4] / self._env.grid_size - 0.5
+                normalized_obs_full = obs_full.copy()
+                normalized_obs_full[0: 4] = (normalized_obs_full[0: 4] + 0.5) / self._env.grid_size
                 action = self._policy.get_action(normalized_obs_full)
                 next_obs, reward, done, _ = self._test_env.step(action)
                 #Concatenate position observation with start, goal, and reduced workspace!!
@@ -326,8 +330,8 @@ class PointrobotTrainer:
                     self._test_env.render()
 
                 episode_return += reward
-                obs = next_obs
-                obs_full = next_obs_full
+                obs = next_obs.copy()
+                obs_full = next_obs_full.copy()
                 
                 if done:
                     break
@@ -384,20 +388,22 @@ class PointrobotTrainer:
         joblib.dump(self.trajectory, file_name)
 
 
-    def _push_to_replay_buffer(self, obs_full, action, next_obs_full, reward, done):
+    def _push_to_replay_buffer(self, obs_full_f, action, next_obs_full_f, reward, done):
         """pushes a training point into the replay buffer. 
         Firts the coordinates of the position and the goal and the actions are normalized.
         """
         # normalization:
-        obs_full[0:4] = obs_full[0:4] / self._env.grid_size - 0.5
-        next_obs_full[0:4] = next_obs_full[0:4] / self._env.grid_size - 0.5
+        obs_full_rb = obs_full_f.copy()
+        obs_full_rb[0:4] = (obs_full_rb[0: 4] + 0.5) / self._env.grid_size
+        next_obs_full_rb = next_obs_full_f.copy()
+        next_obs_full_rb[0:4] = (next_obs_full_rb[0: 4] + 0.5) / self._env.grid_size
         # normalizing action:
         #epsilon = 1e-8
         #action /= (np.linalg.norm(action) + epsilon)
 
         # adding to the replay buffer:
-        self._replay_buffer.add(obs=obs_full, act=action,
-                            next_obs=next_obs_full, rew=reward, done=done)
+        self._replay_buffer.add(obs=obs_full_rb, act=action,
+                            next_obs=next_obs_full_rb, rew=reward, done=done)
 
 
     def _set_from_params(self):
