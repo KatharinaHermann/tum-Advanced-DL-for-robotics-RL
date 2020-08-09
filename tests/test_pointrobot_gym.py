@@ -206,7 +206,7 @@ class PointrobotGymTests(unittest.TestCase):
 
 if __name__ == '__main__':
 
-    """params = load_params("params/test_params.json")
+    params = load_params("params/test_params.json")
     params["env"]["grid_size"] = 20
     params["env"]["goal_reward"] = -0.01
     params["env"]["collision_reward"] = -1
@@ -216,6 +216,6 @@ if __name__ == '__main__':
     test_pointrobot_gym_goal(params)
     test_pointrobot_gym_obstacle(params)
     test_pointrobot_gym_boundaries(params)
-    print('All tests have run successfully!')"""
+    print('All tests have run successfully!')
     
     unittest.main()
