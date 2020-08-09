@@ -15,7 +15,7 @@ class test_env():
         step_reward=-0.01
         ):
 
-        self.radius = radius
+        self.robot_radius = radius
         self.goal_reward = goal_reward
         self.collision_reward = collision_reward
         self.step_reward = step_reward
@@ -174,7 +174,7 @@ class PointrobotRelabelerTests(unittest.TestCase):
         # traj_0:
         self.assertEqual(len(sol_traj_0), len(traj_0))
         self.assertTrue((sol_traj_0[0]['position'] == traj_0[0]['position']).all())
-        self.assertTrue(isclose(np.linalg.norm(sol_traj_0[0]['goal'] - traj_0[0]['position']), (env.radius * 0.99)))
+        self.assertTrue(isclose(np.linalg.norm(sol_traj_0[0]['goal'] - traj_0[0]['position']), (env.robot_radius * 0.99)))
 
         # traj_1:
         self.assertEqual(len(sol_traj_1), len(traj_1))
@@ -182,7 +182,7 @@ class PointrobotRelabelerTests(unittest.TestCase):
             self.assertTrue((sol_traj_1[i]['position'] == traj_1[i]['position']).all())
         
         pos_0, pos_1 = traj_1[0]['position'], traj_1[1]['position']
-        vect = (pos_1 - pos_0) / np.linalg.norm(pos_1 - pos_0) * env.radius * 0.99
+        vect = (pos_1 - pos_0) / np.linalg.norm(pos_1 - pos_0) * env.robot_radius * 0.99
         new_goal_etalon = pos_1 + vect
         self.assertTrue((sol_traj_1[0]['goal'] == new_goal_etalon).all())
 
@@ -190,10 +190,10 @@ class PointrobotRelabelerTests(unittest.TestCase):
         self.assertEqual(len(sol_traj_2), len(traj_2))
         for i, point in enumerate(sol_traj_1[ : -1]):
             self.assertTrue((sol_traj_2[i]['position'] == traj_2[i]['position']).all())
-            self.assertGreater(np.linalg.norm(sol_traj_2[i]['goal'] - sol_traj_2[i]['position']), env.radius)
+            self.assertGreater(np.linalg.norm(sol_traj_2[i]['goal'] - sol_traj_2[i]['position']), env.robot_radius)
 
         self.assertTrue((sol_traj_2[-1]['position'] == traj_2[-1]['position']).all())
-        self.assertTrue(isclose(np.linalg.norm(sol_traj_2[-1]['goal'] - sol_traj_2[-1]['position']), env.radius * 0.99))
+        self.assertTrue(isclose(np.linalg.norm(sol_traj_2[-1]['goal'] - sol_traj_2[-1]['position']), env.robot_radius * 0.99))
 
         # traj_3:
         self.assertEqual(len(sol_traj_3), 0)
