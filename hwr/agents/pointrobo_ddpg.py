@@ -108,6 +108,9 @@ class DDPG(OffPolicyAgent):
         self.sigma = params["agent"]["sigma"]
         self.tau = params["agent"]["tau"]
 
+        # in evaluation mode the action of the agent is deterministic, not stochastic.
+        self.eval_mode = False
+
 
     def get_action(self, state, test=False, tensor=False):
         is_single_state = len(state.shape) == 1
@@ -125,9 +128,12 @@ class DDPG(OffPolicyAgent):
     def _get_action_body(self, state, sigma):
         with tf.device(self.device):
             action = self.actor(state)
-            action += tf.random.normal(shape=action.shape,
-                                       mean=0., stddev=sigma, dtype=tf.float32)
-            return tf.clip_by_value(action, tf.constant(-1, dtype=tf.float32), tf.constant(1, dtype=tf.float32))
+            if self.eval_mode:
+                return action
+            else:
+                action += tf.random.normal(shape=action.shape,
+                                        mean=0., stddev=sigma, dtype=tf.float32)
+                return tf.clip_by_value(action, tf.constant(-1, dtype=tf.float32), tf.constant(1, dtype=tf.float32))
 
     def train(self, states, actions, next_states, rewards, done, weights=None):
         if weights is None:
