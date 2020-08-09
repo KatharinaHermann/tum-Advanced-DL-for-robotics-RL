@@ -139,8 +139,8 @@ class PointrobotTrainer:
             #Get action randomly for warmup /from Actor-NN otherwise
             if total_steps < self._policy.n_warmup:
                 action = self._env.action_space.sample() #/ self._env.action_space.high
-                epsilon = 1e-8
-                action /= (np.linalg.norm(action) + epsilon)
+                #action /= (tf.norm(action) + tf.keras.backend.epsilon())
+               
 
             else:
                 normalized_obs_full = obs_full.copy()
