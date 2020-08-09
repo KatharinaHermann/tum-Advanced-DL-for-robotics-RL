@@ -68,27 +68,29 @@ class PointrobotRelabeler:
 
         workspace = trajectory[0]['workspace']
 
-        # find the entries of the matrix where the robot has collided.:
-        obstacle_entries = self._find_collision_entries(trajectory, env)
+        if trajectory[-1]["reward"] == env.collision_reward:
 
-        if obstacle_entries:
-            # if the robot really has collided.
-            for obstacle_entry in obstacle_entries:
-                workspace = self._remove_obstacle(workspace=workspace, obstacle_entry=obstacle_entry)
-            for data_point in trajectory:
-                data_point['workspace'] = workspace
+            # find the entries of the matrix where the robot has collided.:
+            obstacle_entries = self._find_collision_entries(trajectory, env)
+
+            if obstacle_entries:
+                # if the robot has collided.
+                for obstacle_entry in obstacle_entries:
+                    workspace = self._remove_obstacle(workspace=workspace, obstacle_entry=obstacle_entry)
+                for data_point in trajectory:
+                    data_point['workspace'] = workspace
+            else:
+                # if the obstacle has just left the workspace without collision.
+                # choosing a distance with which the ws and the trajectory will be shifted away from the boarder:
+                shift_distance = np.random.randint(low=1, high=4)
+                trajectory = self._shift_from_boarder(trajectory=trajectory,
+                                        env=env,
+                                        shift_distance=shift_distance)
+
+            # add new goal state to the trajectory:
+            return self._set_new_goal(trajectory, env)
         else:
-            # if the obstacle has just left the workspace without collision.
-            # choosing a distance with which the ws and the trajectory will be shifted away from the boarder:
-            shift_distance = np.random.randint(low=1, high=4)
-            trajectory = self._shift_from_boarder(trajectory=trajectory,
-                                     env=env,
-                                     shift_distance=shift_distance)
-
-        # add new goal state to the trajectory:
-        trajectory = self._set_new_goal(trajectory, env)
-
-        return trajectory
+            return self._set_new_goal(trajectory, env)
 
 
     def _random_relabel(self, trajectory, env):
