@@ -12,7 +12,7 @@
         "num_obj_max": 0,
         "obj_size_avg": 8, 
         "robot_radius": 1,
-        "max_goal_dist": 15
+        "max_goal_dist": null
     },
     "cae": {
         "pooling": "max",
@@ -39,7 +39,7 @@
         "train_from_scratch" : true,
         "evaluate": false,
         "max_steps": 1e6,
-        "episode_max_steps": 20,
+        "episode_max_steps": 50,
         "n_experiments": 1,
         "show_progress": false,
         "show_progress_interval": 100,
