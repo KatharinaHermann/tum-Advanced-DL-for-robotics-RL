@@ -19,6 +19,7 @@ class test_env():
         self.goal_reward = goal_reward
         self.collision_reward = collision_reward
         self.step_reward = step_reward
+        self.normalize = False
 
 
 class PointrobotRelabelerTests(unittest.TestCase):
