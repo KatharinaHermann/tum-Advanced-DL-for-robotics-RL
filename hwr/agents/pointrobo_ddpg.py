@@ -8,12 +8,14 @@ from tf2rl.misc.huber_loss import huber_loss
 
 
 class Actor(tf.keras.Model):
-    def __init__(self, state_shape, action_dim, units=[400, 300], name="Actor"):
+    def __init__(self, state_shape, action_space, units=[400, 300], name="Actor"):
         super().__init__(name=name)
+
+        self._action_space = action_space
 
         self.l1 = Dense(units[0], name="L1")
         self.l2 = Dense(units[1], name="L2")
-        self.l3 = Dense(action_dim, name="L3")
+        self.l3 = Dense(action_space.high.size, name="L3")
 
         with tf.device("/cpu:0"):
             self(tf.constant(np.zeros(shape=(1,)+state_shape, dtype=np.float32)))
@@ -24,6 +26,7 @@ class Actor(tf.keras.Model):
         features = self.l3(features)
         action = tf.nn.tanh(features)
         action /= (tf.norm(action) + tf.keras.backend.epsilon())
+        action *= self._action_space.high
         return action
 
 
@@ -54,8 +57,7 @@ class Critic(tf.keras.Model):
 class DDPG(OffPolicyAgent):
     def __init__(
             self,
-            state_shape,
-            action_dim,
+            env,
             params,
             **kwargs):
         """Initializes a DDPG agent"""
@@ -72,16 +74,31 @@ class DDPG(OffPolicyAgent):
 
 
         # Define and initialize Actor network
-        self.actor = Actor(state_shape, action_dim, params["agent"]["actor_units"])
+        self.actor = Actor(
+            state_shape=env.observation_space.shape,
+            action_space=env.action_space,
+            units=params["agent"]["actor_units"]
+            )
         self.actor_target = Actor(
-            state_shape, action_dim, params["agent"]["actor_units"])
+            state_shape=env.observation_space.shape,
+            action_space=env.action_space,
+            units=params["agent"]["actor_units"]
+            )
         self.actor_optimizer = tf.keras.optimizers.Adam(learning_rate=params["agent"]["lr_actor"])
         update_target_variables(self.actor_target.weights,
                                 self.actor.weights, tau=1.)
 
         # Define and initialize Critic network
-        self.critic = Critic(state_shape, action_dim, params["agent"]["critic_units"])
-        self.critic_target = Critic(state_shape, action_dim, params["agent"]["critic_units"])
+        self.critic = Critic(
+            state_shape=env.observation_space.shape,
+            action_dim=env.action_space.high.size,
+            units=params["agent"]["critic_units"]
+            )
+        self.critic_target = Critic(
+            state_shape=env.observation_space.shape,
+            action_dim=env.action_space.high.size,
+            units=params["agent"]["critic_units"]
+            )
         self.critic_optimizer = tf.keras.optimizers.Adam(
             learning_rate=params["agent"]["lr_critic"])
         update_target_variables(

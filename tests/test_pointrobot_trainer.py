@@ -30,8 +30,7 @@ class PointrobotTrainerTests(unittest.TestCase):
             )
 
         self.policy = DDPG(
-            state_shape=self.env.observation_space.shape,
-            action_dim=self.env.action_space.high.size,
+            env=self.env,
             params=self.params
             )
 
@@ -64,13 +63,13 @@ class PointrobotTrainerTests(unittest.TestCase):
             self.params,
             test_env=self.test_env)
 
-        avg_return = trainer.evaluate_policy(total_steps=total_steps)
+        trainer.evaluate_policy(total_steps=total_steps)
     
 
     def test_training(self):
         """sanity check of the training method."""
 
-        self.params["trainer"]["max_steps"] = 12000
+        self.params["trainer"]["max_steps"] = 1e4
 
         trainer = PointrobotTrainer(
             self.policy,
