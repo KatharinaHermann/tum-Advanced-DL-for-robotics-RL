@@ -75,7 +75,7 @@ class PointroboEnv(gym.Env):
         self.current_step += 1        
 
         # checking whether the goal is reached, collision occured, or just a step was carried out:
-        if (np.linalg.norm(self.agent_pos - self.goal_pos) <= self.robot_radius * 2): 
+        if (np.linalg.norm(self.agent_pos - self.goal_pos) <= self.robot_radius): 
             reward = self.goal_reward
             done = True
         elif self.collision_check():

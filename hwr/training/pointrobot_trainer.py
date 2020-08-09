@@ -129,7 +129,7 @@ class PointrobotTrainer:
            
             #Visualize environment if "show_progess"
             if self._show_progress and \
-                int((total_steps - 30) / 10000) < int(total_steps / 10000) and \
+                ((n_episode % self._show_progress_interval) == 0) and \
                 total_steps > self._policy.n_warmup:
                 self._env.render()
 
@@ -383,6 +383,7 @@ class PointrobotTrainer:
             else self._params["trainer"]["max_steps"]
         self._n_experiments = self._params["trainer"]["n_experiments"]
         self._show_progress = self._params["trainer"]["show_progress"]
+        self._show_progress_interval = self._params["trainer"]["show_progress_interval"]
         self._save_model_interval = self._params["trainer"]["save_model_interval"]
         self._save_summary_interval = self._params["trainer"]["save_summary_interval"]
         self._normalize_obs = self._params["trainer"]["normalize_obs"]

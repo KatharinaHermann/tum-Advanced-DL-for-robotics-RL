@@ -12,7 +12,7 @@
         "num_obj_max": 0,
         "obj_size_avg": 8, 
         "robot_radius": 1,
-        "max_goal_dist": 5
+        "max_goal_dist": 40
     },
     "cae": {
         "pooling": "max",
@@ -39,9 +39,10 @@
         "train_from_scratch" : true,
         "evaluate": false,
         "max_steps": 1e6,
-        "episode_max_steps": 10,
+        "episode_max_steps": 50,
         "n_experiments": 1,
         "show_progress": true,
+        "show_progress_interval": 100,
         "save_model_interval": 1e4,
         "save_summary_interval": 1e3,
         "logdir": "results",
