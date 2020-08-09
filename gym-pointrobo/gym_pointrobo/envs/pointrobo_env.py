@@ -29,6 +29,10 @@ class PointroboEnv(gym.Env):
 
         super(PointroboEnv, self).__init__()
 
+        # action bounds:
+        self.action_low = params["env"]["action_low"]
+        self.action_high = params["env"]["action_high"]
+
         # rewards
         self.goal_reward = params["env"]["goal_reward"]
         self.collision_reward = params["env"]["collision_reward"]
@@ -43,10 +47,7 @@ class PointroboEnv(gym.Env):
         self.max_goal_dist = params["env"]["max_goal_dist"]
         self.normalize = params["env"]["normalize"]
 
-        # action and observation space definitions:
-        self.action_space = spaces.Box(low=0, high=1, shape=(2,), dtype=np.float32)
-        self.observation_space = spaces.Box(low=0.0, high=self.grid_size,
-                                            shape=(20,), dtype=np.float32)
+        self.params = params
 
         # Initialize the agent
         self.current_step = 0
@@ -175,3 +176,40 @@ class PointroboEnv(gym.Env):
             collision = True
         
         return collision
+
+
+    @property
+    def observation_space(self):
+        """observation space. -1 and 1 if normalization is set."""
+        obs_size = 2 + 2 + self.params["cae"]["latent_dim"]
+        if self.normalize:
+            return spaces.Box(low=-1., high=1., shape=(obs_size,), dtype=np.float32)
+        else:
+            # the first 4 coordinates are the bounds of the agent and goal positions:
+            low_bounds = np.array([0] * 4 + [-1] * self.params["cae"]["latent_dim"])
+            high_bounds = np.array([self.grid_size - 1] * 4 + [1] * self.params["cae"]["latent_dim"])
+            return spaces.Box(low=low_bounds, high=high_bounds, shape=(obs_size,), dtype=np.float32)
+
+    @property
+    def action_space(self):
+        """action space. -1 and 1 if normalization is set."""
+        if self.normalize:
+            return spaces.Box(low=-1., high=1., shape=(2,), dtype=np.float32)
+        else:
+            return spaces.Box(low=self.action_low, high=self.action_high,
+                shape=(2,), dtype=np.float32)
+
+    @property
+    def observation_space_orig(self):
+        """always returns the observation space without normalization."""
+        obs_size = 2 + 2 + self.params["cae"]["latent_dim"]
+        # the first 4 coordinates are the bounds of the agent and goal positions:
+        low_bounds = np.array([0] * 4 + [-1] * self.params["cae"]["latent_dim"])
+        high_bounds = np.array([self.grid_size - 1] * 4 + [1] * self.params["cae"]["latent_dim"])
+        return spaces.Box(low=low_bounds, high=high_bounds, shape=(obs_size,), dtype=np.float32)
+
+    @property
+    def action_space_orig(self):
+        """always returns the action space without normalization."""
+        return spaces.Box(low=self.action_low, high=self.action_high,
+            shape=(2,), dtype=np.float32)
