@@ -167,17 +167,19 @@ class PointrobotTrainer:
                     relabeling_begin = time.time()
                     # Create new workspace for the trajectory:
                     relabeled_trajectory = self._relabeler.relabel(trajectory=self.trajectory, env=self._env)
-                    relabeled_ws = relabeled_trajectory[0]['workspace']
-                    relabeled_reduced_ws = self._CAE.evaluate(relabeled_ws)
-                    
-                    # adding the points of the relabeled trajectory to the replay buffer:
-                    for point in relabeled_trajectory:
-                        relabeled_obs_full = np.concatenate((point['position'],
-                            point['goal'], relabeled_reduced_ws))
-                        relabeled_next_obs_full = np.concatenate((point['next_position'],
-                            point['goal'], relabeled_reduced_ws))
-                        self._replay_buffer.add(obs=relabeled_obs_full, act=point['action'],
-                            next_obs=relabeled_next_obs_full, rew=point['reward'], done=point['done'])
+
+                    if len(relabeled_trajectory) != 0:
+                        relabeled_ws = relabeled_trajectory[0]['workspace']
+                        relabeled_reduced_ws = self._CAE.evaluate(relabeled_ws)
+                        
+                        # adding the points of the relabeled trajectory to the replay buffer:
+                        for point in relabeled_trajectory:
+                            relabeled_obs_full = np.concatenate((point['position'],
+                                point['goal'], relabeled_reduced_ws))
+                            relabeled_next_obs_full = np.concatenate((point['next_position'],
+                                point['goal'], relabeled_reduced_ws))
+                            self._replay_buffer.add(obs=relabeled_obs_full, act=point['action'],
+                                next_obs=relabeled_next_obs_full, rew=point['reward'], done=point['done'])
 
                     relabeling_times.append(time.time() - relabeling_begin)
                 else:
