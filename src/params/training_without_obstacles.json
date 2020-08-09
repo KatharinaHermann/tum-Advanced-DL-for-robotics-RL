@@ -9,10 +9,10 @@
         "step_reward": -0.01,
         "buffer_size": 100,
         "grid_size": 32,
-        "num_obj_max": 5,
+        "num_obj_max": 0,
         "obj_size_avg": 8, 
         "robot_radius": 1,
-        "max_goal_dist": null
+        "max_goal_dist": 40
     },
     "cae": {
         "pooling": "max",
@@ -29,7 +29,7 @@
         "critic_units": [400, 300],
         "sigma": 0.1,
         "tau": 0.005,
-        "n_warmup": 1e3,
+        "n_warmup": 1e4,
         "memory_capacity": 1e6,
         "batch_size": 256,
         "update_interval": 1,
@@ -41,7 +41,7 @@
         "max_steps": 1e6,
         "episode_max_steps": 50,
         "n_experiments": 1,
-        "show_progress": false,
+        "show_progress": true,
         "show_progress_interval": 100,
         "save_model_interval": 1e4,
         "save_summary_interval": 1e3,

@@ -1,6 +1,9 @@
 {
     "env": {
         "name": "pointrobo-v0",
+        "normalize": true,
+        "action_low": -1.0,
+        "action_high": 1.0,
         "goal_reward": 5,
         "collision_reward": -1,
         "step_reward": -0.01,
@@ -9,7 +12,7 @@
         "num_obj_max": 5,
         "obj_size_avg": 8, 
         "robot_radius": 1,
-        "max_goal_dist": null
+        "max_goal_dist": 40
     },
     "cae": {
         "pooling": "max",
@@ -38,7 +41,8 @@
         "max_steps": 1e6,
         "episode_max_steps": 50,
         "n_experiments": 1,
-        "show_progress": false,
+        "show_progress": true,
+        "show_progress_interval": 100,
         "save_model_interval": 1e4,
         "save_summary_interval": 1e3,
         "logdir": "results",

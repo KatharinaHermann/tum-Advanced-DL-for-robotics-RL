@@ -62,11 +62,6 @@ class PointrobotTrainer:
             mode='random'
             )
 
-        if self._normalize_obs:
-            assert isinstance(env.observation_space, Box)
-            self._obs_normalizer = EmpiricalNormalizer(
-                shape=env.observation_space.shape)
-
         # prepare log directory
         self._output_dir = prepare_output_dir(
             args=args, user_specified_dir=self._logdir,
@@ -88,6 +83,7 @@ class PointrobotTrainer:
         self.writer = tf.summary.create_file_writer(self._output_dir)
         self.writer.set_as_default()
 
+
     def _set_check_point(self, model_dir):
         # Save and restore model
         self._checkpoint = tf.train.Checkpoint(policy=self._policy)
@@ -101,7 +97,10 @@ class PointrobotTrainer:
             self._checkpoint.restore(self._latest_path_ckpt)
             self.logger.info("Restored {}".format(self._latest_path_ckpt))
 
+
     def __call__(self):
+        """main function in which the training takes place."""
+
         total_steps = 0
         tf.summary.experimental.set_step(total_steps)
         episode_steps = 0
@@ -127,29 +126,26 @@ class PointrobotTrainer:
         
 
         while total_steps < self._max_steps:
-            if episode_steps == 0:
-                assert len(self.trajectory) == 0, 'trajectory at the beginning of an episode is not empty!'
            
             #Visualize environment if "show_progess"
             if self._show_progress and \
-                int((total_steps - 30) / 10000) < int(total_steps / 10000) and \
+                ((n_episode % self._show_progress_interval) == 0) and \
                 total_steps > self._policy.n_warmup:
                 self._env.render()
 
             #Get action randomly for warmup /from Actor-NN otherwise
             if total_steps < self._policy.n_warmup:
-                action = self._env.action_space.sample() / self._env.action_space.high
+                action = self._env.action_space.sample()
             else:
-                normalized_obs_full = obs_full
-                normalized_obs_full[0: 4] = normalized_obs_full[0: 4] / self._env.grid_size - 0.5
-                action = self._policy.get_action(normalized_obs_full)
+                action = self._policy.get_action(obs_full)
 
             #Take action and get next_obs, reward and done_flag from environment
             next_obs, reward, done, _ = self._env.step(action)
             next_obs_full = np.concatenate((next_obs, goal, reduced_workspace))
 
-            # add observation to replay buffer
-            self._push_to_replay_buffer(obs_full, action, next_obs_full, reward, done)
+            # add the new point to replay buffer
+            self._replay_buffer.add(obs=obs_full, act=action,
+                next_obs=next_obs_full, rew=reward, done=done)
 
             #Add obersvation to the trajectory storage
             self.trajectory.append({'workspace': workspace,'position': obs,
@@ -165,11 +161,9 @@ class PointrobotTrainer:
 
             if done or episode_steps == self._episode_max_steps:
                 
-                if (reward == self._env.collision_reward) and\
-                    total_steps > self._policy.n_warmup:
-                    """Workspace relabeling part.
-                    The workspace will not be relabeled, if we are only in the warmup phase.
-                    """
+                if (reward == self._env.collision_reward):
+                    """Workspace relabeling"""
+
                     relabeling_begin = time.time()
                     # Create new workspace for the trajectory:
                     relabeled_trajectory = self._relabeler.relabel(trajectory=self.trajectory, env=self._env)
@@ -178,9 +172,12 @@ class PointrobotTrainer:
                     
                     # adding the points of the relabeled trajectory to the replay buffer:
                     for point in relabeled_trajectory:
-                        relabeled_obs_full = np.concatenate((point['position'], point['goal'], relabeled_reduced_ws))
-                        relabeled_next_obs_full = np.concatenate((point['next_position'], point['goal'], relabeled_reduced_ws))
-                        self._push_to_replay_buffer(relabeled_obs_full, point['action'], relabeled_next_obs_full, point['reward'], point['done'])
+                        relabeled_obs_full = np.concatenate((point['position'],
+                            point['goal'], relabeled_reduced_ws))
+                        relabeled_next_obs_full = np.concatenate((point['next_position'],
+                            point['goal'], relabeled_reduced_ws))
+                        self._replay_buffer.add(obs=relabeled_obs_full, act=point['action'],
+                            next_obs=relabeled_next_obs_full, rew=point['reward'], done=point['done'])
 
                     relabeling_times.append(time.time() - relabeling_begin)
                 
@@ -285,9 +282,6 @@ class PointrobotTrainer:
 
     def evaluate_policy(self, total_steps):
         tf.summary.experimental.set_step(total_steps)
-        if self._normalize_obs:
-            self._test_env.normalizer.set_params(
-                *self._env.normalizer.get_params())
         
         total_test_return = 0.
         success_traj = 0
@@ -304,9 +298,7 @@ class PointrobotTrainer:
             obs_full = np.concatenate((obs, goal, reduced_workspace))
 
             for _ in range(self._episode_max_steps):
-                normalized_obs_full = obs_full
-                normalized_obs_full[0: 4] = normalized_obs_full[0: 4] / self._env.grid_size - 0.5
-                action = self._policy.get_action(normalized_obs_full)
+                action = self._policy.get_action(obs_full)
                 next_obs, reward, done, _ = self._test_env.step(action)
                 #Concatenate position observation with start, goal, and reduced workspace!!
                 next_obs_full = np.concatenate((obs, goal, reduced_workspace))
@@ -331,7 +323,6 @@ class PointrobotTrainer:
                 
                 if done:
                     break
-
 
             prefix = "step_{0:08d}_epi_{1:02d}_return_{2:010.4f}".format(
                 total_steps, i, episode_return)
@@ -384,22 +375,6 @@ class PointrobotTrainer:
         joblib.dump(self.trajectory, file_name)
 
 
-    def _push_to_replay_buffer(self, obs_full, action, next_obs_full, reward, done):
-        """pushes a training point into the replay buffer. 
-        Firts the coordinates of the position and the goal and the actions are normalized.
-        """
-        # normalization:
-        obs_full[0:4] = obs_full[0:4] / self._env.grid_size - 0.5
-        next_obs_full[0:4] = next_obs_full[0:4] / self._env.grid_size - 0.5
-        # normalizing action:
-        #epsilon = 1e-8
-        #action /= (np.linalg.norm(action) + epsilon)
-
-        # adding to the replay buffer:
-        self._replay_buffer.add(obs=obs_full, act=action,
-                            next_obs=next_obs_full, rew=reward, done=done)
-
-
     def _set_from_params(self):
         # experiment settings
         self._max_steps = self._params["trainer"]["max_steps"]
@@ -408,6 +383,7 @@ class PointrobotTrainer:
             else self._params["trainer"]["max_steps"]
         self._n_experiments = self._params["trainer"]["n_experiments"]
         self._show_progress = self._params["trainer"]["show_progress"]
+        self._show_progress_interval = self._params["trainer"]["show_progress_interval"]
         self._save_model_interval = self._params["trainer"]["save_model_interval"]
         self._save_summary_interval = self._params["trainer"]["save_summary_interval"]
         self._normalize_obs = self._params["trainer"]["normalize_obs"]
