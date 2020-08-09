@@ -86,7 +86,7 @@ class PointroboEnv(gym.Env):
             done = False 
 
         if self.normalize:
-            return normalize(self.agent_pos, self.observation_space), reward, done, {}
+            return normalize(self.agent_pos, self.pos_bounds), reward, done, {}
         else:
             return np.copy(self.agent_pos), reward, done, {}
 
@@ -98,8 +98,8 @@ class PointroboEnv(gym.Env):
 
         if self.normalize:
             return np.copy(self.workspace.astype(np.float32)),\
-                normalize(self.goal_pos, self.observation_space).astype(np.float32),\
-                normalize(self.agent_pos, self.observation_space).astype(np.float32)
+                normalize(self.goal_pos, self.pos_bounds).astype(np.float32),\
+                normalize(self.agent_pos, self.pos_bounds).astype(np.float32)
         else:   
             return np.copy(self.workspace.astype(np.float32)),\
                 np.copy(self.goal_pos.astype(np.float32)),\
@@ -200,16 +200,12 @@ class PointroboEnv(gym.Env):
                 shape=(2,), dtype=np.float32)
 
     @property
-    def observation_space_orig(self):
-        """always returns the observation space without normalization."""
-        obs_size = 2 + 2 + self.params["cae"]["latent_dim"]
-        # the first 4 coordinates are the bounds of the agent and goal positions:
-        low_bounds = np.array([0] * 4 + [-1] * self.params["cae"]["latent_dim"])
-        high_bounds = np.array([self.grid_size - 1] * 4 + [1] * self.params["cae"]["latent_dim"])
-        return spaces.Box(low=low_bounds, high=high_bounds, shape=(obs_size,), dtype=np.float32)
+    def pos_bounds(self):
+        """always returns the observation space of the position without normalization."""
+        return spaces.Box(low=0., high=self.grid_size - 1, shape=(2,), dtype=np.float32)
 
     @property
-    def action_space_orig(self):
+    def action_bounds(self):
         """always returns the action space without normalization."""
         return spaces.Box(low=self.action_low, high=self.action_high,
             shape=(2,), dtype=np.float32)

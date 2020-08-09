@@ -165,8 +165,8 @@ class PointrobotGymTests(unittest.TestCase):
     def test_step(self):
         """testing the step function of the environment."""
 
-        # random actions:
         num_of_cases = 100
+        # random actions:
         actions = [np.random.uniform(self.env.action_space.low, 
             self.env.action_space.high) for _ in range(num_of_cases)]
         actions_norm = [normalize(action, self.env.action_space) for action in actions]
@@ -179,13 +179,28 @@ class PointrobotGymTests(unittest.TestCase):
             self.env_norm.agent_pos = agent_pos
 
             # stepping both of the environments:
-            next_pos, reward, done = self.env.step(actions[i])
-            next_pos_norm, reward_norm, done_norm = self.env_norm.step(actions_norm[i])
+            next_pos, reward, done, _ = self.env.step(actions[i])
+            next_pos_norm, reward_norm, done_norm, _ = self.env_norm.step(actions_norm[i])
 
             # assertions:
-            self.assertTrue(np.isclose(next_pos, next_pos_norm, atol=1e-6).all())
+            self.assertTrue(np.isclose(normalize(next_pos, self.env.pos_bounds), next_pos_norm, atol=1e-6).all())
+            self.assertTrue(np.isclose(next_pos, self.env_norm.agent_pos, atol=1e-6).all())
             self.assertEqual(reward, reward_norm)
             self.assertEqual(done, done_norm)
+
+
+    def test_reset(self):
+        """tests the reset function of the environment."""
+
+        num_of_cases = 100
+        for _ in range(num_of_cases):
+            _, goal_pos_norm, agent_pos_norm = self.env_norm.reset()
+
+            # assertions:
+            self.assertTrue(np.isclose(rescale(goal_pos_norm, self.env_norm.pos_bounds),
+                self.env_norm.goal_pos, atol=1e-6).all())
+            self.assertTrue(np.isclose(rescale(agent_pos_norm, self.env_norm.pos_bounds),
+                self.env_norm.agent_pos, atol=1e-6).all())
 
 
 
