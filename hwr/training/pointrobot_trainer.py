@@ -144,7 +144,7 @@ class PointrobotTrainer:
 
             else:
                 normalized_obs_full = obs_full.copy()
-                normalized_obs_full[0: 4] = (normalized_obs_full[0: 4] + 0.5)/ self._env.grid_size
+                normalized_obs_full[0: 4] = (normalized_obs_full[0: 4] -0.5*(self._env.grid_size-1))/ (self._env.grid_size-1)
                 action = self._policy.get_action(normalized_obs_full)
 
             #Take action and get next_obs, reward and done_flag from environment
@@ -309,7 +309,7 @@ class PointrobotTrainer:
 
             for _ in range(self._episode_max_steps):
                 normalized_obs_full = obs_full.copy()
-                normalized_obs_full[0: 4] = (normalized_obs_full[0: 4] + 0.5) / self._env.grid_size
+                normalized_obs_full[0: 4] = (normalized_obs_full[0: 4] -0.5*(self._env.grid_size-1))/ (self._env.grid_size-1)
                 action = self._policy.get_action(normalized_obs_full)
                 next_obs, reward, done, _ = self._test_env.step(action)
                 #Concatenate position observation with start, goal, and reduced workspace!!
@@ -394,9 +394,9 @@ class PointrobotTrainer:
         """
         # normalization:
         obs_full_rb = obs_full_f.copy()
-        obs_full_rb[0:4] = (obs_full_rb[0: 4] + 0.5) / self._env.grid_size
+        obs_full_rb[0:4] = (obs_full_rb[0: 4] -0.5*(self._env.grid_size-1))/ (self._env.grid_size-1)
         next_obs_full_rb = next_obs_full_f.copy()
-        next_obs_full_rb[0:4] = (next_obs_full_rb[0: 4] + 0.5) / self._env.grid_size
+        next_obs_full_rb[0:4] = (next_obs_full_rb[0: 4] -0.5*(self._env.grid_size-1))/ (self._env.grid_size-1)
         # normalizing action:
         #epsilon = 1e-8
         #action /= (np.linalg.norm(action) + epsilon)
