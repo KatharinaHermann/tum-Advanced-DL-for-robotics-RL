@@ -14,7 +14,7 @@ from hwr.utils import load_params
 
 
 # loading params:
-params = load_params('params/pointrobot_training_params.json')
+params = load_params('src/params/training_without_obstacles.json')
 
 if params["trainer"]["train_from_scratch"]:
     # deleting the previous checkpoints:

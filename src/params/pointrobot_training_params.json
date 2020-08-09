@@ -18,7 +18,7 @@
         "pooling": "max",
         "latent_dim": 16,
         "conv_filters": [4, 8, 16],
-        "weights_path": "../models/cae//model_num_5_size_8.h5"
+        "weights_path": "models/cae//model_num_5_size_8.h5"
     },
     "agent": {
         "name": "DDPG",
@@ -47,7 +47,7 @@
         "save_summary_interval": 1e3,
         "logdir": "results",
         "logging_level": "INFO",
-        "model_dir": "../models/agents",
+        "model_dir": "models/agents",
         "dir_suffix": "",
         "use_prioritized_rb": false,
         "use_nstep_rb": false,
