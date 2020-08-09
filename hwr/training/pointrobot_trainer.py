@@ -59,7 +59,7 @@ class PointrobotTrainer:
         # Initialize workspace relabeler:
         self._relabeler = PointrobotRelabeler(
             ws_shape=(self._env.grid_size, self._env.grid_size),
-            mode='random'
+            mode='erease'
             )
 
         # prepare log directory
@@ -100,6 +100,9 @@ class PointrobotTrainer:
 
     def __call__(self):
         """main function in which the training takes place."""
+
+        # training mode:
+        self._env.eval_mode = False
 
         total_steps = 0
         tf.summary.experimental.set_step(total_steps)
@@ -167,17 +170,19 @@ class PointrobotTrainer:
                     relabeling_begin = time.time()
                     # Create new workspace for the trajectory:
                     relabeled_trajectory = self._relabeler.relabel(trajectory=self.trajectory, env=self._env)
-                    relabeled_ws = relabeled_trajectory[0]['workspace']
-                    relabeled_reduced_ws = self._CAE.evaluate(relabeled_ws)
-                    
-                    # adding the points of the relabeled trajectory to the replay buffer:
-                    for point in relabeled_trajectory:
-                        relabeled_obs_full = np.concatenate((point['position'],
-                            point['goal'], relabeled_reduced_ws))
-                        relabeled_next_obs_full = np.concatenate((point['next_position'],
-                            point['goal'], relabeled_reduced_ws))
-                        self._replay_buffer.add(obs=relabeled_obs_full, act=point['action'],
-                            next_obs=relabeled_next_obs_full, rew=point['reward'], done=point['done'])
+
+                    if len(relabeled_trajectory) != 0:
+                        relabeled_ws = relabeled_trajectory[0]['workspace']
+                        relabeled_reduced_ws = self._CAE.evaluate(relabeled_ws)
+                        
+                        # adding the points of the relabeled trajectory to the replay buffer:
+                        for point in relabeled_trajectory:
+                            relabeled_obs_full = np.concatenate((point['position'],
+                                point['goal'], relabeled_reduced_ws))
+                            relabeled_next_obs_full = np.concatenate((point['next_position'],
+                                point['goal'], relabeled_reduced_ws))
+                            self._replay_buffer.add(obs=relabeled_obs_full, act=point['action'],
+                                next_obs=relabeled_next_obs_full, rew=point['reward'], done=point['done'])
 
                     relabeling_times.append(time.time() - relabeling_begin)
                 else:
@@ -245,7 +250,10 @@ class PointrobotTrainer:
 
             # Every test_interval we want to test our agent 
             if total_steps % self._test_interval == 0:
-                #Here we evaluate the policy
+                
+                # setting evaluation mode for deterministic actions:
+                self._env.eval_mode = True
+
                 avg_test_return, success_rate = self.evaluate_policy(total_steps)
                 self.logger.info("Evaluation: Total Steps: {0: 7} Average Reward {1: 5.4f} and Sucess rate: {2: 5.4f} for {3: 2} episodes".format(
                     total_steps, avg_test_return, success_rate, self._test_episodes))
@@ -255,6 +263,9 @@ class PointrobotTrainer:
                     name="Common/test_success_rate", data=success_rate)
                 tf.summary.scalar(name="Common/fps", data=fps)
                 self.writer.flush()
+
+                # setting evaluation mode back to false:
+                self._env.eval_mode = False
 
             # Every save_model_interval we save the model
             if total_steps % self._save_model_interval == 0:
@@ -280,6 +291,8 @@ class PointrobotTrainer:
             self.evaluate_policy(total_steps=0)
 
     def evaluate_policy(self, total_steps):
+        """evaluating the policy."""
+
         tf.summary.experimental.set_step(total_steps)
         
         total_test_return = 0.

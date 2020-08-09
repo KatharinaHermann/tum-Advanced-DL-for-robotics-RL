@@ -12,7 +12,11 @@
         "num_obj_max": 0,
         "obj_size_avg": 8, 
         "robot_radius": 1,
+<<<<<<< HEAD
         "max_goal_dist": 13
+=======
+        "max_goal_dist": null
+>>>>>>> master
     },
     "cae": {
         "pooling": "max",
