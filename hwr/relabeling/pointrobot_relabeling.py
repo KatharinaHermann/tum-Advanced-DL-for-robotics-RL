@@ -88,7 +88,10 @@ class PointrobotRelabeler:
                                         shift_distance=shift_distance)
 
             # add new goal state to the trajectory:
-            return self._set_new_goal(trajectory, env)
+            if len(trajectory) != 0:
+                return self._set_new_goal(trajectory, env)
+            else:
+                return []
         else:
             return self._set_new_goal(trajectory, env)
 
@@ -146,7 +149,7 @@ class PointrobotRelabeler:
 
         workspace = trajectory[0]['workspace']
         last_pos = trajectory[-1]['position']
-        radius = env.radius
+        radius = env.robot_radius
         # range of distances to check in every direction:
         # (it is possible that the radius of the robot is bigger than the grid size, this is why this is necessary.)
         distances = list(range(int(radius) + 1))
@@ -178,7 +181,7 @@ class PointrobotRelabeler:
         shift_distance = int(shift_distance)
         last_pos = trajectory[-1]['position']
         workspace = trajectory[0]['workspace']
-        radius = env.radius
+        radius = env.robot_radius
 
         # shifting the workspace. With the if conditions it is decided to which wall is the robot near:
         if last_pos[0] <= radius:
@@ -250,10 +253,10 @@ class PointrobotRelabeler:
         # the first goal candidate is in the direction of the last motion:
         if len(trajectory) >= 2:
             last_last_pos = trajectory[-2]['position']
-            goal_direction_vect = (last_pos - last_last_pos) / (np.linalg.norm(last_pos - last_last_pos)) * env.radius * 0.99
+            goal_direction_vect = (last_pos - last_last_pos) / (np.linalg.norm(last_pos - last_last_pos)) * env.robot_radius * 0.99
         else:
             goal_direction_vect = np.random.uniform(low=-1, high=1, size=(2,))
-            goal_direction_vect = goal_direction_vect / np.linalg.norm(goal_direction_vect) * env.radius * 0.99
+            goal_direction_vect = goal_direction_vect / np.linalg.norm(goal_direction_vect) * env.robot_radius * 0.99
         new_goal = last_pos + goal_direction_vect
 
         # matrix containing every state except for the last one for effectively calculate distance from them.
@@ -265,10 +268,10 @@ class PointrobotRelabeler:
             # checking the distance from every goal
             distances = np.linalg.norm(every_other_pos - new_goal, axis=1)
 
-            if (distances < env.radius).any():
+            if (distances < env.robot_radius).any():
                 # new random goal to try:
                 goal_direction_vect = np.random.uniform(low=-1, high=1, size=(2,))
-                goal_direction_vect = goal_direction_vect / np.linalg.norm(goal_direction_vect) * env.radius * 0.99
+                goal_direction_vect = goal_direction_vect / np.linalg.norm(goal_direction_vect) * env.robot_radius * 0.99
                 new_goal = last_pos + goal_direction_vect
             else:
                 feasible_goal = True
