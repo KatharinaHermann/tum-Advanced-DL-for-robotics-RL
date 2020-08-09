@@ -1,6 +1,7 @@
 {
     "env": {
         "name": "pointrobo-v0",
+        "normalize": true,
         "goal_reward": 5,
         "collision_reward": -1,
         "step_reward": -0.01,

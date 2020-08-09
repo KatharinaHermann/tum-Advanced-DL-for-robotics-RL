@@ -11,6 +11,7 @@ import sys
 #sys.path.append(os.path.join(os.getcwd(), "lib"))
 from hwr.random_workspace import * 
 from hwr.cae.cae import CAE
+from hwr.utils import normalize, rescale
 
 
 """
@@ -40,6 +41,7 @@ class PointroboEnv(gym.Env):
         self.num_obj_max = params["env"]["num_obj_max"]
         self.obj_size_avg = params["env"]["obj_size_avg"]
         self.max_goal_dist = params["env"]["max_goal_dist"]
+        self.normalize = params["env"]["normalize"]
 
         # Define action and observation space
         # They must be gym.spaces objects
@@ -65,29 +67,33 @@ class PointroboEnv(gym.Env):
         self._robo_artist = None
         self._goal_artist = None
 
-        
 
     def step(self, action):
         """Implements the step function for taking an action and evaluating it"""
         
-        self.take_action(np.copy(action))
+        if self.normalize:
+            rescaled_action = rescale(action, self.action_space)
+            self.take_action(rescaled_action)
+        else:
+            self.take_action(action)
+        
         self.current_step += 1        
 
-        #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made: Reward=-0.01
-        # Tolerance of distance 3, that the robot reached the goal!
-        if (np.linalg.norm(self.agent_pos-self.goal_pos) <= self.robot_radius*2): 
+        # checking whether the goal is reached, collision occured, or just a step was carried out:
+        if (np.linalg.norm(self.agent_pos - self.goal_pos) <= self.robot_radius * 2): 
             reward = self.goal_reward
             done = True
-        #Have we hit an obstacle?
         elif self.collision_check():
             reward = self.collision_reward
             done = True
-        #We made another step
         else: 
             reward = self.step_reward
             done = False 
 
-        return self.agent_pos, reward, done, {}
+        if self.normalize:
+            return normalize(self.agent_pos, self.observation_space), reward, done, {}
+        else:
+            return self.agent_pos, reward, done, {}
 
 
     def reset(self):
@@ -95,10 +101,12 @@ class PointroboEnv(gym.Env):
         self.setup_rndm_workspace_from_buffer()
         self.agent_pos = self.start_pos.astype(np.float32)
 
-        #self.agent_pos = np.array([12., 12.])
-        #self.goal_pos = np.array([14., 14.])
-   
-        return self.workspace.astype(np.float32), self.goal_pos.astype(np.float32), self.agent_pos.astype(np.float32)
+        if self.normalize:
+            return self.workspace.astype(np.float32), \
+                normalize(self.goal_pos, self.observation_space).astype(np.float32),\
+                normalize(self.agent_pos, self.observation_space).astype(np.float32)
+        else:   
+            return self.workspace.astype(np.float32), self.goal_pos.astype(np.float32), self.agent_pos.astype(np.float32)
 
 
     def render(self, mode='plot', close=False):
@@ -130,11 +138,6 @@ class PointroboEnv(gym.Env):
         """The action is encoded like a real velocity vector with the first element 
         pointing in x-direction and the second element pointing in y-direction
         """
-        # normalizing action:
-        #epsilon = 1e-8
-        #action /= (np.linalg.norm(action) + epsilon)
-        
-        action *= self.action_space.high
 
         self.agent_pos += action 
         self.agent_pos = np.clip(self.agent_pos, [0.0, 0.0], [float(self.grid_size-1), float(self.grid_size-1)])
@@ -176,6 +179,5 @@ class PointroboEnv(gym.Env):
         # With -0.5 we count for the obstacle expansion
         if nearest_dist - self.robot_radius - 0.5 < 0 :
             collision = True
-            #print("Collision is: ", collision)
         
         return collision
