@@ -62,11 +62,6 @@ class PointrobotTrainer:
             mode='random'
             )
 
-        #if self._normalize_obs:
-        #    assert isinstance(env.observation_space, Box)
-        #    self._obs_normalizer = EmpiricalNormalizer(
-        #        shape=env.observation_space.shape)
-
         # prepare log directory
         self._output_dir = prepare_output_dir(
             args=args, user_specified_dir=self._logdir,
