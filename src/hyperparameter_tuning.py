@@ -37,10 +37,10 @@ for f in logdir_files:
 
 
 # Hyperparameter grid search
-for lr_i, lr in enumerate([1e-3]):
-    for max_grad_i, max_grad in enumerate([1]):
-        for tau_i, tau in enumerate([0.05, 0.01, 0.001]):
-            for memory_capacity_i, memory_capacity in enumerate([1e5]):
+for lr_i, lr in enumerate([5e-4, 1e-4, 5e-5]):
+    for max_grad_i, max_grad in enumerate([1, 0.5, 0.1]):
+        for tau_i, tau in enumerate([0.005, 0.001, 0.0005]):
+            for memory_capacity_i, memory_capacity in enumerate([1e6]):
                 print("Learning rate: {0: 1.8f} max_grad: {1: 3.2f} Tau_Target_update: {2: 1.3f}  memory_capacity: {3: 4}".format(
                             lr, max_grad, tau, memory_capacity))
 
@@ -80,8 +80,7 @@ for lr_i, lr in enumerate([1e-3]):
 
                 # initialize the agent:
                 policy = DDPG(
-                    state_shape=env.observation_space.shape,
-                    action_dim=env.action_space.high.size,
+                    env=env,
                     params=params
                     )
                 
