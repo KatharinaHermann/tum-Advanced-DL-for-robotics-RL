@@ -11,6 +11,7 @@ import sys
 #sys.path.append(os.path.join(os.getcwd(), "lib"))
 from hwr.random_workspace import * 
 from hwr.cae.cae import CAE
+from hwr.utils import normalize, rescale
 
 
 """
@@ -28,6 +29,10 @@ class PointroboEnv(gym.Env):
 
         super(PointroboEnv, self).__init__()
 
+        # action bounds:
+        self.action_low = params["env"]["action_low"]
+        self.action_high = params["env"]["action_high"]
+
         # rewards
         self.goal_reward = params["env"]["goal_reward"]
         self.collision_reward = params["env"]["collision_reward"]
@@ -40,17 +45,9 @@ class PointroboEnv(gym.Env):
         self.num_obj_max = params["env"]["num_obj_max"]
         self.obj_size_avg = params["env"]["obj_size_avg"]
         self.max_goal_dist = params["env"]["max_goal_dist"]
+        self.normalize = params["env"]["normalize"]
 
-        # Define action and observation space
-        # They must be gym.spaces objects
-        
-        # Continuous action space with velocities up to 10m/s in x- & y- direction
-        self.action_space = spaces.Box(low=0, high=1, shape=(2,), dtype=np.float32)
-        
-        #The observation will be the coordinate of the agent 
-        #this can be described by Box space
-        self.observation_space = spaces.Box(low=0.0, high=self.grid_size,
-                                            shape=(20,), dtype=np.float32)
+        self.params = params
 
         # Initialize the agent
         self.current_step = 0
@@ -65,29 +62,33 @@ class PointroboEnv(gym.Env):
         self._robo_artist = None
         self._goal_artist = None
 
-        
 
     def step(self, action):
         """Implements the step function for taking an action and evaluating it"""
         
-        self.take_action(np.copy(action))
+        if self.normalize:
+            rescaled_action = rescale(action, self.action_space)
+            self.take_action(rescaled_action)
+        else:
+            self.take_action(action)
+        
         self.current_step += 1        
 
-        #Goal reached: Reward=1; Obstacle Hit: Reward=-1; Step made: Reward=-0.01
-        # Tolerance of distance 3, that the robot reached the goal!
-        if (np.linalg.norm(self.agent_pos-self.goal_pos) <= self.robot_radius*2): 
+        # checking whether the goal is reached, collision occured, or just a step was carried out:
+        if (np.linalg.norm(self.agent_pos - self.goal_pos) <= self.robot_radius): 
             reward = self.goal_reward
             done = True
-        #Have we hit an obstacle?
         elif self.collision_check():
             reward = self.collision_reward
             done = True
-        #We made another step
         else: 
             reward = self.step_reward
             done = False 
 
-        return self.agent_pos, reward, done, {}
+        if self.normalize:
+            return normalize(self.agent_pos, self.pos_bounds), reward, done, {}
+        else:
+            return np.copy(self.agent_pos), reward, done, {}
 
 
     def reset(self):
@@ -95,17 +96,23 @@ class PointroboEnv(gym.Env):
         self.setup_rndm_workspace_from_buffer()
         self.agent_pos = self.start_pos.astype(np.float32)
 
-        #self.agent_pos = np.array([12., 12.])
-        #self.goal_pos = np.array([14., 14.])
-   
-        return self.workspace.astype(np.float32), self.goal_pos.astype(np.float32), self.agent_pos.astype(np.float32)
+        if self.normalize:
+            return np.copy(self.workspace.astype(np.float32)),\
+                normalize(self.goal_pos, self.pos_bounds).astype(np.float32),\
+                normalize(self.agent_pos, self.pos_bounds).astype(np.float32)
+        else:   
+            return np.copy(self.workspace.astype(np.float32)),\
+                np.copy(self.goal_pos.astype(np.float32)),\
+                np.copy(self.agent_pos.astype(np.float32))
 
 
     def render(self, mode='plot', close=False):
-        """"The x-axis of the environment is pointing from left to right. 
-            The y-axis is pointing downwards. 
-            The origin of the KOSY is in the top left corner."""
-        # Render the environment to the screen
+        """ Rendering the environment to the screen.
+        The x-axis of the environment is pointing from left to right. 
+        The y-axis is pointing downwards. 
+        The origin of the KOSY is in the top left corner.
+        """
+
         if mode != 'plot':
             raise NotImplementedError()
             
@@ -123,19 +130,11 @@ class PointroboEnv(gym.Env):
 
         plt.pause(0.01)
 
-        # draw the renderer
-        #plt.savefig("/results/workspace_img.png")
 
     def take_action(self, action):
         """The action is encoded like a real velocity vector with the first element 
         pointing in x-direction and the second element pointing in y-direction
         """
-        # normalizing action:
-        #epsilon = 1e-8
-        #action /= (np.linalg.norm(action) + epsilon)
-        
-        action *= self.action_space.high
-
         self.agent_pos += action 
         self.agent_pos = np.clip(self.agent_pos, [0.0, 0.0], [float(self.grid_size-1), float(self.grid_size-1)])
 
@@ -172,10 +171,41 @@ class PointroboEnv(gym.Env):
         x = self.agent_pos
         nearest_dist = dist_fun(x=x)
 
-        #print("Distance to the nearest obstacle at the center: ", nearest_dist)
         # With -0.5 we count for the obstacle expansion
         if nearest_dist - self.robot_radius - 0.5 < 0 :
             collision = True
-            #print("Collision is: ", collision)
         
         return collision
+
+
+    @property
+    def observation_space(self):
+        """observation space. -1 and 1 if normalization is set."""
+        obs_size = 2 + 2 + self.params["cae"]["latent_dim"]
+        if self.normalize:
+            return spaces.Box(low=-1., high=1., shape=(obs_size,), dtype=np.float32)
+        else:
+            # the first 4 coordinates are the bounds of the agent and goal positions:
+            low_bounds = np.array([0] * 4 + [-1] * self.params["cae"]["latent_dim"])
+            high_bounds = np.array([self.grid_size - 1] * 4 + [1] * self.params["cae"]["latent_dim"])
+            return spaces.Box(low=low_bounds, high=high_bounds, shape=(obs_size,), dtype=np.float32)
+
+    @property
+    def action_space(self):
+        """action space. -1 and 1 if normalization is set."""
+        if self.normalize:
+            return spaces.Box(low=-1., high=1., shape=(2,), dtype=np.float32)
+        else:
+            return spaces.Box(low=self.action_low, high=self.action_high,
+                shape=(2,), dtype=np.float32)
+
+    @property
+    def pos_bounds(self):
+        """always returns the observation space of the position without normalization."""
+        return spaces.Box(low=0., high=self.grid_size - 1, shape=(2,), dtype=np.float32)
+
+    @property
+    def action_bounds(self):
+        """always returns the action space without normalization."""
+        return spaces.Box(low=self.action_low, high=self.action_high,
+            shape=(2,), dtype=np.float32)

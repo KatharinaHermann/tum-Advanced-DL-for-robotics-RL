@@ -1,6 +1,9 @@
 {
     "env": {
         "name": "pointrobo-v0",
+        "normalize": true,
+        "action_low": -1.0,
+        "action_high": 1.0,
         "goal_reward": 5,
         "collision_reward": -1,
         "step_reward": -0.01,
@@ -26,7 +29,7 @@
         "critic_units": [400, 300],
         "sigma": 0.1,
         "tau": 0.005,
-        "n_warmup": 1e4,
+        "n_warmup": 1e3,
         "memory_capacity": 1e6,
         "batch_size": 256,
         "update_interval": 1,

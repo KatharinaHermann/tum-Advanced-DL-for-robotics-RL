@@ -35,8 +35,7 @@ test_env = gym.make(
 
 # initialize the agent:
 policy = DDPG(
-    state_shape=env.observation_space.shape,
-    action_dim=env.action_space.high.size,
+    env=env,
     params=params
     )
 

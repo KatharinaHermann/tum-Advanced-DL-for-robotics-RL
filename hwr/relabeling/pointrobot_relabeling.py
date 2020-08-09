@@ -1,6 +1,8 @@
 import numpy as np
 import math
 
+from hwr.utils import normalize, rescale
+
 
 class PointrobotRelabeler:
     """Class that implements a workspace relabeler object for a pointrobot.
@@ -36,12 +38,20 @@ class PointrobotRelabeler:
     def relabel(self, trajectory, env):
         """creates a new workspace and goal for the given trajectory."""
 
+        # rescale the trajectory if normalization is used in the environment:
+        if env.normalize:
+            trajectory = self._rescale_trajectory(trajectory, env)
+
         if self._mode == 'erease':
             relabeled_trajectory = self._erease_relabel(trajectory, env)
         elif self._mode == 'random':
             relabeled_trajectory = self._random_relabel(trajectory, env)
         elif self._mode == 'slding':
             relabeled_trajectory = self._sliding_relabel(trajectory, env)
+
+        # normalize the trajectory if normalization is used in the environment:
+        if env.normalize:
+            relabeled_trajectory = self._normalize_trajectory(relabeled_trajectory, env)
 
         return relabeled_trajectory
 
@@ -273,5 +283,27 @@ class PointrobotRelabeler:
             trajectory[-1]['done'] = True
         else:
             trajectory = []
+
+        return trajectory
+
+
+    def _rescale_trajectory(self, trajectory, env):
+        """rescales a trajectory to the original range."""
+        for point in trajectory:
+            point["position"] = rescale(point["position"], env.pos_bounds)
+            point["next_position"] = rescale(point["next_position"], env.pos_bounds)
+            point["goal"] = rescale(point["goal"], env.pos_bounds)
+            point["action"] = rescale(point["action"], env.action_bounds)
+
+        return trajectory
+
+
+    def _normalize_trajectory(self, trajectory, env):
+        """normalizes a trajectory."""
+        for point in trajectory:
+            point["position"] = normalize(point["position"], env.pos_bounds)
+            point["next_position"] = normalize(point["next_position"], env.pos_bounds)
+            point["goal"] = normalize(point["goal"], env.pos_bounds)
+            point["action"] = normalize(point["action"], env.action_bounds)
 
         return trajectory
