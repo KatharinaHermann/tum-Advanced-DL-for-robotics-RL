@@ -161,7 +161,7 @@ class PointrobotTrainer:
 
             if done or episode_steps == self._episode_max_steps:
                 
-                if (reward == self._env.collision_reward):
+                if (reward != self._env.goal_reward):
                     """Workspace relabeling"""
 
                     relabeling_begin = time.time()
@@ -180,8 +180,7 @@ class PointrobotTrainer:
                             next_obs=relabeled_next_obs_full, rew=point['reward'], done=point['done'])
 
                     relabeling_times.append(time.time() - relabeling_begin)
-                
-                if reward == self._env.goal_reward:
+                else:
                     success_traj_train += 1
 
                 # resetting:
