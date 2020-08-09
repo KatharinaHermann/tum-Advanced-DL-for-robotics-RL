@@ -43,14 +43,8 @@ class PointroboEnv(gym.Env):
         self.max_goal_dist = params["env"]["max_goal_dist"]
         self.normalize = params["env"]["normalize"]
 
-        # Define action and observation space
-        # They must be gym.spaces objects
-        
-        # Continuous action space with velocities up to 10m/s in x- & y- direction
+        # action and observation space definitions:
         self.action_space = spaces.Box(low=0, high=1, shape=(2,), dtype=np.float32)
-        
-        #The observation will be the coordinate of the agent 
-        #this can be described by Box space
         self.observation_space = spaces.Box(low=0.0, high=self.grid_size,
                                             shape=(20,), dtype=np.float32)
 
@@ -93,7 +87,7 @@ class PointroboEnv(gym.Env):
         if self.normalize:
             return normalize(self.agent_pos, self.observation_space), reward, done, {}
         else:
-            return self.agent_pos, reward, done, {}
+            return np.copy(self.agent_pos), reward, done, {}
 
 
     def reset(self):
@@ -102,18 +96,22 @@ class PointroboEnv(gym.Env):
         self.agent_pos = self.start_pos.astype(np.float32)
 
         if self.normalize:
-            return self.workspace.astype(np.float32), \
+            return np.copy(self.workspace.astype(np.float32)),\
                 normalize(self.goal_pos, self.observation_space).astype(np.float32),\
                 normalize(self.agent_pos, self.observation_space).astype(np.float32)
         else:   
-            return self.workspace.astype(np.float32), self.goal_pos.astype(np.float32), self.agent_pos.astype(np.float32)
+            return np.copy(self.workspace.astype(np.float32)),\
+                np.copy(self.goal_pos.astype(np.float32)),\
+                np.copy(self.agent_pos.astype(np.float32))
 
 
     def render(self, mode='plot', close=False):
-        """"The x-axis of the environment is pointing from left to right. 
-            The y-axis is pointing downwards. 
-            The origin of the KOSY is in the top left corner."""
-        # Render the environment to the screen
+        """ Rendering the environment to the screen.
+        The x-axis of the environment is pointing from left to right. 
+        The y-axis is pointing downwards. 
+        The origin of the KOSY is in the top left corner.
+        """
+
         if mode != 'plot':
             raise NotImplementedError()
             
@@ -131,14 +129,11 @@ class PointroboEnv(gym.Env):
 
         plt.pause(0.01)
 
-        # draw the renderer
-        #plt.savefig("/results/workspace_img.png")
 
     def take_action(self, action):
         """The action is encoded like a real velocity vector with the first element 
         pointing in x-direction and the second element pointing in y-direction
         """
-
         self.agent_pos += action 
         self.agent_pos = np.clip(self.agent_pos, [0.0, 0.0], [float(self.grid_size-1), float(self.grid_size-1)])
 
@@ -175,7 +170,6 @@ class PointroboEnv(gym.Env):
         x = self.agent_pos
         nearest_dist = dist_fun(x=x)
 
-        #print("Distance to the nearest obstacle at the center: ", nearest_dist)
         # With -0.5 we count for the obstacle expansion
         if nearest_dist - self.robot_radius - 0.5 < 0 :
             collision = True
