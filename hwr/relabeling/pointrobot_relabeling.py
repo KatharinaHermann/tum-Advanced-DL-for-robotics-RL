@@ -82,10 +82,14 @@ class PointrobotRelabeler:
             else:
                 # if the obstacle has just left the workspace without collision.
                 # choosing a distance with which the ws and the trajectory will be shifted away from the boarder:
-                shift_distance = np.random.randint(low=1, high=4)
-                trajectory = self._shift_from_boarder(trajectory=trajectory,
-                                        env=env,
-                                        shift_distance=shift_distance)
+                erase_length = np.random.randint(low=1, high=4)
+                trajectory = self._erase_from_boarder(trajectory=trajectory,
+                                        env=env, erase_length=erase_length)
+
+                #shift_distance = np.random.randint(low=1, high=4)
+                #trajectory = self._shift_from_boarder(trajectory=trajectory,
+                #                        env=env,
+                #                        shift_distance=shift_distance)
 
             # add new goal state to the trajectory:
             if len(trajectory) != 0:
@@ -168,11 +172,21 @@ class PointrobotRelabeler:
         for direction in directions_to_check:
             for distance in distances:
                 pos = last_pos + distance * direction
-                entry = (int(pos[0]), int(pos[1]))
+                entry = (int(pos[1]), int(pos[0]))
                 if workspace[entry] == 1:
                     collision_entries.append(entry)
 
         return collision_entries
+
+    def _erase_from_boarder(self, trajectory, env, erase_length):
+        """Erases the last part of the trajectory, that crashed with the boarder."""
+        erase_length = int(erase_length)
+
+        trajectory_to_return = []
+        for point in trajectory[:(-erase_length)]:
+            trajectory_to_return.append(point)
+
+        return trajectory_to_return
 
 
     def _shift_from_boarder(self, trajectory, env, shift_distance):
@@ -184,41 +198,41 @@ class PointrobotRelabeler:
         radius = env.robot_radius
 
         # shifting the workspace. With the if conditions it is decided to which wall is the robot near:
-        if last_pos[0] <= radius:
-            new_workspace = np.zeros_like(workspace)
-            new_workspace[shift_distance: , :] = workspace[ :(-shift_distance), :]
-            workspace = new_workspace
-            for point in trajectory:
-                point['position'][0] += shift_distance
-                point['next_position'][0] += shift_distance
-                point['goal'][0] += shift_distance
-
-        elif last_pos[0] >= (workspace.shape[0] - 1 - radius):
-            new_workspace = np.zeros_like(workspace)
-            new_workspace[ :(-shift_distance), :] = workspace[shift_distance: , :]
-            workspace = new_workspace
-            for point in trajectory:
-                point['position'][0] -= shift_distance
-                point['next_position'][0] -= shift_distance
-                point['goal'][0] -= shift_distance
-
         if last_pos[1] <= radius:
             new_workspace = np.zeros_like(workspace)
-            new_workspace[ :, shift_distance:] = workspace[ :, :(-shift_distance)]
+            new_workspace[shift_distance: , :] = workspace[ :(-shift_distance), :]
             workspace = new_workspace
             for point in trajectory:
                 point['position'][1] += shift_distance
                 point['next_position'][1] += shift_distance
                 point['goal'][1] += shift_distance
-                
-        elif last_pos[1] >= (workspace.shape[1] - 1 - radius):
+
+        elif last_pos[1] >= (workspace.shape[0] - 1 - radius):
             new_workspace = np.zeros_like(workspace)
-            new_workspace[ :, :(-shift_distance)] = workspace[ :, shift_distance: ]
+            new_workspace[ :(-shift_distance), :] = workspace[shift_distance: , :]
             workspace = new_workspace
             for point in trajectory:
                 point['position'][1] -= shift_distance
                 point['next_position'][1] -= shift_distance
                 point['goal'][1] -= shift_distance
+
+        if last_pos[0] <= radius:
+            new_workspace = np.zeros_like(workspace)
+            new_workspace[ :, shift_distance:] = workspace[ :, :(-shift_distance)]
+            workspace = new_workspace
+            for point in trajectory:
+                point['position'][0] += shift_distance
+                point['next_position'][0] += shift_distance
+                point['goal'][0] += shift_distance
+                
+        elif last_pos[0] >= (workspace.shape[1] - 1 - radius):
+            new_workspace = np.zeros_like(workspace)
+            new_workspace[ :, :(-shift_distance)] = workspace[ :, shift_distance: ]
+            workspace = new_workspace
+            for point in trajectory:
+                point['position'][0] -= shift_distance
+                point['next_position'][0] -= shift_distance
+                point['goal'][0] -= shift_distance
 
         for point in trajectory:
             point['workspace'] = workspace
