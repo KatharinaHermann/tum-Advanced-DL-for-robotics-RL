@@ -50,7 +50,7 @@ for run in range(params["hyper_tuning"]["num_of_runs"]):
         )
 
     # deleting the previous checkpoints:
-    ckp_files = glob.glob(params["trainer"]["model_dir"])
+    ckp_files = glob.glob(os.path.join(params["trainer"]["model_dir"], "*"))
     for f in ckp_files:
         os.remove(f)
 

@@ -66,7 +66,7 @@ for lr_i, lr in enumerate([5e-4, 1e-4, 5e-5]):
                     f.write('batch size: {0: 4}'.format(memory_capacity) + '\n')
 
                 # deleting the previous checkpoints:
-                ckp_files = glob.glob('../models/agents/*')
+                ckp_files = glob.glob(os.path.join(params["trainer"]["model_dir"], "*"))
                 for f in ckp_files:
                     os.remove(f)
 
