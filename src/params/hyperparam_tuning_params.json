@@ -37,7 +37,7 @@
     },
     "trainer": {
         "train_from_scratch" : true,
-        "evaluate": false,
+        "mode": "train",
         "max_steps": 2e5,
         "episode_max_steps": 50,
         "n_experiments": 1,

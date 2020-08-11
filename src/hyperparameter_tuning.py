@@ -75,7 +75,6 @@ for lr_i, lr in enumerate([5e-4, 1e-4, 5e-5]):
                 ckp_files = glob.glob('../models/agents/*')
                 for f in ckp_files:
                     os.remove(f)
-                    print('------DELETED MODEL---------')
 
                 params["trainer"]["logdir"] = logdir
 
@@ -93,6 +92,4 @@ for lr_i, lr in enumerate([5e-4, 1e-4, 5e-5]):
                     test_env=test_env
                     )
 
-                print('-' * 5 + "Let's start training" + '-' * 5)
-
-                trainer()
+                trainer.train()
