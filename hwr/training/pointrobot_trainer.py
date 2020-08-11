@@ -4,6 +4,7 @@ import time
 import logging
 import argparse
 import joblib
+import glob
 from matplotlib import animation
 
 import numpy as np
@@ -75,8 +76,8 @@ class PointrobotTrainer:
                 if not os.path.exists(os.path.join(self._logdir, logdir)):
                     os.makedirs(os.path.join(self._logdir, logdir))
 
-        if params["trainer"]["evaluate"]:
-            assert params["trainer"]["model_dir"] is not None
+        if params["trainer"]["mode"] == "evaluate":
+            assert glob.glob(os.path.join(params["trainer"]["model_dir"], '*'))
         self._set_check_point(params["trainer"]["model_dir"])
 
         # prepare TensorBoard output
@@ -98,11 +99,10 @@ class PointrobotTrainer:
             self.logger.info("Restored {}".format(self._latest_path_ckpt))
 
 
-    def __call__(self):
-        """main function in which the training takes place."""
+    def train(self):
+        """method for training an agent with Hindsight Workspace Relabeling"""
 
         # training mode:
-        #self._env.eval_mode = False
         self._policy.eval_mode = False
 
         total_steps = 0
@@ -130,7 +130,7 @@ class PointrobotTrainer:
         
 
         while total_steps < self._max_steps:
-           
+        
             #Visualize environment if "show_progess"
             if self._show_progress and \
                 ((n_episode % self._show_progress_interval) == 0) and \
@@ -238,7 +238,7 @@ class PointrobotTrainer:
                         samples["obs"], samples["act"], samples["next_obs"],
                         samples["rew"], np.array(samples["done"], dtype=np.float32),
                         None if not self._use_prioritized_rb else samples["weights"])
-               
+            
                 if self._use_prioritized_rb:
                     #Here we compute the Td-Critic-Loss/error
                     td_error = self._policy.compute_td_error(
@@ -253,7 +253,6 @@ class PointrobotTrainer:
             if total_steps % self._test_interval == 0:
                 
                 # setting evaluation mode for deterministic actions:
-                #self._env.eval_mode = True
                 self._policy.eval_mode = True
 
                 avg_test_return, success_rate = self.evaluate_policy(total_steps)
@@ -267,7 +266,6 @@ class PointrobotTrainer:
                 self.writer.flush()
 
                 # setting evaluation mode back to false:
-                #self._env.eval_mode = False
                 self._policy.eval_mode = False
 
             # Every save_model_interval we save the model
@@ -275,6 +273,17 @@ class PointrobotTrainer:
                 self.checkpoint_manager.save()
 
         tf.summary.flush()
+
+    
+    def evaluate(self):
+        """method for evaluating a pretrained agent for some episodes."""
+        self._policy.eval_mode = True
+
+        avg_test_return, success_rate = self.evaluate_policy(total_steps=0)
+        print("----- Evaluation -----")
+        print("average test return: {}".format(avg_test_return))
+        print("average test success rate: {}".format(success_rate))
+
 
     def evaluate_policy_continuously(self):
         """

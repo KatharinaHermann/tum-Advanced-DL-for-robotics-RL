@@ -28,7 +28,7 @@ test_env = gym.make(
     )
 
 # deleting the previous runs logs:
-logdir_files = glob.glob(params["trainer"]["logdir"])
+logdir_files = glob.glob(os.path.join('results', 'hyperparam_tuning', '*'))
 for f in logdir_files:
     if os.path.isdir(f):
         shutil.rmtree(f)
@@ -52,16 +52,10 @@ for lr_i, lr in enumerate([5e-4, 1e-4, 5e-5]):
                 params["agent"]["memory_capacity"] = memory_capacity
                 
                 # setting up logdir for the current hyperparams:
-                logdir = os.path.join('results/hyperparam_tuning',
+                logdir = os.path.join('results', 'hyperparam_tuning',
                     str(lr_i)+str(max_grad_i)+str(tau_i)+str(memory_capacity_i))
-                if not os.path.exists(logdir):
-                    os.makedirs(logdir)
-                logdir_files = glob.glob(logdir + '/*')
-                for f in logdir_files:
-                    if os.path.isdir(f):
-                        shutil.rmtree(f)
-                    else:
-                        os.remove(f)
+                os.makedirs(logdir)
+                params["trainer"]["logdir"] = logdir
 
                 # writing the hyperparameters into a file:
                 info_file = os.path.join(logdir, 'params.txt')
@@ -72,12 +66,9 @@ for lr_i, lr in enumerate([5e-4, 1e-4, 5e-5]):
                     f.write('batch size: {0: 4}'.format(memory_capacity) + '\n')
 
                 # deleting the previous checkpoints:
-                ckp_files = glob.glob('../models/agents/*')
+                ckp_files = glob.glob(os.path.join(params["trainer"]["model_dir"], "*"))
                 for f in ckp_files:
                     os.remove(f)
-                    print('------DELETED MODEL---------')
-
-                params["trainer"]["logdir"] = logdir
 
                 # initialize the agent:
                 policy = DDPG(
@@ -93,6 +84,4 @@ for lr_i, lr in enumerate([5e-4, 1e-4, 5e-5]):
                     test_env=test_env
                     )
 
-                print('-' * 5 + "Let's start training" + '-' * 5)
-
-                trainer()
+                trainer.train()
