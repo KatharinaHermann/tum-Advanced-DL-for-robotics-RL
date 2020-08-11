@@ -82,14 +82,14 @@ class PointrobotRelabeler:
             else:
                 # if the obstacle has just left the workspace without collision.
                 # choosing a distance with which the ws and the trajectory will be shifted away from the boarder:
-                erase_length = np.random.randint(low=1, high=4)
-                trajectory = self._erase_from_boarder(trajectory=trajectory,
-                                        env=env, erase_length=erase_length)
+                #erase_length = np.random.randint(low=1, high=4)
+                #trajectory = self._erase_from_boarder(trajectory=trajectory,
+                #                        env=env, erase_length=erase_length)
 
-                #shift_distance = np.random.randint(low=1, high=4)
-                #trajectory = self._shift_from_boarder(trajectory=trajectory,
-                #                        env=env,
-                #                        shift_distance=shift_distance)
+                shift_distance = np.random.randint(low=1, high=4)
+                trajectory = self._shift_from_boarder(trajectory=trajectory,
+                                        env=env,
+                                        shift_distance=shift_distance)
 
             # add new goal state to the trajectory:
             if len(trajectory) != 0:
