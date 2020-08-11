@@ -27,6 +27,16 @@ def load_params(param_file):
         return json.load(json_file)
 
 
+def get_random_params(params):
+    """gets random hyperparams according to the info stored in params["hyper_tuning"]"""
+    return params
+
+
+def export_params(params):
+    """"exports the actual hyperparams to a json file."""
+    pass
+
+
 def visualize_trajectory(filename):
     """Visualizes a complete saved trajectory that was stored 
     during training in filename.
