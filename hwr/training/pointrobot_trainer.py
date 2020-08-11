@@ -102,7 +102,7 @@ class PointrobotTrainer:
         """main function in which the training takes place."""
 
         # training mode:
-        self._env.eval_mode = False
+        self._policy.eval_mode = False
 
         total_steps = 0
         tf.summary.experimental.set_step(total_steps)
@@ -252,7 +252,7 @@ class PointrobotTrainer:
             if total_steps % self._test_interval == 0:
                 
                 # setting evaluation mode for deterministic actions:
-                self._env.eval_mode = True
+                self._policy.eval_mode = True
 
                 avg_test_return, success_rate = self.evaluate_policy(total_steps)
                 self.logger.info("Evaluation: Total Steps: {0: 7} Average Reward {1: 5.4f} and Sucess rate: {2: 5.4f} for {3: 2} episodes".format(
@@ -265,7 +265,7 @@ class PointrobotTrainer:
                 self.writer.flush()
 
                 # setting evaluation mode back to false:
-                self._env.eval_mode = False
+                self._policy.eval_mode = False
 
             # Every save_model_interval we save the model
             if total_steps % self._save_model_interval == 0:
