@@ -38,14 +38,14 @@
     "trainer": {
         "train_from_scratch" : true,
         "mode": "train",
-        "max_steps": 2e5,
+        "max_steps": 2e4,
         "episode_max_steps": 50,
         "n_experiments": 1,
         "show_progress": false,
         "show_progress_interval": 100,
         "save_model_interval": 1e4,
         "save_summary_interval": 1e3,
-        "logdir": "results",
+        "logdir": "results/hyperparam_tuning",
         "logging_level": "INFO",
         "model_dir": "../models/agents",
         "dir_suffix": "",
@@ -60,5 +60,29 @@
         "save_test_movie": false,
         "show_test_images": false,
         "normalize_obs": false
+    },
+    "hyper_tuning": {
+        "num_of_runs": 20,
+        "param_1":{
+            "group": "env",
+            "name": ["goal_reward"],
+            "low_bound": 2,
+            "high_bound": 10,
+            "scale": "linear"
+        },
+        "param_2":{
+            "group": "env",
+            "name": ["step_reward"],
+            "low_bound": -1e-1,
+            "high_bound": -1e-2,
+            "scale": "linear"
+        },
+        "param_3":{
+            "group": "env",
+            "name": ["collision_reward"],
+            "low_bound": -10,
+            "high_bound": -0.5,
+            "scale": "linear"
+        }
     }
 }
