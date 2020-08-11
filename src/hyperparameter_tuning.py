@@ -28,7 +28,7 @@ test_env = gym.make(
     )
 
 # deleting the previous runs logs:
-logdir_files = glob.glob(os.path.join('results', 'hyperparam_tuning'))
+logdir_files = glob.glob(os.path.join('results', 'hyperparam_tuning', '*'))
 for f in logdir_files:
     if os.path.isdir(f):
         shutil.rmtree(f)
