@@ -65,21 +65,21 @@
         "num_of_runs": 20,
         "param_1":{
             "group": "env",
-            "param": ["goal_reward"],
+            "name": ["goal_reward"],
             "low_bound": 2,
             "high_bound": 10,
             "scale": "linear"
         },
         "param_2":{
             "group": "env",
-            "param": ["step_reward"],
+            "name": ["step_reward"],
             "low_bound": -1e-1,
             "high_bound": -1e-2,
             "scale": "linear"
         },
         "param_3":{
             "group": "env",
-            "param": ["collision_reward"],
+            "name": ["collision_reward"],
             "low_bound": -10,
             "high_bound": -0.5,
             "scale": "linear"

@@ -36,7 +36,8 @@ for run in range(params["hyper_tuning"]["num_of_runs"]):
     params["trainer"]["logdir"] = logdir
 
     # write the actual hyperparams into a file:
-    export_params(params)
+    info_file = os.path.join(logdir, "params.txt")
+    export_params(params, info_file)
 
     #Initialize the environment
     env = gym.make(

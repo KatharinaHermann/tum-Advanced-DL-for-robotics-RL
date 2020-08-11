@@ -54,9 +54,15 @@ def get_random_params(params):
     return params
 
 
-def export_params(params):
+def export_params(params, info_file):
     """"exports the actual hyperparams to a json file."""
-    pass
+    for key in params["hyper_tuning"]:
+        if "param" in key:
+            group = params["hyper_tuning"][key]["group"]
+            for name in params["hyper_tuning"][key]["name"]:
+                with open(info_file, 'a') as f:
+                    param = params[group][name]
+                    f.write("{}/{} : {}".format(group, name, param) + '\n')
 
 
 def visualize_trajectory(filename):
