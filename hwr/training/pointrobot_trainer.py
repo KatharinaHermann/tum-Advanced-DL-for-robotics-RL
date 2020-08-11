@@ -277,7 +277,12 @@ class PointrobotTrainer:
     
     def evaluate(self):
         """method for evaluating a pretrained agent for some episodes."""
-        pass
+        self._policy.eval_mode = True
+
+        avg_test_return, success_rate = self.evaluate_policy(total_steps=0)
+        print("----- Evaluation -----")
+        print("average test return: {}".format(avg_test_return))
+        print("average test success rate: {}".format(success_rate))
 
 
     def evaluate_policy_continuously(self):

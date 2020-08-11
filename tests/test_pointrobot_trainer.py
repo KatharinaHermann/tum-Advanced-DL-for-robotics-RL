@@ -54,8 +54,6 @@ class PointrobotTrainerTests(unittest.TestCase):
 
     def test_evaluation(self):
         """tests the evaluation method of the pointrobot trainer"""
-        
-        total_steps = 10
 
         trainer = PointrobotTrainer(
             self.policy,
@@ -63,7 +61,7 @@ class PointrobotTrainerTests(unittest.TestCase):
             self.params,
             test_env=self.test_env)
 
-        trainer.evaluate_policy(total_steps=total_steps)
+        trainer.evaluate()
     
 
     def test_training(self):
@@ -76,7 +74,8 @@ class PointrobotTrainerTests(unittest.TestCase):
             self.env,
             self.params,
             test_env=self.test_env)
-        trainer()
+            
+        trainer.train()
 
 
 if __name__ == '__main__':
