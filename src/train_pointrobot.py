@@ -16,13 +16,6 @@ from hwr.utils import load_params
 # loading params:
 params = load_params('params/training_without_obstacles.json')
 
-if params["trainer"]["train_from_scratch"]:
-    # deleting the previous checkpoints:
-    ckp_files = glob.glob(os.path.join(params["trainer"]["model_dir"], '*'))
-    for f in ckp_files:
-        os.remove(f)
-    print('-' * 5 + 'TRAINING FROM SCRATCH!! --> DELETED CHECKPOINTS!' + '-' * 5)
-
 #Initialize the environment
 env = gym.make(
     params["env"]["name"],
@@ -46,8 +39,15 @@ trainer = PointrobotTrainer(
     params,
     test_env=test_env)
 
-print('-' * 5 + "Let's start training" + '-' * 5)
+if params["trainer"]["mode"] == "train":
+    if params["trainer"]["train_from_scratch"]:
+        # deleting the previous checkpoints:
+        ckp_files = glob.glob(os.path.join(params["trainer"]["model_dir"], '*'))
+        for f in ckp_files:
+            os.remove(f)
 
-trainer()
-
-print('-' * 5 + "We succeeeeeded!!!!!!!!!!!!!" + '-' * 5)
+    trainer.train()
+elif params["trainer"]["mode"] == "evaluate":
+    trainer.evaluate()
+else:
+    print("Unknown training mode. Expected \"train\" or \"evaluate\", received: {}".format(params["trainer"]["mode"]))
