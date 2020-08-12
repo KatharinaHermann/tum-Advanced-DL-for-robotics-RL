@@ -16,6 +16,12 @@ from hwr.utils import load_params
 # loading params:
 params = load_params('params/pointrobot_training_params.json')
 
+if params["trainer"]["train_from_scratch"]:
+    # deleting the previous checkpoints:
+    ckp_files = glob.glob(os.path.join(params["trainer"]["model_dir"], '*'))
+    for f in ckp_files:
+        os.remove(f)
+
 #Initialize the environment
 env = gym.make(
     params["env"]["name"],
@@ -40,12 +46,6 @@ trainer = PointrobotTrainer(
     test_env=test_env)
 
 if params["trainer"]["mode"] == "train":
-    if params["trainer"]["train_from_scratch"]:
-        # deleting the previous checkpoints:
-        ckp_files = glob.glob(os.path.join(params["trainer"]["model_dir"], '*'))
-        for f in ckp_files:
-            os.remove(f)
-
     trainer.train()
 elif params["trainer"]["mode"] == "evaluate":
     trainer.evaluate()
