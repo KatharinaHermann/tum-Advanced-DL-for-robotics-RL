@@ -60,7 +60,7 @@ class PointrobotTrainer:
         # Initialize workspace relabeler:
         self._relabeler = PointrobotRelabeler(
             ws_shape=(self._env.grid_size, self._env.grid_size),
-            mode='erease'
+            mode='straight_line'
             )
 
         # prepare log directory
