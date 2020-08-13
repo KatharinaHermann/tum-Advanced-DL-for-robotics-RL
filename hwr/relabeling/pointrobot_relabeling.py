@@ -73,7 +73,7 @@ class PointrobotRelabeler:
         if trajectory[-1]["reward"] == env.collision_reward:
 
             # find the entries of the matrix where the robot has collided.:
-            obstacle_entries = self._find_collision_entries(trajectory, env)
+            obstacle_entries = self._find_collision_entries(trajectory[-1], env)
 
             if obstacle_entries:
                 # if the robot has collided.
@@ -110,7 +110,7 @@ class PointrobotRelabeler:
         if trajectory[-1]["reward"] == env.collision_reward:
 
             # find the entries of the matrix where the robot has collided.:
-            obstacle_entries = self._find_collision_entries(trajectory, env)
+            obstacle_entries = self._find_collision_entries(trajectory[-1], env)
 
             if obstacle_entries:
                 # if the robot has collided.
@@ -129,10 +129,10 @@ class PointrobotRelabeler:
                                         env=env,
                                         shift_distance=shift_distance)
 
-            "Sample new obstacles in workspace"
+            #Sample new obstacles in workspace
             workspace = self._sample_objects(workspace=workspace, num_objects=4, avg_object_size=5, grid_size=env.grid_size)
 
-            "Check collision for all points in the trajectory and remove obstacles "
+            #Check collision for all points in the trajectory and remove obstacles.
             for point in trajectory:
                 obstacle_entries = self._find_collision_entries(point, env)
 
@@ -174,7 +174,7 @@ class PointrobotRelabeler:
 
         while np.linalg.norm(goal-pos) > env.robot_radius:
             trajectory_to_return.append({'workspace': workspace,'position': pos,
-                'next_position': next_pos,'goal': goal, 'action': action, 'reward': reward, 'done': done})      
+                'next_position': next_pos,'goal': goal, 'action': action, 'reward': reward, 'done': done})     
             pos = next_pos
             next_pos = pos + normal_step_direction
         
@@ -228,11 +228,11 @@ class PointrobotRelabeler:
         return workspace
 
 
-    def _find_collision_entries(self, trajectory, env):
+    def _find_collision_entries(self, traj_point, env):
         """Finds the entries of the matrix, where the agent has collided into an obstacle."""
 
-        workspace = trajectory[0]['workspace']
-        last_pos = trajectory[-1]['position']
+        workspace = traj_point['workspace']
+        last_pos = traj_point['position']
         radius = env.robot_radius
         # range of distances to check in every direction:
         # (it is possible that the radius of the robot is bigger than the grid size, this is why this is necessary.)
