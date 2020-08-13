@@ -28,8 +28,8 @@ class PointrobotRelabeler:
                     possible values are: 'erease', 'random', 'sliding'
         """
 
-        assert mode in ['erease', 'random', 'sliding'] ,\
-            'mode should be either \'erease\', \'random\' or \'sliding\'. Received {}'.format(mode)
+        assert mode in ['erease', 'random', 'sliding', 'straight_line'] ,\
+            'mode should be either \'erease\', \'random\' or \'sliding\' or \'straight_line\'. Received {}'.format(mode)
 
         self._ws_shape = ws_shape
         self._mode = mode
@@ -48,6 +48,8 @@ class PointrobotRelabeler:
             relabeled_trajectory = self._random_relabel(trajectory, env)
         elif self._mode == 'slding':
             relabeled_trajectory = self._sliding_relabel(trajectory, env)
+        elif self._mode == 'straight_line':
+            relabeled_trajectory = self. _straight_line_relabel(trajectory, env)
 
         # normalize the trajectory if normalization is used in the environment:
         if env.normalize:
@@ -82,6 +84,10 @@ class PointrobotRelabeler:
             else:
                 # if the obstacle has just left the workspace without collision.
                 # choosing a distance with which the ws and the trajectory will be shifted away from the boarder:
+                #erase_length = np.random.randint(low=1, high=4)
+                #trajectory = self._erase_from_boarder(trajectory=trajectory,
+                #                        env=env, erase_length=erase_length)
+
                 shift_distance = np.random.randint(low=1, high=4)
                 trajectory = self._shift_from_boarder(trajectory=trajectory,
                                         env=env,
@@ -98,11 +104,86 @@ class PointrobotRelabeler:
 
     def _random_relabel(self, trajectory, env):
         """Relabels a workspace with 'random' method."""
-        relabeled_trajectory = trajectory
 
-        return relabeled_trajectory
+        workspace = trajectory[0]['workspace']
+
+        if trajectory[-1]["reward"] == env.collision_reward:
+
+            # find the entries of the matrix where the robot has collided.:
+            obstacle_entries = self._find_collision_entries(trajectory, env)
+
+            if obstacle_entries:
+                # if the robot has collided.
+                for obstacle_entry in obstacle_entries:
+                    workspace = self._remove_obstacle(workspace=workspace, obstacle_entry=obstacle_entry)
+
+            else:
+                # if the obstacle has just left the workspace without collision.
+                # choosing a distance with which the ws and the trajectory will be shifted away from the boarder:
+                #erase_length = np.random.randint(low=1, high=4)
+                #trajectory = self._erase_from_boarder(trajectory=trajectory,
+                #                        env=env, erase_length=erase_length)
+
+                shift_distance = np.random.randint(low=1, high=4)
+                trajectory = self._shift_from_boarder(trajectory=trajectory,
+                                        env=env,
+                                        shift_distance=shift_distance)
+
+            "Sample new obstacles in workspace"
+            workspace = self._sample_objects(workspace=workspace, num_objects=4, avg_object_size=5, grid_size=env.grid_size)
+
+            "Check collision for all points in the trajectory and remove obstacles "
+            for point in trajectory:
+                obstacle_entries = self._find_collision_entries(point, env)
+
+                if obstacle_entries:
+                # if the robot has collided at at position point, remove obstacle.
+                    for obstacle_entry in obstacle_entries:
+                        workspace = self._remove_obstacle(workspace=workspace, obstacle_entry=obstacle_entry)
+                    #Sample new object
+                    workspace = self._sample_objects(workspace=workspace, num_objects=1, avg_object_size=5, grid_size=env.grid_size)
+            
+            for data_point in trajectory:
+                    data_point['workspace'] = workspace
+            # add new goal state to the trajectory:
+            if len(trajectory) != 0:
+                return self._set_new_goal(trajectory, env)
+            else:
+                return []
+        else:
+            return self._set_new_goal(trajectory, env)
 
 
+    def _straight_line_relabel(self, trajectory, env):
+        """Relabels the trajectory as a 'straight line'"""
+        start = trajectory[0]['position']
+        goal = trajectory[0]['goal']
+        workspace = trajectory[0]['workspace']
+
+        trajectory_to_return = []
+        if (np.linalg.norm(goal - start)) <= (env.robot_radius):
+            return trajectory_to_return
+
+        pos = start.copy()
+        action = (goal-start) / (np.linalg.norm(goal-start))
+        next_pos = pos + action
+        reward = env.step_reward
+        done = False
+        trajectory_to_return.append({'workspace': workspace,'position': pos,
+            'next_position': next_pos,'goal': goal, 'action': action, 'reward': reward, 'done': done})
+
+        while np.linalg.norm(goal - pos) > env.robot_radius:
+            pos = next_pos
+            next_pos += action
+            trajectory_to_return.append({'workspace': workspace, 'position': pos,
+                'next_position': next_pos,'goal': goal, 'action': action, 'reward': reward, 'done': done})
+
+        trajectory_to_return[-1]['reward'] = env.goal_reward
+        trajectory_to_return[-1]['done'] = True
+
+        return trajectory_to_return
+    
+    
     def _sliding_relabel(self, trajectory, env):
         """Relabels a workspace with 'sliding' method"""
         relabeled_trajectory = trajectory
@@ -168,11 +249,21 @@ class PointrobotRelabeler:
         for direction in directions_to_check:
             for distance in distances:
                 pos = last_pos + distance * direction
-                entry = (int(pos[0]), int(pos[1]))
+                entry = (int(pos[1]), int(pos[0]))
                 if workspace[entry] == 1:
                     collision_entries.append(entry)
 
         return collision_entries
+
+    def _erase_from_boarder(self, trajectory, env, erase_length):
+        """Erases the last part of the trajectory, that crashed with the boarder."""
+        erase_length = int(erase_length)
+
+        trajectory_to_return = []
+        for point in trajectory[:(-erase_length)]:
+            trajectory_to_return.append(point)
+
+        return trajectory_to_return
 
 
     def _shift_from_boarder(self, trajectory, env, shift_distance):
@@ -184,41 +275,41 @@ class PointrobotRelabeler:
         radius = env.robot_radius
 
         # shifting the workspace. With the if conditions it is decided to which wall is the robot near:
-        if last_pos[0] <= radius:
-            new_workspace = np.zeros_like(workspace)
-            new_workspace[shift_distance: , :] = workspace[ :(-shift_distance), :]
-            workspace = new_workspace
-            for point in trajectory:
-                point['position'][0] += shift_distance
-                point['next_position'][0] += shift_distance
-                point['goal'][0] += shift_distance
-
-        elif last_pos[0] >= (workspace.shape[0] - 1 - radius):
-            new_workspace = np.zeros_like(workspace)
-            new_workspace[ :(-shift_distance), :] = workspace[shift_distance: , :]
-            workspace = new_workspace
-            for point in trajectory:
-                point['position'][0] -= shift_distance
-                point['next_position'][0] -= shift_distance
-                point['goal'][0] -= shift_distance
-
         if last_pos[1] <= radius:
             new_workspace = np.zeros_like(workspace)
-            new_workspace[ :, shift_distance:] = workspace[ :, :(-shift_distance)]
+            new_workspace[shift_distance: , :] = workspace[ :(-shift_distance), :]
             workspace = new_workspace
             for point in trajectory:
                 point['position'][1] += shift_distance
                 point['next_position'][1] += shift_distance
                 point['goal'][1] += shift_distance
-                
-        elif last_pos[1] >= (workspace.shape[1] - 1 - radius):
+
+        elif last_pos[1] >= (workspace.shape[0] - 1 - radius):
             new_workspace = np.zeros_like(workspace)
-            new_workspace[ :, :(-shift_distance)] = workspace[ :, shift_distance: ]
+            new_workspace[ :(-shift_distance), :] = workspace[shift_distance: , :]
             workspace = new_workspace
             for point in trajectory:
                 point['position'][1] -= shift_distance
                 point['next_position'][1] -= shift_distance
                 point['goal'][1] -= shift_distance
+
+        if last_pos[0] <= radius:
+            new_workspace = np.zeros_like(workspace)
+            new_workspace[ :, shift_distance:] = workspace[ :, :(-shift_distance)]
+            workspace = new_workspace
+            for point in trajectory:
+                point['position'][0] += shift_distance
+                point['next_position'][0] += shift_distance
+                point['goal'][0] += shift_distance
+                
+        elif last_pos[0] >= (workspace.shape[1] - 1 - radius):
+            new_workspace = np.zeros_like(workspace)
+            new_workspace[ :, :(-shift_distance)] = workspace[ :, shift_distance: ]
+            workspace = new_workspace
+            for point in trajectory:
+                point['position'][0] -= shift_distance
+                point['next_position'][0] -= shift_distance
+                point['goal'][0] -= shift_distance
 
         for point in trajectory:
             point['workspace'] = workspace
@@ -233,6 +324,37 @@ class PointrobotRelabeler:
                 trajectory_to_return.append(point)
 
         return trajectory_to_return
+
+    def _sample_objects(self, workspace, num_objects, avg_object_size, grid_size):
+
+        if num_objects >= 1:
+             
+            #Generate an origin from a uniform distribution for each object
+            origin= np.random.randint(low=0, high=grid_size, size=(num_objects,2))
+            origin=np.asarray(origin, dtype=None, order=None)
+            
+            #Generate a width and height from a Gaussian distribution for each object
+            width =np.random.normal(loc=avg_object_size, scale=2, size=(num_objects,1))
+            width=np.asarray(width, dtype=int, order=None)
+            
+            height =np.random.normal(loc=avg_object_size, scale=2, size=(num_objects,1))
+            height =np.asarray(height, dtype=int, order=None)
+
+            #Assign each entry with an object a 1. 
+            for i in range(num_objects):
+                if origin[i,1]+width[i] > grid_size:
+                    right_bound=grid_size+1
+                else: right_bound = (origin[i,1]+width[i]).item()
+
+                if origin[i,0]+height[i] > grid_size:
+                    upper_bound=grid_size+1
+                else: upper_bound = (origin[i,0]+height[i]).item()
+                
+                workspace[origin[i,0]:upper_bound, origin[i,1]:right_bound]=1
+            return workspace
+            
+        else:
+            return workspace
 
 
     def _set_new_goal(self, trajectory, env):

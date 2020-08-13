@@ -1,4 +1,5 @@
-import numpy
+import numpy as np
+import math
 import joblib
 import os
 import matplotlib.pyplot as plt
@@ -25,6 +26,43 @@ def load_params(param_file):
     """loads a json parameter file."""
     with open(param_file) as json_file:
         return json.load(json_file)
+
+
+def get_random_params(params):
+    """gets random hyperparams according to the info stored in params["hyper_tuning"]"""
+
+    for key in params["hyper_tuning"]:
+        if "param" in key:
+            assert params["hyper_tuning"][key]["scale"] in ["linear", "log"]
+            assert params["hyper_tuning"][key]["low_bound"] < params["hyper_tuning"][key]["high_bound"]
+            group = params["hyper_tuning"][key]["group"]
+            if params["hyper_tuning"][key]["scale"] == "linear":
+                for name in params["hyper_tuning"][key]["name"]:
+                    random_param = np.random.uniform(
+                        low=params["hyper_tuning"][key]["low_bound"],
+                        high=params["hyper_tuning"][key]["high_bound"])
+                    params[group][name] = random_param
+            else:
+                for name in params["hyper_tuning"][key]["name"]:
+                    low = math.log10(params["hyper_tuning"][key]["low_bound"])
+                    high = math.log10(params["hyper_tuning"][key]["high_bound"])
+                    random_param = np.random.uniform(
+                        low=low,
+                        high=high)
+                    params[group][name] = math.pow(10, random_param)
+
+    return params
+
+
+def export_params(params, info_file):
+    """"exports the actual hyperparams to a json file."""
+    for key in params["hyper_tuning"]:
+        if "param" in key:
+            group = params["hyper_tuning"][key]["group"]
+            for name in params["hyper_tuning"][key]["name"]:
+                with open(info_file, 'a') as f:
+                    param = params[group][name]
+                    f.write("{}/{} : {}".format(group, name, param) + '\n')
 
 
 def visualize_trajectory(filename):

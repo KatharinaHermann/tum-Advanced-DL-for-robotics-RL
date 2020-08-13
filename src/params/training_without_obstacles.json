@@ -22,7 +22,7 @@
     },
     "agent": {
         "name": "DDPG",
-        "max_grad": 1,
+        "max_grad": 1.0,
         "lr_actor": 1e-4,
         "lr_critic": 1e-4,
         "actor_units": [400, 300],
