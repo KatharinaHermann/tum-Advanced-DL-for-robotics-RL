@@ -110,10 +110,10 @@ class PointrobotRelabelerTests(unittest.TestCase):
         # etalon solutions:
         etalon_wss = [np.zeros_like(workspace) for _ in range(5)]
         etalon_wss[0] = workspace.copy()
-        etalon_wss[1][10:15, 9:14] = 1
-        etalon_wss[2][10:15, 11:16] = 1
-        etalon_wss[3][9:14, 10:15] = 1
-        etalon_wss[4][11:16, 10:15] = 1
+        etalon_wss[1][9:14, 10:15] = 1
+        etalon_wss[2][11:16, 10:15] = 1
+        etalon_wss[3][10:15, 9:14] = 1
+        etalon_wss[4][10:15, 11:16] = 1
 
         etalon_trajs = []
         etalon_trajs.append([{'workspace': etalon_wss[0], 'position': np.array([10, 20]),
@@ -205,9 +205,9 @@ class PointrobotRelabelerTests(unittest.TestCase):
         """
 
         workspace = np.zeros((32, 32))
-        workspace[5:10, 12:19] = 1
+        workspace[12:19, 5:10] = 1
         etalon_workspace = workspace.copy()
-        workspace[22:, :5] = 1
+        workspace[:5, 22:] = 1
 
         env = test_env(radius=0.5)
         relabeler = PointrobotRelabeler(ws_shape=(32, 32),
@@ -237,6 +237,39 @@ class PointrobotRelabelerTests(unittest.TestCase):
             self.assertTrue((etalon_relabeled_traj[i]['position'] == relabeled_traj[i]['position']).all())
             self.assertEqual(etalon_relabeled_traj[i]['done'], relabeled_traj[i]['done'])
             self.assertEqual(etalon_relabeled_traj[i]['reward'], relabeled_traj[i]['reward'])
+
+
+    def test_straight_line_relabeler(self):
+        """tests the straight line relabeler method."""
+        workspace = np.zeros((32, 32))
+        relabeler = PointrobotRelabeler(ws_shape=(32, 32),
+                                        mode='straight_line')
+        env = test_env(radius=1)
+
+        trajectory = []
+        for _ in range(30):
+            trajectory.append({'workspace': workspace, 'position': np.zeros((2,)),
+            'done': False, 'reward': env.step_reward})
+
+        start = np.ones((2, ))
+        goal = np.array([30, 19])
+        trajectory[0]["position"] = start
+        trajectory[0]["goal"] = goal
+
+        relabeled_traj = relabeler.relabel(trajectory, env)
+
+        self.assertAlmostEqual(np.linalg.norm(relabeled_traj[0]["action"]), 1.)
+        self.assertEqual(relabeled_traj[-1]["reward"], env.goal_reward)
+        self.assertTrue(relabeled_traj[-1]["done"])
+        self.assertGreater(env.robot_radius, np.linalg.norm(goal - relabeled_traj[-1]["position"]))
+
+        # checkoing whether all points lie on the same straight:
+        # normal_vect^T * pos = c
+        action = (goal - start) / np.linalg.norm([goal - start])
+        normal_vect = np.array([action[1], -action[0]])
+        c = normal_vect @ start
+        for point in relabeled_traj:
+            self.assertAlmostEqual(normal_vect @ point["position"], c)
 
 
 if __name__ == '__main__':

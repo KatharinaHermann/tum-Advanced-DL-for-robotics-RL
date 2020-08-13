@@ -14,9 +14,10 @@ from hwr.utils import load_params
 
 
 # loading params:
-params = load_params('src/params/training_without_obstacles.json')
+params = load_params('params/training_without_obstacles.json')
 
-if params["trainer"]["train_from_scratch"]:
+if params["trainer"]["train_from_scratch"] and\
+    params["trainer"]["mode"] == "train":
     # deleting the previous checkpoints:
     ckp_files = glob.glob(os.path.join(params["trainer"]["model_dir"], '*'))
     for f in ckp_files:
