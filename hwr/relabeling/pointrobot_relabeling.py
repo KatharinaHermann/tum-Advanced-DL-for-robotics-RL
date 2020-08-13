@@ -173,8 +173,9 @@ class PointrobotRelabeler:
             pos = next_pos.copy()
             next_pos += action
 
-        trajectory_to_return[-1]['reward'] = env.goal_reward
-        trajectory_to_return[-1]['done'] = True
+        if trajectory_to_return:
+            trajectory_to_return[-1]['reward'] = env.goal_reward
+            trajectory_to_return[-1]['done'] = True
 
         return trajectory_to_return
     
