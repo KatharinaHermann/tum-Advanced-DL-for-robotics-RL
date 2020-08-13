@@ -248,10 +248,10 @@ class PointrobotRelabelerTests(unittest.TestCase):
 
         trajectory = []
         for _ in range(30):
-            trajectory.append({'workspace': workspace, 'position': np.zeros((1, 2)),
+            trajectory.append({'workspace': workspace, 'position': np.zeros((2,)),
             'done': False, 'reward': env.step_reward})
 
-        start = np.ones((1, 2))
+        start = np.ones((2, ))
         goal = np.array([30, 19])
         trajectory[0]["position"] = start
         trajectory[0]["goal"] = goal
@@ -259,6 +259,17 @@ class PointrobotRelabelerTests(unittest.TestCase):
         relabeled_traj = relabeler.relabel(trajectory, env)
 
         self.assertAlmostEqual(np.linalg.norm(relabeled_traj[0]["action"]), 1.)
+        self.assertEqual(relabeled_traj[-1]["reward"], env.goal_reward)
+        self.assertTrue(relabeled_traj[-1]["done"])
+        self.assertGreater(env.robot_radius, np.linalg.norm(goal - relabeled_traj[-1]["position"]))
+
+        # checkoing whether all points lie on the same straight:
+        # normal_vect^T * pos = c
+        action = (goal - start) / np.linalg.norm([goal - start])
+        normal_vect = np.array([action[1], -action[0]])
+        c = normal_vect @ start
+        for point in relabeled_traj:
+            self.assertAlmostEqual(normal_vect @ point["position"], c)
 
 
 if __name__ == '__main__':
