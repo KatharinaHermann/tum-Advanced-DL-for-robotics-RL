@@ -22,7 +22,7 @@
     },
     "agent": {
         "name": "DDPG",
-        "max_grad": 0.5,
+        "max_grad": 1.0,
         "lr_actor": 1e-4,
         "lr_critic": 1e-4,
         "actor_units": [400, 300],
@@ -37,7 +37,7 @@
     },
     "trainer": {
         "train_from_scratch" : true,
-        "mode": "evaluate",
+        "mode": "train",
         "max_steps": 1e6,
         "episode_max_steps": 50,
         "n_experiments": 1,
@@ -53,8 +53,8 @@
         "use_nstep_rb": false,
         "n_step": 4,
         "test_interval": 1e4,
-        "show_test_progress": true,
-        "test_episodes": 20,
+        "show_test_progress": false,
+        "test_episodes": 100,
         "save_test_path": false,
         "save_test_path_sep": false,
         "save_test_movie": false,
