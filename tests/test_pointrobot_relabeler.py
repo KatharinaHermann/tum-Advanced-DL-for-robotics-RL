@@ -261,7 +261,14 @@ class PointrobotRelabelerTests(unittest.TestCase):
         self.assertAlmostEqual(np.linalg.norm(relabeled_traj[0]["action"]), 1.)
         self.assertEqual(relabeled_traj[-1]["reward"], env.goal_reward)
         self.assertTrue(relabeled_traj[-1]["done"])
-        self.assertGreater(env.robot_radius, np.linalg.norm(goal - relabeled_traj[-1]["position"]))
+        self.assertGreater(env.robot_radius, np.linalg.norm(goal - relabeled_traj[-1]["next_position"]))
+        for point in relabeled_traj:
+            self.assertGreater(np.linalg.norm(goal - point["position"]), env.robot_radius)
+        for i, point in enumerate(relabeled_traj[1:]):
+            self.assertTrue((point["position"] == relabeled_traj[i]["next_position"]).all())
+        for point in relabeled_traj[:-1]:
+            self.assertEqual(point["reward"], env.step_reward)
+            self.assertFalse(point["done"])
 
         # checkoing whether all points lie on the same straight:
         # normal_vect^T * pos = c
