@@ -277,6 +277,7 @@ class PointrobotRelabelerTests(unittest.TestCase):
         c = normal_vect @ start
         for point in relabeled_traj:
             self.assertAlmostEqual(normal_vect @ point["position"], c)
+            
 
 
 if __name__ == '__main__':
