@@ -38,6 +38,7 @@
     "trainer": {
         "train_from_scratch" : true,
         "mode": "train",
+        "relabeling_mode": "straight_line",
         "max_steps": 1e5,
         "episode_max_steps": 50,
         "n_experiments": 1,
