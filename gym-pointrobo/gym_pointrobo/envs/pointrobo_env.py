@@ -124,6 +124,9 @@ class PointroboEnv(gym.Env):
             self._goal_artist = plt.Circle((self.goal_pos[0], self.goal_pos[1]), self.robot_radius, color='b')
             self._ax.add_artist(self._goal_artist)
         
+        self._ax.cla()
+        self._ax.add_artist(self._robo_artist)
+        self._ax.add_artist(self._goal_artist)
         self._ax.matshow(self.workspace)
         self._robo_artist.set_center((self.agent_pos[0], self.agent_pos[1]))
         self._goal_artist.set_center((self.goal_pos[0], self.goal_pos[1]))
