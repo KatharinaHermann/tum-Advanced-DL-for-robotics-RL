@@ -161,25 +161,21 @@ class PointrobotRelabeler:
         workspace = trajectory[0]['workspace']
 
         trajectory_to_return = []
-        if (np.linalg.norm(goal - start)) <= (env.robot_radius):
-            return trajectory_to_return
 
         pos = start.copy()
         action = (goal-start) / (np.linalg.norm(goal-start))
         next_pos = pos + action
         reward = env.step_reward
-        done = False
-        trajectory_to_return.append({'workspace': workspace,'position': pos,
-            'next_position': next_pos,'goal': goal, 'action': action, 'reward': reward, 'done': done})
 
         while np.linalg.norm(goal - pos) > env.robot_radius:
-            pos = next_pos
+            trajectory_to_return.append({'workspace': workspace, 'position': pos.copy(),
+                'next_position': next_pos.copy(),'goal': goal, 'action': action, 'reward': reward, 'done': False})
+            pos = next_pos.copy()
             next_pos += action
-            trajectory_to_return.append({'workspace': workspace, 'position': pos,
-                'next_position': next_pos,'goal': goal, 'action': action, 'reward': reward, 'done': done})
 
-        trajectory_to_return[-1]['reward'] = env.goal_reward
-        trajectory_to_return[-1]['done'] = True
+        if trajectory_to_return:
+            trajectory_to_return[-1]['reward'] = env.goal_reward
+            trajectory_to_return[-1]['done'] = True
 
         return trajectory_to_return
     
