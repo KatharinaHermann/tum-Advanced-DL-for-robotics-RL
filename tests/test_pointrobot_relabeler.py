@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import math
 
 from hwr.relabeling.pointrobot_relabeling import PointrobotRelabeler
 from math import isclose
@@ -278,6 +279,32 @@ class PointrobotRelabelerTests(unittest.TestCase):
         for point in relabeled_traj:
             self.assertAlmostEqual(normal_vect @ point["position"], c)
             
+
+    def test_calc_angle(self):
+        """tests the angle calculation method of the relabeler."""
+        num_angles = 10
+        num_tests = 100
+        angles = np.random.uniform(low=0., high=2 * math.pi, size=(num_angles,))
+        actions = [np.array([math.cos(angle), math.sin(angle)]) for angle in angles]
+
+        env = test_env(radius=0.5)
+        relabeler = PointrobotRelabeler(ws_shape=(32, 32),
+                                        mode='erease')
+        
+        for test in range(num_tests):
+            i1 = np.random.randint(low=0, high=num_angles)
+            i2 = np.random.randint(low=0, high=num_angles)
+            action1, angle1 = actions[i1], angles[i1]
+            action2, angle2 = actions[i2], angles[i2]
+
+            d_theta_ground = abs(angle1 - angle2)
+            if d_theta_ground > math.pi:
+                d_theta_ground = 2 * math.pi - d_theta_ground
+            
+            d_theta = relabeler._calc_angle(action1, action2)
+
+            self.assertAlmostEqual(abs(d_theta), d_theta_ground)
+    
 
 
 if __name__ == '__main__':
