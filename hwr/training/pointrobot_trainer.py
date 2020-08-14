@@ -176,7 +176,7 @@ class PointrobotTrainer:
                     # Create new workspace for the trajectory:
                     relabeled_trajectory = self._relabeler.relabel(trajectory=self.trajectory, env=self._env)
 
-                    if len(relabeled_trajectory) != 0:
+                    if relabeled_trajectory:
                         relabeled_ws = relabeled_trajectory[0]['workspace']
                         relabeled_reduced_ws = self._CAE.evaluate(relabeled_ws)
                         
@@ -192,12 +192,13 @@ class PointrobotTrainer:
                     relabeling_times.append(time.time() - relabeling_begin)
 
                     # plotting the relabeled trajectory:
-                    self._relabel_fig = visualize_trajectory(
-                        trajectory=relabeled_trajectory,
-                        fig=self._relabel_fig,
-                        env=self._env
-                        )
-                    plt.pause(1)
+                    if self._params["trainer"]["show_relabeling"]:
+                        self._relabel_fig = visualize_trajectory(
+                            trajectory=relabeled_trajectory,
+                            fig=self._relabel_fig,
+                            env=self._env
+                            )
+                        plt.pause(1)
                 else:
                     success_traj_train += 1
 
