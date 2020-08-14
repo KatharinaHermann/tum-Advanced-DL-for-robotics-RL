@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import math
 
 from hwr.relabeling.pointrobot_relabeling import PointrobotRelabeler
 from math import isclose
@@ -215,20 +216,20 @@ class PointrobotRelabelerTests(unittest.TestCase):
 
         trajectory = []
         trajectory.append({'workspace': workspace, 'position': np.array([21.0, 5.0]),
-            'done': False, 'reward': env.step_reward})
+            'done': False, 'reward': env.step_reward, 'action': np.ones((2,))})
         trajectory.append({'workspace': workspace, 'position': np.array([21.3, 4.7]),
-            'done': False, 'reward': env.step_reward})
+            'done': False, 'reward': env.step_reward, 'action': np.ones((2,))})
         trajectory.append({'workspace': workspace, 'position': np.array([21.6, 4.4]),
-            'done': True, 'reward': env.collision_reward})
+            'done': True, 'reward': env.collision_reward, 'action': np.ones((2,))})
 
         # etalon solutions:
         etalon_relabeled_traj = []
         etalon_relabeled_traj.append({'workspace': etalon_workspace, 'position': np.array([21.0, 5.0]),
-            'done': False, 'reward': env.step_reward})
+            'done': False, 'reward': env.step_reward, 'action': np.ones((2,))})
         etalon_relabeled_traj.append({'workspace': etalon_workspace, 'position': np.array([21.3, 4.7]),
-            'done': False, 'reward': env.step_reward})
+            'done': False, 'reward': env.step_reward, 'action': np.ones((2,))})
         etalon_relabeled_traj.append({'workspace': etalon_workspace, 'position': np.array([21.6, 4.4]), 
-            'done': True, 'reward': env.goal_reward})
+            'done': True, 'reward': env.goal_reward, 'action': np.ones((2,))})
 
         relabeled_traj = relabeler.relabel(trajectory, env)
 
@@ -278,6 +279,61 @@ class PointrobotRelabelerTests(unittest.TestCase):
         for point in relabeled_traj:
             self.assertAlmostEqual(normal_vect @ point["position"], c)
             
+
+    def test_calc_angle(self):
+        """tests the angle calculation method of the relabeler."""
+        num_angles = 10
+        num_tests = 100
+        angles = np.random.uniform(low=0., high=2 * math.pi, size=(num_angles,))
+        actions = [np.array([math.cos(angle), math.sin(angle)]) for angle in angles]
+
+        relabeler = PointrobotRelabeler(ws_shape=(32, 32),
+                                        mode='erease')
+        
+        for _ in range(num_tests):
+            i1 = np.random.randint(low=0, high=num_angles)
+            i2 = np.random.randint(low=0, high=num_angles)
+            action1, angle1 = actions[i1], angles[i1]
+            action2, angle2 = actions[i2], angles[i2]
+
+            d_theta_ground = abs(angle1 - angle2)
+            if d_theta_ground > math.pi:
+                d_theta_ground = 2 * math.pi - d_theta_ground
+            
+            d_theta = relabeler._calc_angle(action1, action2)
+
+            self.assertAlmostEqual(abs(d_theta), d_theta_ground)
+
+
+    def test_zig_zag(self):
+        """tests the zig-zag finder method of the relabeler."""
+
+        relabeler = PointrobotRelabeler(ws_shape=(32, 32),
+                                        mode='erease')
+
+        trajectories = []
+        trajectory = []
+        for i in range(10):
+            angle = math.pow(-1, i) * math.pi / 3
+            action = np.array([math.cos(angle), math.sin(angle)])
+            trajectory.append({"action": action})
+        trajectories.append(trajectory)
+
+        trajectory = []
+        for _ in range(10):
+            angle = np.random.uniform(low=0, high=math.pi / 2)
+            action = np.array([math.cos(angle), math.sin(angle)])
+            trajectory.append({"action": action})
+        trajectories.append(trajectory)
+
+        trajectory = []
+        trajectory.append({"action": np.array([0, 1])})
+        trajectories.append(trajectory)
+
+        results = [True, False, False]
+
+        for i, trajectory in enumerate(trajectories):
+            self.assertEqual(results[i], relabeler._zig_zag_path(trajectory))    
 
 
 if __name__ == '__main__':

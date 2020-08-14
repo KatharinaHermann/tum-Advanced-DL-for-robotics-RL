@@ -37,17 +37,21 @@ class PointrobotRelabeler:
 
     def relabel(self, trajectory, env):
         """creates a new workspace and goal for the given trajectory."""
-
+        
+        relabeled_trajectory = []
         # rescale the trajectory if normalization is used in the environment:
         if env.normalize:
             trajectory = self._rescale_trajectory(trajectory, env)
 
         if self._mode == 'erease':
-            relabeled_trajectory = self._erease_relabel(trajectory, env)
+            if not self._zig_zag_path(trajectory):
+                relabeled_trajectory = self._erease_relabel(trajectory, env)
         elif self._mode == 'random':
-            relabeled_trajectory = self._random_relabel(trajectory, env)
+            if not self._zig_zag_path(trajectory):
+                relabeled_trajectory = self._random_relabel(trajectory, env)
         elif self._mode == 'slding':
-            relabeled_trajectory = self._sliding_relabel(trajectory, env)
+            if not self._zig_zag_path(trajectory):
+                relabeled_trajectory = self._sliding_relabel(trajectory, env)
         elif self._mode == 'straight_line':
             relabeled_trajectory = self. _straight_line_relabel(trajectory, env)
 
@@ -408,6 +412,35 @@ class PointrobotRelabeler:
             trajectory = []
 
         return trajectory
+
+
+    def _zig_zag_path(self, trajectory):
+        """returns True, if the trajectory contains some serious zig zaging.
+        It checks the average orientation difference among the points.
+        If it is bigger then a specified threshold, it returns True.
+        """
+        threshold = math.pi / 2
+        zig_zag = False
+        if len(trajectory) > 1:
+            angle_sum = 0
+            for i, point in enumerate(trajectory[1:]):
+                angle_sum += abs(self._calc_angle(trajectory[i]["action"], point["action"]))
+            
+            angle_diff_average = angle_sum / (len(trajectory) - 1)
+            if angle_diff_average > threshold:
+                zig_zag = True
+
+        return zig_zag
+
+
+    def _calc_angle(self, action1, action2):
+        """calculates the angle between two successive actions."""
+        length1 = np.linalg.norm(action1)
+        length2 = np.linalg.norm(action2)
+        cos_theta = action1 @ action2 / (length1 * length2)
+        cross = action1[0] * action2[1] - action1[1] * action2[0]
+        sin_theta = cross / (length1 * length2)
+        return math.atan2(sin_theta, cos_theta)
 
 
     def _rescale_trajectory(self, trajectory, env):
