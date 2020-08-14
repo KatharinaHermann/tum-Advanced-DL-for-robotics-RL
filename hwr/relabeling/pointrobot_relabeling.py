@@ -107,7 +107,8 @@ class PointrobotRelabeler:
 
 
     def _random_relabel(self, trajectory, env):
-        """Relabels a workspace with 'random' method."""
+        """Relabels a workspace with 'random' method.
+        Random means, that obstacles are sampled in the range of the trajectory."""
 
         workspace = trajectory[0]['workspace']
 
@@ -133,29 +134,17 @@ class PointrobotRelabeler:
                                         env=env,
                                         shift_distance=shift_distance)
 
-            #Sample new obstacles in workspace
-            workspace = self._sample_objects(workspace=workspace, num_objects=4, avg_object_size=5, grid_size=env.grid_size)
-
-            #Check collision for all points in the trajectory and remove obstacles.
-            for point in trajectory:
-                obstacle_entries = self._find_collision_entries(point, env)
-
-                if obstacle_entries:
-                # if the robot has collided at at position point, remove obstacle.
-                    for obstacle_entry in obstacle_entries:
-                        workspace = self._remove_obstacle(workspace=workspace, obstacle_entry=obstacle_entry)
-                    #Sample new object
-                    workspace = self._sample_objects(workspace=workspace, num_objects=1, avg_object_size=5, grid_size=env.grid_size)
+        #Sample new obstacles in workspace
+        workspace = self._sample_objects(workspace=workspace, trajectory=trajectory, num_objects=10, avg_object_size=5, env =env)
             
-            for data_point in trajectory:
-                    data_point['workspace'] = workspace
-            # add new goal state to the trajectory:
-            if len(trajectory) != 0:
-                return self._set_new_goal(trajectory, env)
-            else:
-                return []
-        else:
+        for data_point in trajectory:
+            data_point['workspace'] = workspace
+        
+        # add new goal state to the trajectory:
+        if len(trajectory) != 0:
             return self._set_new_goal(trajectory, env)
+        else:
+            return []
 
 
     def _straight_line_relabel(self, trajectory, env):
@@ -325,32 +314,76 @@ class PointrobotRelabeler:
 
         return trajectory_to_return
 
-    def _sample_objects(self, workspace, num_objects, avg_object_size, grid_size):
+    def _sample_objects(self, workspace, trajectory, num_objects, avg_object_size, env):
 
-        if num_objects >= 1:
-             
-            #Generate an origin from a uniform distribution for each object
-            origin= np.random.randint(low=0, high=grid_size, size=(num_objects,2))
-            origin=np.asarray(origin, dtype=None, order=None)
+        if (num_objects >= 1) and trajectory != []:
+
+            #Calculate the lowest and highest positions of the trajectory in each direction, in order to sample next to it. 
+            low_x = trajectory[0]['position'][0]
+            high_x = trajectory[0]['position'][0]
+
+            low_y = trajectory[0]['position'][1]
+            high_y = trajectory[0]['position'][1]
+
+            for point in trajectory:
+                if point['position'][0] < low_x:
+                    low_x = point['position'][0]
+                if point['position'][0] > high_x:
+                    high_x = point['position'][0]
+                if point['position'][1] < low_y:
+                    low_y = point['position'][1]
+                if point['position'][1] > high_y:
+                    high_y = point['position'][1]
             
+            low_x = low_x - (avg_object_size) - env.robot_radius
+            high_x = high_x + env.robot_radius
+
+            low_y = low_y - (avg_object_size) - env.robot_radius
+            high_y = high_y + env.robot_radius 
+
+            
+            low_x = np.clip(low_x, a_min=1., a_max=float(env.grid_size-2))
+            high_x = np.clip(high_x, a_min=1., a_max=float(env.grid_size-2))  
+
+            low_y = np.clip(low_y, a_min=1., a_max=float(env.grid_size-2))
+            high_y = np.clip(high_y, a_min=1., a_max=float(env.grid_size-2)) 
+
             #Generate a width and height from a Gaussian distribution for each object
             width =np.random.normal(loc=avg_object_size, scale=2, size=(num_objects,1))
             width=np.asarray(width, dtype=int, order=None)
             
             height =np.random.normal(loc=avg_object_size, scale=2, size=(num_objects,1))
-            height =np.asarray(height, dtype=int, order=None)
+            height =np.asarray(height, dtype=int, order=None)   
+             
+            #Generate an origin from a uniform distribution for each object
+            origin_y= np.random.randint(low=low_y, high=high_y, size=(num_objects,1))
+            origin_x= np.random.randint(low=low_x, high=high_x, size=(num_objects,1))
+            #origin = (np.array([origin_y, origin_x])).transpose()
+            
 
             #Assign each entry with an object a 1. 
             for i in range(num_objects):
-                if origin[i,1]+width[i] > grid_size:
-                    right_bound=grid_size+1
-                else: right_bound = (origin[i,1]+width[i]).item()
+                if origin_x[i,0]+width[i] > env.grid_size:
+                    right_bound=env.grid_size+1
+                else: right_bound = (origin_x[i,0]+width[i]).item()
 
-                if origin[i,0]+height[i] > grid_size:
-                    upper_bound=grid_size+1
-                else: upper_bound = (origin[i,0]+height[i]).item()
+                if origin_y[i,0]+height[i] > env.grid_size:
+                    upper_bound=env.grid_size+1
+                else: upper_bound = (origin_y[i,0]+height[i]).item()
                 
-                workspace[origin[i,0]:upper_bound, origin[i,1]:right_bound]=1
+                workspace[origin_y[i,0]:upper_bound, origin_x[i,0]:right_bound] = 1
+
+                
+                for point in trajectory: 
+                        x = int(point['position'][0])
+                        y = int(point['position'][1])
+
+                        point_blocked = workspace[y-2: y+3, x-2: x+3].any()
+                        
+                        if point_blocked:
+                            workspace[y-2: y+3, x-2: x+3] = 0
+
+
             return workspace
             
         else:
@@ -394,7 +427,7 @@ class PointrobotRelabeler:
             x = int(new_goal[0])
             y = int(new_goal[1])
 
-            if ((distances < env.robot_radius).any() or workspace[y-1: y+2, x-1: x+2].any()):
+            if ((distances <= env.robot_radius).any() or workspace[y-2: y+3, x-2: x+3].any()):
                 # new random goal to try:
                 goal_direction_vect = np.random.uniform(low=-1, high=1, size=(2,))
                 goal_direction_vect = goal_direction_vect / np.linalg.norm(goal_direction_vect) * env.robot_radius * 0.99

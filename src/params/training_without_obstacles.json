@@ -12,7 +12,7 @@
         "num_obj_max": 5,
         "obj_size_avg": 8, 
         "robot_radius": 1,
-        "max_goal_dist": 20
+        "max_goal_dist": null
     },
     "cae": {
         "pooling": "max",
@@ -61,6 +61,6 @@
         "save_test_movie": false,
         "show_test_images": false,
         "normalize_obs": false,
-        "show_relabeling": true
+        "show_relabeling": false
     }
 }

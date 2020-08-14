@@ -179,7 +179,7 @@ class PointrobotTrainer:
                             fig=self._relabel_fig,
                             env=self._env
                             )
-                        plt.pause(1)
+                        plt.pause(0.1)
 
                     relabeling_begin = time.time()
                     # Create new workspace for the trajectory:
@@ -205,7 +205,7 @@ class PointrobotTrainer:
                                 fig=self._relabel_fig,
                                 env=self._env
                                 )
-                            plt.pause(1.5)
+                            plt.pause(0.5)
 
                         relabeling_times.append(time.time() - relabeling_begin)
 

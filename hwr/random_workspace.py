@@ -49,6 +49,8 @@ def random_workspace(grid_size, num_obj_max, obj_size_avg):
     return workspace
 
 
+
+
 def get_start_goal_for_workspace(workspace, max_goal_dist=None):
     """generates a discrete start and goal point for a given workspace. 
     It throws in randomply points from a uniform distribution until the points are in free space.
