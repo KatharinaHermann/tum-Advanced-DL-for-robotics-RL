@@ -60,6 +60,7 @@
         "save_test_path_sep": false,
         "save_test_movie": false,
         "show_test_images": false,
-        "normalize_obs": false
+        "normalize_obs": false,
+        "show_relabeling": false
     }
 }
