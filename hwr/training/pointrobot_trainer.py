@@ -5,10 +5,10 @@ import logging
 import argparse
 import joblib
 import glob
-from matplotlib import animation
 
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from gym.spaces import Box
 
 from tf2rl.experiments.utils import save_path, frames_to_gif
@@ -20,6 +20,7 @@ from tf2rl.envs.normalizer import EmpiricalNormalizer
 # sys.path.append(os.path.join(os.getcwd(), "lib"))
 from hwr.cae.cae import CAE
 from hwr.relabeling.pointrobot_relabeling import PointrobotRelabeler
+from hwr.utils import visualize_trajectory
 
 
 if tf.config.experimental.list_physical_devices('GPU'):
@@ -83,6 +84,9 @@ class PointrobotTrainer:
         # prepare TensorBoard output
         self.writer = tf.summary.create_file_writer(self._output_dir)
         self.writer.set_as_default()
+
+        # relabeling visualization:
+        self._relabel_fig = plt.figure(2)
 
 
     def _set_check_point(self, model_dir):
@@ -186,6 +190,14 @@ class PointrobotTrainer:
                                 next_obs=relabeled_next_obs_full, rew=point['reward'], done=point['done'])
 
                     relabeling_times.append(time.time() - relabeling_begin)
+
+                    # plotting the relabeled trajectory:
+                    self._relabel_fig = visualize_trajectory(
+                        trajectory=relabeled_trajectory,
+                        fig=self._relabel_fig,
+                        env=self._env
+                        )
+                    plt.pause(1)
                 else:
                     success_traj_train += 1
 
