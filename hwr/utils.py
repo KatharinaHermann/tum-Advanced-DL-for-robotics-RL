@@ -65,26 +65,33 @@ def export_params(params, info_file):
                     f.write("{}/{} : {}".format(group, name, param) + '\n')
 
 
-def visualize_trajectory(filename):
-    """Visualizes a complete saved trajectory that was stored 
-    during training in filename.
-    """
-
-    # loading the trajectory from the pickle file.
-    assert os.path.exists(filename), "File: {} does not exist.".format(filename)
-    trajectory = joblib.load(filename)
+def visualize_trajectory(trajectory, fig, env):
+    """Visualizes a trajectory."""
 
     workspace = trajectory[0]['workspace']
-    x = [point['position'][0] for point in trajectory]
-    y = [point['position'][1] for point in trajectory]
-    goal = trajectory[0]['goal']
+    if env.normalize:
+        rescaled_points = [rescale(point['position'], env.pos_bounds) for point in trajectory]
+        x = [point[1] for point in rescaled_points]
+        y = [point[0] for point in rescaled_points]
+        goal = rescale(trajectory[0]['goal'], env.pos_bounds)
+    else:
+        x = [point['position'][1] for point in trajectory]
+        y = [point['position'][0] for point in trajectory]
+        goal = trajectory[0]['goal']
 
     # plotting:
-    fig = plt.figure(1)
-    plt.matshow(workspace, fignum=1)
+    fig.clf()
     plt.plot(x, y, figure=fig)
-    circle = plt.Circle((goal[1], goal[0]), 0.5, figure=fig, color='#d347a8')
     ax = fig.gca()
+    ax.matshow(workspace)
+    circle = plt.Circle((goal[1], goal[0]), 1.0, figure=fig, color='#d347a8')
     ax.add_artist(circle)
 
-    plt.show()
+    return fig
+
+
+def load_trajectory_from_file(filename):
+    """loads a saved trajectory from a pickle file."""
+    assert os.path.exists(filename), "File: {} does not exist.".format(filename)
+    return joblib.load(filename)
+    
