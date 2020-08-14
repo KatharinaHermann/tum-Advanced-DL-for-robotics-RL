@@ -22,7 +22,7 @@
     },
     "agent": {
         "name": "DDPG",
-        "max_grad": 1,
+        "max_grad": 1.0,
         "lr_actor": 1e-4,
         "lr_critic": 1e-4,
         "actor_units": [400, 300],
@@ -38,10 +38,11 @@
     "trainer": {
         "train_from_scratch" : true,
         "mode": "train",
+        "relabeling_mode": "straight_line",
         "max_steps": 1e6,
         "episode_max_steps": 50,
         "n_experiments": 1,
-        "show_progress": true,
+        "show_progress": false,
         "show_progress_interval": 100,
         "save_model_interval": 1e4,
         "save_summary_interval": 1e3,
