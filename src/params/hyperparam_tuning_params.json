@@ -4,9 +4,9 @@
         "normalize": true,
         "action_low": -1.0,
         "action_high": 1.0,
-        "goal_reward": 5,
-        "collision_reward": -1,
-        "step_reward": -0.01,
+        "goal_reward": 8,
+        "collision_reward": -7,
+        "step_reward": -0.059,
         "buffer_size": 100,
         "grid_size": 32,
         "num_obj_max": 0,
@@ -64,24 +64,31 @@
     "hyper_tuning": {
         "num_of_runs": 20,
         "param_1":{
-            "group": "env",
-            "name": ["goal_reward"],
-            "low_bound": 2,
-            "high_bound": 10,
-            "scale": "linear"
+            "group": "agent",
+            "name": ["lr_actor"],
+            "low_bound": 1e-5,
+            "high_bound": 1e-3,
+            "scale": "log"
         },
-        "param_2":{
-            "group": "env",
-            "name": ["step_reward"],
-            "low_bound": -1e-1,
-            "high_bound": -1e-2,
-            "scale": "linear"
+        "param_2": {
+            "group": "agent",
+            "name": ["lr_critic"],
+            "low_bound": 1e-5,
+            "high_bound": 1e-3,
+            "scale": "log"
         },
-        "param_3":{
-            "group": "env",
-            "name": ["collision_reward"],
-            "low_bound": -10,
-            "high_bound": -0.5,
+        "param_3": {
+            "group": "agent",
+            "name": ["tau"],
+            "low_bound": 0.0005,
+            "high_bound": 0.01,
+            "scale": "log"
+        },
+        "param_4": {
+            "group": "agent",
+            "name": ["max_grad"],
+            "low_bound": 0.1,
+            "high_bound": 1,
             "scale": "linear"
         }
     }
