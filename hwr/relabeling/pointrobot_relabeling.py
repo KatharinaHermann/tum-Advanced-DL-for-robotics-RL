@@ -419,7 +419,18 @@ class PointrobotRelabeler:
         It checks the average orientation difference among the points.
         If it is bigger then a specified threshold, it returns True.
         """
-        return False
+        threshold = math.pi / 2
+        zig_zag = False
+        if len(trajectory) > 1:
+            angle_sum = 0
+            for i, point in enumerate(trajectory[1:]):
+                angle_sum += abs(self._calc_angle(trajectory[i]["action"], point["action"]))
+            
+            angle_diff_average = angle_sum / (len(trajectory) - 1)
+            if angle_diff_average > threshold:
+                zig_zag = True
+
+        return zig_zag
 
 
     def _calc_angle(self, action1, action2):
