@@ -368,6 +368,7 @@ class PointrobotRelabeler:
         feasible_goal = False
 
         last_pos = trajectory[-1]['position']
+        workspace =trajectory[0]['workspace']
         # the first goal candidate is in the direction of the last motion:
         if len(trajectory) >= 2:
             last_last_pos = trajectory[-2]['position']
@@ -386,7 +387,10 @@ class PointrobotRelabeler:
             # checking the distance from every goal
             distances = np.linalg.norm(every_other_pos - new_goal, axis=1)
 
-            if (distances < env.robot_radius).any():
+            x = int(new_goal[0])
+            y = int(new_goal[1])
+
+            if ((distances < env.robot_radius).any() or workspace[y-1: y+2, x-1: x+2].any()):
                 # new random goal to try:
                 goal_direction_vect = np.random.uniform(low=-1, high=1, size=(2,))
                 goal_direction_vect = goal_direction_vect / np.linalg.norm(goal_direction_vect) * env.robot_radius * 0.99

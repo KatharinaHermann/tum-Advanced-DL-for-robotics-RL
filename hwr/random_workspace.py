@@ -70,8 +70,8 @@ def get_start_goal_for_workspace(workspace, max_goal_dist=None):
 
     # Generate goal point (repeat until point is found where no object ist placed) and assign goal point with a 1
     # if a maximum goal distance is specified, Points are only generated within that range.
-    goal_found = False
-    while not goal_found:
+    goal_blocked = True
+    while goal_blocked:
         
         if max_goal_dist is None:
             low = 1.
@@ -84,7 +84,7 @@ def get_start_goal_for_workspace(workspace, max_goal_dist=None):
 
         x = int(goal[0])
         y = int(goal[1])
-        goal_found = not workspace[y-1: y+2, x-1: x+2].any()
+        goal_blocked = workspace[y-2: y+3, x-2: x+3].any()
 
     return start, goal
 

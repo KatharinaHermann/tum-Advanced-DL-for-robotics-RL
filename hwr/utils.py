@@ -68,15 +68,22 @@ def export_params(params, info_file):
 def visualize_trajectory(trajectory, fig, env):
     """Visualizes a trajectory."""
 
+    if trajectory == []:
+        fig.clf()
+        ax = fig.gca()
+        ax.matshow(np.zeros((env.grid_size, env.grid_size), dtype=int))
+
+        return fig
+
     workspace = trajectory[0]['workspace']
     if env.normalize:
         rescaled_points = [rescale(point['position'], env.pos_bounds) for point in trajectory]
-        x = [point[1] for point in rescaled_points]
-        y = [point[0] for point in rescaled_points]
+        y = [point[1] for point in rescaled_points]
+        x = [point[0] for point in rescaled_points]
         goal = rescale(trajectory[0]['goal'], env.pos_bounds)
     else:
-        x = [point['position'][1] for point in trajectory]
-        y = [point['position'][0] for point in trajectory]
+        y = [point['position'][1] for point in trajectory]
+        x = [point['position'][0] for point in trajectory]
         goal = trajectory[0]['goal']
 
     # plotting:
@@ -84,7 +91,7 @@ def visualize_trajectory(trajectory, fig, env):
     plt.plot(x, y, figure=fig)
     ax = fig.gca()
     ax.matshow(workspace)
-    circle = plt.Circle((goal[1], goal[0]), 1.0, figure=fig, color='#d347a8')
+    circle = plt.Circle((goal[0], goal[1]), 1.0, figure=fig, color='#d347a8')
     ax.add_artist(circle)
 
     return fig

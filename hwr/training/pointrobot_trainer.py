@@ -171,6 +171,15 @@ class PointrobotTrainer:
                 
                 if (reward != self._env.goal_reward):
                     """Workspace relabeling"""
+                
+                    # plotting the trajectory:
+                    if self._params["trainer"]["show_relabeling"]:
+                        self._relabel_fig = visualize_trajectory(
+                            trajectory=self.trajectory, 
+                            fig=self._relabel_fig,
+                            env=self._env
+                            )
+                        plt.pause(1)
 
                     relabeling_begin = time.time()
                     # Create new workspace for the trajectory:
@@ -189,16 +198,17 @@ class PointrobotTrainer:
                             self._replay_buffer.add(obs=relabeled_obs_full, act=point['action'],
                                 next_obs=relabeled_next_obs_full, rew=point['reward'], done=point['done'])
 
-                    relabeling_times.append(time.time() - relabeling_begin)
+                        # plotting the relabeled trajectory:
+                        if self._params["trainer"]["show_relabeling"]:
+                            self._relabel_fig = visualize_trajectory( 
+                                trajectory=relabeled_trajectory,
+                                fig=self._relabel_fig,
+                                env=self._env
+                                )
+                            plt.pause(1.5)
 
-                    # plotting the relabeled trajectory:
-                    if self._params["trainer"]["show_relabeling"]:
-                        self._relabel_fig = visualize_trajectory(
-                            trajectory=relabeled_trajectory,
-                            fig=self._relabel_fig,
-                            env=self._env
-                            )
-                        plt.pause(1)
+                        relabeling_times.append(time.time() - relabeling_begin)
+
                 else:
                     success_traj_train += 1
 
