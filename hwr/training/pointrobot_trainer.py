@@ -61,7 +61,8 @@ class PointrobotTrainer:
         # Initialize workspace relabeler:
         self._relabeler = PointrobotRelabeler(
             ws_shape=(self._env.grid_size, self._env.grid_size),
-            mode=params["trainer"]["relabeling_mode"]
+            mode=params["trainer"]["relabeling_mode"],
+            remove_zigzaging=params["trainer"]["remove_zigzaging"]
             )
 
         # prepare log directory
@@ -253,7 +254,7 @@ class PointrobotTrainer:
                 training_begin = time.time()
                 #Sample a new batch of experiences from the replay buffer for training
                 samples = self._replay_buffer.sample(self._policy.batch_size)
-                
+
                 with tf.summary.record_if(total_steps % self._save_summary_interval == 0):
                     # Here we update the Actor-NN, Critic-NN, and the Target-Actor-NN & Target-Critic-NN 
                     # after computing the Critic-loss and the Actor-loss
