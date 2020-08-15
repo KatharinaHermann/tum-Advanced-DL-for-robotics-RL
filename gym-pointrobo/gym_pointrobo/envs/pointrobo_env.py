@@ -147,11 +147,11 @@ class PointroboEnv(gym.Env):
 
     def create_workspace_buffer(self):
         """Create workspace buffer of size buffer_size"""
-        if self.params["env"]["WS_level"] == "easy":
+        if self.params["env"]["WS_level"] in ["easy", ""]:
             self.workspace_buffer = [random_workspace(self.grid_size, self.num_obj_max, self.obj_size_avg)\
                                         for _ in range(self.buffer_size)]
         
-        if (self.params["env"]["WS_level"] == "middle") or (self.params["env"]["WS_level"] == "hard"):
+        if self.params["env"]["WS_level"] in ["middle", "hard"]:
             self.workspace_buffer = [mid_level_workspace(self.grid_size, self.num_obj_max, self.obj_size_avg)\
                                         for _ in range(self.buffer_size)]
 
@@ -189,7 +189,7 @@ class PointroboEnv(gym.Env):
         nearest_dist = dist_fun(x=x)
 
         # With -0.5 we count for the obstacle expansion
-        if nearest_dist - self.robot_radius - 0.5 < 0 :
+        if nearest_dist - self.robot_radius - 0.5 < 0:
             collision = True
         
         return collision
