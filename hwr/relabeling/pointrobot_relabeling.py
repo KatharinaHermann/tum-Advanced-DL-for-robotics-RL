@@ -45,7 +45,7 @@ class PointrobotRelabeler:
             trajectory = self._rescale_trajectory(trajectory, env)
 
         if self._mode == 'no_relabeling':
-            relabeled_trajectory = []
+            return relabeled_trajectory
 
         if self._mode == 'erease':
             if self._remove_zigzaging == True:

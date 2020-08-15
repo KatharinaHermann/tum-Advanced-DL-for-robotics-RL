@@ -114,4 +114,15 @@ def load_trajectory_from_file(filename):
     """loads a saved trajectory from a pickle file."""
     assert os.path.exists(filename), "File: {} does not exist.".format(filename)
     return joblib.load(filename)
-    
+
+
+def set_up_benchmark_params(params, key):
+    """sets up the parameters according to params["benchmark"]["key"]"""
+
+    for setting in params["benchmark"][key]:
+        group = params["benchmark"][key][setting]["group"]
+        name = params["benchmark"][key][setting]["name"]
+        value = params["benchmark"][key][setting]["value"]
+        params[group][name] = value
+
+    return params
