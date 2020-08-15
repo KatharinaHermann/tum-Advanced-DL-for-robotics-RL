@@ -82,10 +82,14 @@ def visualize_trajectory(trajectory, fig, env):
         y = [point[1] for point in rescaled_points]
         x = [point[0] for point in rescaled_points]
         goal = rescale(trajectory[0]['goal'], env.pos_bounds)
+        start = rescale(trajectory[0]['position'], env.pos_bounds)
+        end = rescale(trajectory[-1]['position'], env.pos_bounds)
     else:
         y = [point['position'][1] for point in trajectory]
         x = [point['position'][0] for point in trajectory]
         goal = trajectory[0]['goal']
+        start = rescale(trajectory[0]['position'], env.pos_bounds)
+        end = rescale(trajectory[-1]['position'], env.pos_bounds)
 
     # plotting:
     fig.clf()
@@ -93,8 +97,15 @@ def visualize_trajectory(trajectory, fig, env):
     ax = fig.gca()
     cmap = ListedColormap(['#240B3B', '#81BEF7'])
     ax.matshow(workspace, cmap=cmap)
-    circle = plt.Circle((goal[0], goal[1]), env.robot_radius, figure=fig, color="#37EC52")
-    ax.add_artist(circle)
+
+    circle_end = plt.Circle((end[0], end[1]), env.robot_radius, figure=fig, color="w")
+    ax.add_artist(circle_end)
+    
+    circle_start = plt.Circle((start[0], start[1]), 0.3, figure=fig, color="w")
+    ax.add_artist(circle_start)
+
+    circle_goal = plt.Circle((goal[0], goal[1]), env.robot_radius, figure=fig, color="#37EC52")
+    ax.add_artist(circle_goal)
 
     return fig
 

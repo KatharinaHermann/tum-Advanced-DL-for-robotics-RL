@@ -9,11 +9,11 @@
         "step_reward": -0.01,
         "buffer_size": 100,
         "grid_size": 32,
-        "num_obj_max": 4, 
+        "num_obj_max": 5, 
         "obj_size_avg": 8, 
         "robot_radius": 1,
         "max_goal_dist": null,
-        "WS_level": "easy" 
+        "WS_level": "middle" 
     },
     "cae": {
         "pooling": "max",
@@ -39,7 +39,7 @@
     "trainer": {
         "train_from_scratch" : true,
         "mode": "train",
-        "relabeling_mode": "no_relabeling",
+        "relabeling_mode": "random",
         "remove_zigzaging": false,
         "max_steps": 1e6,
         "episode_max_steps": 50,
