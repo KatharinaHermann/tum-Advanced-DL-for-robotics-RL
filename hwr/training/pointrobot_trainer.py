@@ -141,6 +141,14 @@ class PointrobotTrainer:
                 total_steps > self._policy.n_warmup:
                 self._env.render()
 
+            if total_steps in self._params["agent"]["lr_decay_steps"]:
+                ind = self._params["agent"]["lr_decay_steps"].index(total_steps)
+                self._params["agent"]["lr_actor"] = self._params["agent"]["actor_lr_decay_vals"][ind]
+                self._params["agent"]["lr_actor"] = self._params["agent"]["critic_lr_decay_vals"][ind]
+                self._policy.actor_optimizer.learning_rate = self._params["agent"]["lr_actor"]
+                self._policy.critic_optimizer.learning_rate = self._params["agent"]["lr_critic"]
+                print("---- Learning rate: {}".format(self._policy.actor_optimizer.learning_rate))
+
             #Get action randomly for warmup /from Actor-NN otherwise
             if total_steps < self._policy.n_warmup:
                 action = self._env.action_space.sample()
