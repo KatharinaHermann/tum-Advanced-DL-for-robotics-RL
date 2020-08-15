@@ -3,7 +3,8 @@ import sys
 import numpy as np
 import tensorflow as tf
 import glob
-import joblib
+import json
+import shutil
 
 import gym
 import gym_pointrobo
@@ -14,7 +15,19 @@ from hwr.training.pointrobot_trainer import PointrobotTrainer
 from hwr.utils import load_params, set_up_benchmark_params
 
 
-for key in params["benchmark"]:
+# loading the params:
+params = load_params('params/benchmark_params.json')
+benchmark_keys = params["benchmark"].keys()
+
+# deleting the previous runs logs:
+logdir_files = glob.glob(os.path.join(params["trainer"]["logdir"], "*"))
+for f in logdir_files:
+    if os.path.isdir(f):
+        shutil.rmtree(f)
+    else:
+        os.remove(f)
+
+for key in benchmark_keys:
     # loading original params:
     params = load_params('params/benchmark_params.json')
 
@@ -25,9 +38,8 @@ for key in params["benchmark"]:
 
     # setting up training run:
     params = set_up_benchmark_params(params, key)
-    params["training"]["logdir"] = os.path.join(params["training"]["logdir"], key)
-    param_log_path = os.path.join(params["training"]["logdir"], "params.json")
-    joblib.dump(params["benchmark"][key], param_log_path)
+    params["trainer"]["logdir"] = os.path.join(params["trainer"]["logdir"], key)
+    param_log_path = os.path.join(params["trainer"]["logdir"], "params.json")        
 
     #Initialize the environment
     env = gym.make(
@@ -51,6 +63,11 @@ for key in params["benchmark"]:
         env,
         params,
         test_env=test_env)
+
+    # saving the params:
+    param_log_path = os.path.join(params["trainer"]["logdir"], "params.json")
+    with open(param_log_path, 'w') as f:
+        json.dump(params["benchmark"][key], f)
 
     if params["trainer"]["mode"] == "train":
         trainer.train()

@@ -66,12 +66,12 @@
         "save_test_movie": false,
         "show_test_images": false,
         "normalize_obs": false,
-        "show_relabeling": true
+        "show_relabeling": false
     },
     "benchmark": {
         "1": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "no_relabeling"
             },
@@ -83,7 +83,7 @@
         },
         "2": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "straight_line"
             },
@@ -95,7 +95,7 @@
         },
         "3": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "erease"
             },
@@ -105,14 +105,14 @@
                 "value": 0
             },
             "param3": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": false
             }
         },
         "4": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "erease"
             },
@@ -122,14 +122,14 @@
                 "value": 0
             },
             "param3": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": true
             }
         },
         "5": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "no_relabeling"
             },
@@ -146,7 +146,7 @@
         },
         "6": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "erease"
             },
@@ -161,14 +161,14 @@
                 "value": "easy"
             },
             "param4": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": false
             }
         },
         "7": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "erease"
             },
@@ -183,14 +183,14 @@
                 "value": "easy"
             },
             "param4": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": true
             }
         },
         "8": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "random"
             },
@@ -205,14 +205,14 @@
                 "value": "easy"
             },
             "param4": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": false
             }
         },
         "9": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "random"
             },
@@ -227,14 +227,14 @@
                 "value": "easy"
             },
             "param4": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": true
             }
         },
         "10": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "no_relabeling"
             },
@@ -251,7 +251,7 @@
         },
         "11": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "erease"
             },
@@ -266,14 +266,14 @@
                 "value": "middle"
             },
             "param4": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": false
             }
         },
         "12": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "erease"
             },
@@ -288,14 +288,14 @@
                 "value": "middle"
             },
             "param4": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": true
             }
         },
         "13": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "random"
             },
@@ -310,14 +310,14 @@
                 "value": "middle"
             },
             "param4": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": false
             }
         },
         "14": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "random"
             },
@@ -332,14 +332,14 @@
                 "value": "middle"
             },
             "param4": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": true
             }
         },
         "15": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "no_relabeling"
             },
@@ -356,7 +356,7 @@
         },
         "16": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "erease"
             },
@@ -371,14 +371,14 @@
                 "value": "hard"
             },
             "param4": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": false
             }
         },
         "17": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "erease"
             },
@@ -393,14 +393,14 @@
                 "value": "hard"
             },
             "param4": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": true
             }
         },
         "18": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "random"
             },
@@ -415,14 +415,14 @@
                 "value": "hard"
             },
             "param4": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": false
             }
         },
         "19": {
             "param1": {
-                "group": "training",
+                "group": "trainer",
                 "name": "relabeling_mode",
                 "value": "random"
             },
@@ -437,7 +437,7 @@
                 "value": "hard"
             },
             "param4": {
-                "group": "training",
+                "group": "trainer",
                 "name": "remove_zigzaging",
                 "value": true
             }
