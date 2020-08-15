@@ -2,6 +2,7 @@ import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 import numpy as np
 import scipy.ndimage as ndimage
 
@@ -119,19 +120,21 @@ class PointroboEnv(gym.Env):
         if self._fig is None:
             self._fig = plt.figure(1)
             self._ax = plt.gca()
-            self._robo_artist = plt.Circle((self.agent_pos[0], self.agent_pos[1]), self.robot_radius, color='m') 
+            self._robo_artist = plt.Circle((self.agent_pos[0], self.agent_pos[1]), self.robot_radius, color='#EC66BA') 
             self._ax.add_artist(self._robo_artist)
-            self._goal_artist = plt.Circle((self.goal_pos[0], self.goal_pos[1]), self.robot_radius, color='b')
+            self._goal_artist = plt.Circle((self.goal_pos[0], self.goal_pos[1]), self.robot_radius, color="#37EC52")
             self._ax.add_artist(self._goal_artist)
         
         self._ax.cla()
         self._ax.add_artist(self._robo_artist)
         self._ax.add_artist(self._goal_artist)
+        cmap = ListedColormap(['#240B3B', '#81BEF7'])
+        ax.matshow(workspace, cmap=cmap)
         self._ax.matshow(self.workspace)
         self._robo_artist.set_center((self.agent_pos[0], self.agent_pos[1]))
         self._goal_artist.set_center((self.goal_pos[0], self.goal_pos[1]))
 
-        plt.pause(0.01)
+        plt.pause(0.001)
 
 
     def take_action(self, action):
@@ -144,16 +147,27 @@ class PointroboEnv(gym.Env):
 
     def create_workspace_buffer(self):
         """Create workspace buffer of size buffer_size"""
-        self.workspace_buffer = [random_workspace(self.grid_size, self.num_obj_max, self.obj_size_avg)\
-                                    for _ in range(self.buffer_size)]
+        if self.params["env"]["WS_level"] in ["easy", ""]:
+            self.workspace_buffer = [random_workspace(self.grid_size, self.num_obj_max, self.obj_size_avg)\
+                                        for _ in range(self.buffer_size)]
+        
+        if self.params["env"]["WS_level"] in ["middle", "hard"]:
+            self.workspace_buffer = [mid_level_workspace(self.grid_size, self.num_obj_max, self.obj_size_avg)\
+                                        for _ in range(self.buffer_size)]
 
 
     def setup_rndm_workspace_from_buffer(self):
         """Choose random workspace from buffer"""
         buffer_index = np.random.randint(low=0, high=self.buffer_size - 1)
         self.workspace = self.workspace_buffer[buffer_index]
-        self.start_pos, self.goal_pos = get_start_goal_for_workspace(self.workspace,
-            max_goal_dist=self.max_goal_dist)
+        
+        if (self.params["env"]["WS_level"] == "easy") or (self.params["env"]["WS_level"] == "middle"):
+            self.start_pos, self.goal_pos = get_start_goal_for_workspace(self.workspace,
+                max_goal_dist=self.max_goal_dist)
+        
+        if self.params["env"]["WS_level"] == "hard":
+            self.workspace, self.start_pos, self.goal_pos = hard_level_workspace(self.workspace, self.grid_size, self.obj_size_avg)
+
 
 
     def collision_check(self):
@@ -175,7 +189,7 @@ class PointroboEnv(gym.Env):
         nearest_dist = dist_fun(x=x)
 
         # With -0.5 we count for the obstacle expansion
-        if nearest_dist - self.robot_radius - 0.5 < 0 :
+        if nearest_dist - self.robot_radius - 0.5 < 0:
             collision = True
         
         return collision

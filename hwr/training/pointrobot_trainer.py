@@ -61,7 +61,8 @@ class PointrobotTrainer:
         # Initialize workspace relabeler:
         self._relabeler = PointrobotRelabeler(
             ws_shape=(self._env.grid_size, self._env.grid_size),
-            mode=params["trainer"]["relabeling_mode"]
+            mode=params["trainer"]["relabeling_mode"],
+            remove_zigzaging=params["trainer"]["remove_zigzaging"]
             )
 
         # prepare log directory
@@ -180,6 +181,15 @@ class PointrobotTrainer:
                 if (reward != self._env.goal_reward):
                     """Workspace relabeling"""
 
+                    # plotting the trajectory:
+                    if self._params["trainer"]["show_relabeling"]:                    
+                        self._relabel_fig = visualize_trajectory(
+                            trajectory=self.trajectory, 
+                            fig=self._relabel_fig,
+                            env=self._env
+                            )
+                        plt.pause(1)
+
                     relabeling_begin = time.time()
                     # Create new workspace for the trajectory:
                     relabeled_trajectory = self._relabeler.relabel(trajectory=self.trajectory, env=self._env)
@@ -197,16 +207,17 @@ class PointrobotTrainer:
                             self._replay_buffer.add(obs=relabeled_obs_full, act=point['action'],
                                 next_obs=relabeled_next_obs_full, rew=point['reward'], done=point['done'])
 
-                    relabeling_times.append(time.time() - relabeling_begin)
+                        # plotting the relabeled trajectory:
+                        if self._params["trainer"]["show_relabeling"]:
+                            self._relabel_fig = visualize_trajectory( 
+                                trajectory=relabeled_trajectory,
+                                fig=self._relabel_fig,
+                                env=self._env
+                                )
+                            plt.pause(3)
 
-                    # plotting the relabeled trajectory:
-                    if self._params["trainer"]["show_relabeling"]:
-                        self._relabel_fig = visualize_trajectory(
-                            trajectory=relabeled_trajectory,
-                            fig=self._relabel_fig,
-                            env=self._env
-                            )
-                        plt.pause(1)
+                        relabeling_times.append(time.time() - relabeling_begin)
+
                 else:
                     success_traj_train += 1
 
@@ -251,7 +262,7 @@ class PointrobotTrainer:
                 training_begin = time.time()
                 #Sample a new batch of experiences from the replay buffer for training
                 samples = self._replay_buffer.sample(self._policy.batch_size)
-                
+
                 with tf.summary.record_if(total_steps % self._save_summary_interval == 0):
                     # Here we update the Actor-NN, Critic-NN, and the Target-Actor-NN & Target-Critic-NN 
                     # after computing the Critic-loss and the Actor-loss
