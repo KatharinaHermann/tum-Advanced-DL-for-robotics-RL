@@ -158,7 +158,7 @@ class PointrobotRelabeler:
                     trajectory = self._shift_from_boarder(trajectory=trajectory,
                                     env=env,
                                     shift_distance=shift_distance)
-            else:
+            #else:
                 #print("No Collision!!!!!!")
             #Sample new obstacles in workspace
             workspace = self._sample_objects(workspace=workspace, trajectory=trajectory, num_objects=env.num_obj_max, avg_object_size=env.obj_size_avg, env =env)
