@@ -129,8 +129,7 @@ class PointroboEnv(gym.Env):
         self._ax.add_artist(self._robo_artist)
         self._ax.add_artist(self._goal_artist)
         cmap = ListedColormap(['#240B3B', '#81BEF7'])
-        self._ax.matshow(workspace, cmap=cmap)
-        self._ax.matshow(self.workspace)
+        self._ax.matshow(self.workspace, cmap=cmap)
         self._robo_artist.set_center((self.agent_pos[0], self.agent_pos[1]))
         self._goal_artist.set_center((self.goal_pos[0], self.goal_pos[1]))
 
