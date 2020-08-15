@@ -1,4 +1,4 @@
-{
+{ 
     "env": {
         "name": "pointrobo-v0",
         "normalize": true,
@@ -9,10 +9,11 @@
         "step_reward": -0.01,
         "buffer_size": 100,
         "grid_size": 32,
-        "num_obj_max": 5,
-        "obj_size_avg": 8, 
+        "num_obj_max": 4, 
+        "obj_size_avg": 6, 
         "robot_radius": 1,
-        "max_goal_dist": null
+        "max_goal_dist": null,
+        "WS_level": "hard" 
     },
     "cae": {
         "pooling": "max",
@@ -37,7 +38,7 @@
     },
     "trainer": {
         "train_from_scratch" : true,
-        "mode": "train",
+        "mode": "evaluate",
         "relabeling_mode": "random",
         "max_steps": 1e6,
         "episode_max_steps": 50,
@@ -54,7 +55,7 @@
         "use_nstep_rb": false,
         "n_step": 4,
         "test_interval": 1e4,
-        "show_test_progress": false,
+        "show_test_progress": true,
         "test_episodes": 100,
         "save_test_path": false,
         "save_test_path_sep": false,

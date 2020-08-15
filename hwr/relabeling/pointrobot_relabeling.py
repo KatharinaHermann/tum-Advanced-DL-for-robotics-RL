@@ -13,14 +13,14 @@ class PointrobotRelabeler:
         the workspace, the trajectory points and the goal is shifted away from the boarder
         with some value. (Possibly a random value)
         - erease: Simply removes the object with which the agent has collided. 
-        - random: Randomly tries to throw in obstacles, and generates a workspace
-                 in which the trajectory is feasible, however possibly not very effective.
-        - sliding: Slides the obstacles of the original workspace and hence creates a workspace,
+        - random: Randomly tries to throw in obstacles, close to the robot's trajectory, and generates a workspace
+                 in which the trajectory is feasible. Obstacle parts which result in a collision are removed, suchthat often small corridors are created.
+        - sliding: NOT IMPLEMENTED! Slides the obstacles of the original workspace and hence creates a workspace,
                   where the pointrobot was successful and the trajectory was a somewhat effective
                   solution to the workspace.
     """
 
-    def __init__(self, ws_shape=(32, 32), mode='random'):
+    def __init__(self, ws_shape=(32, 32), mode='no_relabeling', remove_zigzaging=False):
         """ Initialization of a workspace relabeler for a Pointrobot
         Args:
             - ws_shape: tuple, (ws_height, ws_width)
@@ -28,11 +28,12 @@ class PointrobotRelabeler:
                     possible values are: 'erease', 'random', 'sliding'
         """
 
-        assert mode in ['erease', 'random', 'sliding', 'straight_line'] ,\
-            'mode should be either \'erease\', \'random\' or \'sliding\' or \'straight_line\'. Received {}'.format(mode)
+        assert mode in ['no relabeling', 'erease', 'random', 'sliding', 'straight_line'] ,\
+            'mode should be either \'no relabeling\', \'erease\', \'random\' or \'sliding\' or \'straight_line\'. Received {}'.format(mode)
 
         self._ws_shape = ws_shape
         self._mode = mode
+        self._remove_zigzaging = remove_zigzaging
 
 
     def relabel(self, trajectory, env):
@@ -43,15 +44,27 @@ class PointrobotRelabeler:
         if env.normalize:
             trajectory = self._rescale_trajectory(trajectory, env)
 
+        if self._mode == 'no_relabeling':
+            relabeled_trajectory = trajectory
+
         if self._mode == 'erease':
-            if not self._zig_zag_path(trajectory):
-                relabeled_trajectory = self._erease_relabel(trajectory, env)
+            if self._remove_zigzaging == True:
+                if not self._zig_zag_path(trajectory):
+                    relabeled_trajectory = self._erease_relabel(trajectory, env)
+            else: relabeled_trajectory = self._erease_relabel(trajectory, env)
+
         elif self._mode == 'random':
-            if not self._zig_zag_path(trajectory):
-                relabeled_trajectory = self._random_relabel(trajectory, env)
+            if self._remove_zigzaging == True:
+                if not self._zig_zag_path(trajectory):
+                    relabeled_trajectory = self._random_relabel(trajectory, env)
+            else: relabeled_trajectory = self._random_relabel(trajectory, env)
+
         elif self._mode == 'slding':
-            if not self._zig_zag_path(trajectory):
-                relabeled_trajectory = self._sliding_relabel(trajectory, env)
+            if self._remove_zigzaging == True:
+                if not self._zig_zag_path(trajectory):
+                    relabeled_trajectory = self._sliding_relabel(trajectory, env)
+            else: relabeled_trajectory = self._sliding_relabel(trajectory, env)
+
         elif self._mode == 'straight_line':
             relabeled_trajectory = self. _straight_line_relabel(trajectory, env)
 
@@ -108,7 +121,8 @@ class PointrobotRelabeler:
 
     def _random_relabel(self, trajectory, env):
         """Relabels a workspace with 'random' method.
-        Random means, that obstacles are sampled in the range of the trajectory."""
+        Random means, that obstacles are sampled in the range of the trajectory.
+        Obstacle parts which result in a collision are removed, suchthat often small corridors are created."""
 
         workspace = trajectory[0]['workspace']
 
