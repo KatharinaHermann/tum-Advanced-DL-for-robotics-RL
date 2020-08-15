@@ -129,7 +129,7 @@ class PointroboEnv(gym.Env):
         self._ax.add_artist(self._robo_artist)
         self._ax.add_artist(self._goal_artist)
         cmap = ListedColormap(['#240B3B', '#81BEF7'])
-        ax.matshow(workspace, cmap=cmap)
+        self._ax.matshow(workspace, cmap=cmap)
         self._ax.matshow(self.workspace)
         self._robo_artist.set_center((self.agent_pos[0], self.agent_pos[1]))
         self._goal_artist.set_center((self.goal_pos[0], self.goal_pos[1]))
@@ -161,11 +161,11 @@ class PointroboEnv(gym.Env):
         buffer_index = np.random.randint(low=0, high=self.buffer_size - 1)
         self.workspace = self.workspace_buffer[buffer_index]
         
-        if (self.params["env"]["WS_level"] == "easy") or (self.params["env"]["WS_level"] == "middle"):
+        if self.params["env"]["WS_level"] in ["easy", "middle", ""]:
             self.start_pos, self.goal_pos = get_start_goal_for_workspace(self.workspace,
                 max_goal_dist=self.max_goal_dist)
         
-        if self.params["env"]["WS_level"] == "hard":
+        else:
             self.workspace, self.start_pos, self.goal_pos = hard_level_workspace(self.workspace, self.grid_size, self.obj_size_avg)
 
 
