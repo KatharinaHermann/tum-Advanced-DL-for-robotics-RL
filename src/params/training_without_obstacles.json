@@ -41,7 +41,7 @@
     },
     "trainer": {
         "train_from_scratch" : true,
-        "mode": "train",
+        "mode": "evaluate",
         "relabeling_mode": "random",
         "remove_zigzaging": false,
         "max_steps": 1e6,
@@ -59,7 +59,7 @@
         "use_nstep_rb": false,
         "n_step": 4,
         "test_interval": 1e4,
-        "show_test_progress": false,
+        "show_test_progress": true,
         "test_episodes": 100,
         "save_test_path": false,
         "save_test_path_sep": false,
