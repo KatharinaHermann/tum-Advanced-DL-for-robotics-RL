@@ -172,9 +172,9 @@ class PointrobotTrainer:
                 
                 if (reward != self._env.goal_reward):
                     """Workspace relabeling"""
-                
+
                     # plotting the trajectory:
-                    if self._params["trainer"]["show_relabeling"]:
+                    if self._params["trainer"]["show_relabeling"]:                    
                         self._relabel_fig = visualize_trajectory(
                             trajectory=self.trajectory, 
                             fig=self._relabel_fig,

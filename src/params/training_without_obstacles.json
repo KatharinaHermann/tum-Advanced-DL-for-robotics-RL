@@ -10,10 +10,10 @@
         "buffer_size": 100,
         "grid_size": 32,
         "num_obj_max": 4, 
-        "obj_size_avg": 6, 
+        "obj_size_avg": 8, 
         "robot_radius": 1,
         "max_goal_dist": null,
-        "WS_level": "hard" 
+        "WS_level": "easy" 
     },
     "cae": {
         "pooling": "max",
@@ -38,8 +38,9 @@
     },
     "trainer": {
         "train_from_scratch" : true,
-        "mode": "evaluate",
-        "relabeling_mode": "random",
+        "mode": "train",
+        "relabeling_mode": "no_relabeling",
+        "remove_zigzaging": false,
         "max_steps": 1e6,
         "episode_max_steps": 50,
         "n_experiments": 1,
@@ -55,13 +56,13 @@
         "use_nstep_rb": false,
         "n_step": 4,
         "test_interval": 1e4,
-        "show_test_progress": true,
+        "show_test_progress": false,
         "test_episodes": 100,
         "save_test_path": false,
         "save_test_path_sep": false,
         "save_test_movie": false,
         "show_test_images": false,
         "normalize_obs": false,
-        "show_relabeling": false
+        "show_relabeling": true
     }
 }

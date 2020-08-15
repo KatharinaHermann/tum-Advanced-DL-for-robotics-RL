@@ -235,7 +235,7 @@ def visualize_distance_field(workspace, fignum=1):
     
     return fig
 
-def visualize_robot(current_position, robot_radius, color='#d347a8'):
+def visualize_robot(current_position, robot_radius, color='m'):
     """for nicely visualizing the distance field to the obstacles. The robot's position is described in the workspace matrix (with indices). Therefore, the x-coordinate is the second element of the array. The y-coordinate is the first element"""
     robot = plt.Circle((current_position[0], current_position[1]), robot_radius, color=color)
     ax = plt.gca()

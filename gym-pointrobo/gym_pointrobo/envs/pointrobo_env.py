@@ -2,6 +2,7 @@ import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 import numpy as np
 import scipy.ndimage as ndimage
 
@@ -119,14 +120,16 @@ class PointroboEnv(gym.Env):
         if self._fig is None:
             self._fig = plt.figure(1)
             self._ax = plt.gca()
-            self._robo_artist = plt.Circle((self.agent_pos[0], self.agent_pos[1]), self.robot_radius, color='m') 
+            self._robo_artist = plt.Circle((self.agent_pos[0], self.agent_pos[1]), self.robot_radius, color='#EC66BA') 
             self._ax.add_artist(self._robo_artist)
-            self._goal_artist = plt.Circle((self.goal_pos[0], self.goal_pos[1]), self.robot_radius, color='b')
+            self._goal_artist = plt.Circle((self.goal_pos[0], self.goal_pos[1]), self.robot_radius, color="#37EC52")
             self._ax.add_artist(self._goal_artist)
         
         self._ax.cla()
         self._ax.add_artist(self._robo_artist)
         self._ax.add_artist(self._goal_artist)
+        cmap = ListedColormap(['#240B3B', '#81BEF7'])
+        ax.matshow(workspace, cmap=cmap)
         self._ax.matshow(self.workspace)
         self._robo_artist.set_center((self.agent_pos[0], self.agent_pos[1]))
         self._goal_artist.set_center((self.goal_pos[0], self.goal_pos[1]))

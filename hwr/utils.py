@@ -3,6 +3,7 @@ import math
 import joblib
 import os
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 import json
 
 
@@ -88,10 +89,11 @@ def visualize_trajectory(trajectory, fig, env):
 
     # plotting:
     fig.clf()
-    plt.plot(x, y, figure=fig)
+    plt.plot(x, y, figure=fig, color='#EC66BA', linewidth=2)
     ax = fig.gca()
-    ax.matshow(workspace)
-    circle = plt.Circle((goal[0], goal[1]), 1.0, figure=fig, color='#d347a8')
+    cmap = ListedColormap(['#240B3B', '#81BEF7'])
+    ax.matshow(workspace, cmap=cmap)
+    circle = plt.Circle((goal[0], goal[1]), env.robot_radius, figure=fig, color="#37EC52")
     ax.add_artist(circle)
 
     return fig

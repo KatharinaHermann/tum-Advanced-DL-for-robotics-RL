@@ -28,8 +28,8 @@ class PointrobotRelabeler:
                     possible values are: 'erease', 'random', 'sliding'
         """
 
-        assert mode in ['no relabeling', 'erease', 'random', 'sliding', 'straight_line'] ,\
-            'mode should be either \'no relabeling\', \'erease\', \'random\' or \'sliding\' or \'straight_line\'. Received {}'.format(mode)
+        assert mode in ['no_relabeling', 'erease', 'random', 'sliding', 'straight_line'] ,\
+            'mode should be either \'no_relabeling\', \'erease\', \'random\' or \'sliding\' or \'straight_line\'. Received {}'.format(mode)
 
         self._ws_shape = ws_shape
         self._mode = mode
@@ -149,7 +149,7 @@ class PointrobotRelabeler:
                                         shift_distance=shift_distance)
 
         #Sample new obstacles in workspace
-        workspace = self._sample_objects(workspace=workspace, trajectory=trajectory, num_objects=10, avg_object_size=5, env =env)
+        workspace = self._sample_objects(workspace=workspace, trajectory=trajectory, num_objects=env.num_objects, avg_object_size=env.avg_object_size, env =env)
             
         for data_point in trajectory:
             data_point['workspace'] = workspace
