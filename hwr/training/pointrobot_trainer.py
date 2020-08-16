@@ -21,7 +21,7 @@ from tf2rl.envs.normalizer import EmpiricalNormalizer
 from hwr.cae.cae import CAE
 from hwr.relabeling.pointrobot_relabeling import PointrobotRelabeler
 from hwr.utils import visualize_trajectory
-
+from hwr.utils import straight_line_feasible
 
 if tf.config.experimental.list_physical_devices('GPU'):
     for cur_device in tf.config.experimental.list_physical_devices("GPU"):
@@ -287,13 +287,19 @@ class PointrobotTrainer:
                 # setting evaluation mode for deterministic actions:
                 self._policy.eval_mode = True
 
-                avg_test_return, success_rate = self.evaluate_policy(total_steps)
+                avg_test_return, success_rate, ratio_straight_lines, success_rate_straight_line, success_rate_no_straight_line = self.evaluate_policy(total_steps)
                 self.logger.info("Evaluation: Total Steps: {0: 7} Average Reward {1: 5.4f} and Sucess rate: {2: 5.4f} for {3: 2} episodes".format(
                     total_steps, avg_test_return, success_rate, self._test_episodes))
                 tf.summary.scalar(
                     name="Common/average_test_return", data=avg_test_return)
                 tf.summary.scalar(
                     name="Common/test_success_rate", data=success_rate)
+                tf.summary.scalar(
+                    name="Ratio_feasible straight_line episodes", data=ratio_straight_lines)
+                tf.summary.scalar(
+                    name="test_success_rate straight_line episodes", data=success_rate_straight_line)
+                tf.summary.scalar(
+                    name="test_success_rate no_straight_line episodes", data=success_rate_no_straight_line)
                 tf.summary.scalar(name="Common/fps", data=fps)
                 self.writer.flush()
 
@@ -311,11 +317,13 @@ class PointrobotTrainer:
         """method for evaluating a pretrained agent for some episodes."""
         self._policy.eval_mode = True
 
-        avg_test_return, success_rate = self.evaluate_policy(total_steps=0)
+        avg_test_return, success_rate, ratio_straight_lines, success_rate_straight_line, success_rate_no_straight_line = self.evaluate_policy(total_steps=0)
         print("----- Evaluation -----")
-        print("average test return: {}".format(avg_test_return))
-        print("average test success rate: {}".format(success_rate))
-
+        print("avg test return: {}".format(avg_test_return))
+        print("avg test success rate: {}".format(success_rate))
+        print("Ratio of feasible straight_line episodes: {}".format(ratio_straight_lines))
+        print("avg test success_rate for straight_line episodes: {}".format(success_rate_straight_line))
+        print("avg test success_rate for no_straight_line episodes: {}".format(success_rate_no_straight_line))
 
     def evaluate_policy_continuously(self):
         """
@@ -344,6 +352,11 @@ class PointrobotTrainer:
         if self._save_test_path:
             replay_buffer = get_replay_buffer(
                 self._policy, self._test_env, size=self._episode_max_steps)
+
+        straight_line_episode = 0 
+        no_straight_line_episode = 0
+        success_traj_straight_line = 0
+        success_traj_no_straight_line = 0
 
         for i in range(self._test_episodes):
             episode_return = 0.
@@ -396,6 +409,15 @@ class PointrobotTrainer:
                    
             total_test_return += episode_return
 
+            if straight_line_feasible(workspace, start, goal):
+                straight_line_episode += 1
+                if reward == self._test_env.goal_reward:        
+                    success_traj_straight_line += 1
+            elif not straight_line_feasible(workspace, start, goal):
+                no_straight_line_episode += 1
+                if reward == self._test_env.goal_reward:        
+                    success_traj_no_straight_line += 1
+
             if reward == self._test_env.goal_reward:        
                 success_traj += 1
 
@@ -410,8 +432,11 @@ class PointrobotTrainer:
 
         avg_test_return = total_test_return / self._test_episodes
         success_rate = success_traj / self._test_episodes
+        success_rate_straight_line = success_traj_straight_line/straight_line_episode
+        success_rate_no_straight_line = success_traj_no_straight_line/no_straight_line_episode
+        ratio_straight_lines = straight_line_episode/ self._test_episodes
 
-        return avg_test_return, success_rate
+        return avg_test_return, success_rate, ratio_straight_lines, success_rate_straight_line, success_rate_no_straight_line
 
 
     def _save_traj_separately(self, prefix):

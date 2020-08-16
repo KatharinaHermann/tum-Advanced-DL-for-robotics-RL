@@ -114,4 +114,23 @@ def load_trajectory_from_file(filename):
     """loads a saved trajectory from a pickle file."""
     assert os.path.exists(filename), "File: {} does not exist.".format(filename)
     return joblib.load(filename)
+
+def straight_line_feasible(workspace, start, goal):
+    
+    pos = start.copy()
+        
+    action = (goal-start) / (np.linalg.norm(goal-start))
+
+    while np.linalg.norm(goal - pos) < goal:
+        
+        x = pos[0]
+        y = pos[1]
+
+        if workspace[y-2: y+3, x-2: x+3].any():
+            return False
+        int(pos + 0.5* action)
+
+        pos += action
+    
+    return True
     
