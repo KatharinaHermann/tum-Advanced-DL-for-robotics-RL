@@ -362,6 +362,7 @@ class PointrobotTrainer:
             episode_return = 0.
             frames = []
             workspace, goal, obs = self._test_env.reset()
+            start = obs
             reduced_workspace = self._CAE.evaluate(workspace)
             #Concatenate position observation with start, goal, and reduced workspace!!
             obs_full = np.concatenate((obs, goal, reduced_workspace))
