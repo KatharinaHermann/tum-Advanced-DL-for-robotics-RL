@@ -148,26 +148,54 @@ class PointroboEnv(gym.Env):
     def create_workspace_buffer(self):
         """Create workspace buffer of size buffer_size"""
         if self.params["env"]["WS_level"] == "easy":
-            self.workspace_buffer = [random_workspace(self.grid_size, self.num_obj_max, self.obj_size_avg)\
+            self.workspace_buffer = [random_workspace(self.grid_size, self.num_obj_max-2, self.obj_size_avg)\
                                         for _ in range(self.buffer_size)]
         
-        if (self.params["env"]["WS_level"] == "middle") or (self.params["env"]["WS_level"] == "hard"):
+        if (self.params["env"]["WS_level"] == "middle"):
             self.workspace_buffer = [mid_level_workspace(self.grid_size, self.num_obj_max, self.obj_size_avg)\
                                         for _ in range(self.buffer_size)]
+        
+        if (self.params["env"]["WS_level"] == "hard"):
+            self.workspace_buffer = [mid_level_workspace(self.grid_size, self.num_obj_max-1, self.obj_size_avg-2)\
+                                        for _ in range(self.buffer_size)]
+
+        if self.params["env"]["WS_level"] == "mixture":
+            self.workspace_buffer_easy = [random_workspace(self.grid_size, self.num_obj_max-2, self.obj_size_avg)\
+                                        for _ in range(int(self.buffer_size/3))]
+            self.workspace_buffer_middle = [mid_level_workspace(self.grid_size, self.num_obj_max, self.obj_size_avg)\
+                                        for _ in range(int(self.buffer_size/3))]
+            self.workspace_buffer_hard = [mid_level_workspace(self.grid_size, self.num_obj_max-1, self.obj_size_avg-2)\
+                                        for _ in range(int(self.buffer_size/3))]
 
 
     def setup_rndm_workspace_from_buffer(self):
         """Choose random workspace from buffer"""
-        buffer_index = np.random.randint(low=0, high=self.buffer_size - 1)
-        self.workspace = self.workspace_buffer[buffer_index]
         
         if (self.params["env"]["WS_level"] == "easy") or (self.params["env"]["WS_level"] == "middle"):
+            buffer_index = np.random.randint(low=0, high=self.buffer_size - 1)
+            self.workspace = self.workspace_buffer[buffer_index]
             self.start_pos, self.goal_pos = get_start_goal_for_workspace(self.workspace,
                 max_goal_dist=self.max_goal_dist)
         
         if self.params["env"]["WS_level"] == "hard":
+            buffer_index = np.random.randint(low=0, high=self.buffer_size - 1)
+            self.workspace = self.workspace_buffer[buffer_index]
             self.workspace, self.start_pos, self.goal_pos = hard_level_workspace(self.workspace, self.grid_size, self.obj_size_avg)
-
+        
+        if self.params["env"]["WS_level"] == "mixture":
+            buffer_index = np.random.randint(low=0, high=int(self.buffer_size/3) - 1)
+            ws_level = np.random.randint(low=0, high=3)
+            if ws_level == 0:
+                self.workspace = self.workspace_buffer_easy[buffer_index]
+                self.start_pos, self.goal_pos = get_start_goal_for_workspace(self.workspace,
+                    max_goal_dist=self.max_goal_dist)
+            if ws_level == 1: 
+                self.workspace = self.workspace_buffer_middle[buffer_index]
+                self.start_pos, self.goal_pos = get_start_goal_for_workspace(self.workspace,
+                    max_goal_dist=self.max_goal_dist)
+            if ws_level == 2: 
+                self.workspace = self.workspace_buffer_hard[buffer_index]
+                self.workspace, self.start_pos, self.goal_pos = hard_level_workspace(self.workspace, self.grid_size, self.obj_size_avg)
 
 
     def collision_check(self):

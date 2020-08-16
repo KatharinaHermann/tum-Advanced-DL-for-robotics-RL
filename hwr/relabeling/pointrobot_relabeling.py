@@ -99,7 +99,7 @@ class PointrobotRelabeler:
                     trajectory = self._cut_trajectory(trajectory=trajectory,
                                         env=env, erase_length=erase_length)
                     #for obstacle_entry in obstacle_entries:
-                        #workspace = self._remove_obstacle(workspace=workspace, obstacle_entry=obstacle_entry)
+                    #    workspace = self._remove_obstacle(workspace=workspace, obstacle_entry=obstacle_entry)
                     for data_point in trajectory:
                         data_point['workspace'] = workspace
                 else:
@@ -143,8 +143,11 @@ class PointrobotRelabeler:
                 if obstacle_entries:
                     #print("Collision with obstacle!!!!!!")
                     # if the robot has collided.
-                    for obstacle_entry in obstacle_entries:
-                        workspace = self._remove_obstacle(workspace=workspace, obstacle_entry=obstacle_entry)
+                    erase_length = env.robot_radius+2
+                    trajectory = self._cut_trajectory(trajectory=trajectory,
+                                        env=env, erase_length=erase_length)
+                    #for obstacle_entry in obstacle_entries:
+                    #    workspace = self._remove_obstacle(workspace=workspace, obstacle_entry=obstacle_entry)
 
                 else:
                     #print("Collision with boundary!!!!!!")
