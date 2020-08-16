@@ -33,7 +33,10 @@
         "memory_capacity": 1e6,
         "batch_size": 256,
         "update_interval": 1,
-        "gpu": 0
+        "gpu": 0,
+        "lr_decay_steps": [3e5],
+        "actor_lr_decay_vals": [3e-5],
+        "critic_lr_decay_vals": [1e-5]
     },
     "trainer": {
         "train_from_scratch" : true,

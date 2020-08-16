@@ -217,7 +217,7 @@ class PointroboEnv(gym.Env):
         nearest_dist = dist_fun(x=x)
 
         # With -0.5 we count for the obstacle expansion
-        if nearest_dist - self.robot_radius - 0.5 < 0 :
+        if nearest_dist - self.robot_radius - 0.5 < 0:
             collision = True
         
         return collision
