@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Dense
+from tensorflow.keras import regularizers
 
 from tf2rl.algos.policy_base import OffPolicyAgent
 from tf2rl.misc.target_update_ops import update_target_variables
@@ -8,14 +9,17 @@ from tf2rl.misc.huber_loss import huber_loss
 
 
 class Actor(tf.keras.Model):
-    def __init__(self, state_shape, action_space, units=[400, 300], name="Actor"):
+    def __init__(self, state_shape, action_space, params, name="Actor"):
         super().__init__(name=name)
 
         self._action_space = action_space
+        units = params["agent"]["actor_units"]
+        l1 = params["agent"]["weight_decay_l1"]
+        l2 = params["agent"]["weight_decay_l2"]
 
-        self.l1 = Dense(units[0], name="L1")
-        self.l2 = Dense(units[1], name="L2")
-        self.l3 = Dense(action_space.high.size, name="L3")
+        self.l1 = Dense(units[0], name="L1", kernel_regularizer=regularizers.L1L2(l1=l1, l2=l2))
+        self.l2 = Dense(units[1], name="L2", kernel_regularizer=regularizers.L1L2(l1=l1, l2=l2))
+        self.l3 = Dense(action_space.high.size, name="L3", kernel_regularizer=regularizers.L1L2(l1=l1, l2=l2))
 
         with tf.device("/cpu:0"):
             self(tf.constant(np.zeros(shape=(1,)+state_shape, dtype=np.float32)))
@@ -31,12 +35,16 @@ class Actor(tf.keras.Model):
 
 
 class Critic(tf.keras.Model):
-    def __init__(self, state_shape, action_dim, units=[400, 300], name="Critic"):
+    def __init__(self, state_shape, action_dim, params, name="Critic"):
         super().__init__(name=name)
 
-        self.l1 = Dense(units[0], name="L1")
-        self.l2 = Dense(units[1], name="L2")
-        self.l3 = Dense(1, name="L3")
+        units = params["agent"]["critic_units"]
+        l1 = params["agent"]["weight_decay_l1"]
+        l2 = params["agent"]["weight_decay_l2"]
+
+        self.l1 = Dense(units[0], name="L1", kernel_regularizer=regularizers.L1L2(l1=l1, l2=l2))
+        self.l2 = Dense(units[1], name="L2", kernel_regularizer=regularizers.L1L2(l1=l1, l2=l2))
+        self.l3 = Dense(1, name="L3", kernel_regularizer=regularizers.L1L2(l1=l1, l2=l2))
 
         dummy_state = tf.constant(
             np.zeros(shape=(1,)+state_shape, dtype=np.float32))
@@ -77,12 +85,12 @@ class DDPG(OffPolicyAgent):
         self.actor = Actor(
             state_shape=env.observation_space.shape,
             action_space=env.action_space,
-            units=params["agent"]["actor_units"]
+            params=params
             )
         self.actor_target = Actor(
             state_shape=env.observation_space.shape,
             action_space=env.action_space,
-            units=params["agent"]["actor_units"]
+            params=params
             )
         self.actor_optimizer = tf.keras.optimizers.Adam(learning_rate=params["agent"]["lr_actor"])
         update_target_variables(self.actor_target.weights,
@@ -92,12 +100,12 @@ class DDPG(OffPolicyAgent):
         self.critic = Critic(
             state_shape=env.observation_space.shape,
             action_dim=env.action_space.high.size,
-            units=params["agent"]["critic_units"]
+            params=params
             )
         self.critic_target = Critic(
             state_shape=env.observation_space.shape,
             action_dim=env.action_space.high.size,
-            units=params["agent"]["critic_units"]
+            params=params
             )
         self.critic_optimizer = tf.keras.optimizers.Adam(
             learning_rate=params["agent"]["lr_critic"])
