@@ -27,11 +27,6 @@ for key in benchmark_keys:
     params = set_up_benchmark_params(params, key)
     params["trainer"]["logdir"] = os.path.join(params["trainer"]["logdir"], key)
 
-    ######################
-    # only for testing:
-    params["trainer"]["model_dir"] = "../models/agents"
-    ######################
-
     #Initialize the environment
     env = gym.make(
         params["env"]["name"],
@@ -60,11 +55,11 @@ for key in benchmark_keys:
     # writing the results into a log file.
     results_path = os.path.join(params["trainer"]["logdir"], "results.txt")
     with open(results_path, 'a') as f:
-        f.write("model_dir: {}".format(params["trainer"]["model_dir"]), "\n")
-        f.write("WS_level: {}".format(params["env"]["WS_level"]), "\n")
-        f.write("num_obj_max: {}".format(params["env"]["num_obj_max"]), "\n")
-        f.write("avg_test_return: {}".format(avg_test_return), "\n")
-        f.write("success_rate: {}".format(success_rate), "\n")
-        f.write("ratio_straight_lines: {}".format(ratio_straight_lines), "\n")
-        f.write("success_rate_straight_line: {}".format(success_rate_straight_line), "\n")
-        f.write("success_rate_no_straight_line: {}".format(success_rate_no_straight_line), "\n")
+        f.write("model_dir: {}".format(params["trainer"]["model_dir"]) + "\n")
+        f.write("WS_level: {}".format(params["env"]["WS_level"]) + "\n")
+        f.write("num_obj_max: {}".format(params["env"]["num_obj_max"]) + "\n")
+        f.write("avg_test_return: {}".format(avg_test_return) + "\n")
+        f.write("success_rate: {}".format(success_rate) + "\n")
+        f.write("ratio_straight_lines: {}".format(ratio_straight_lines) + "\n")
+        f.write("success_rate_straight_line: {}".format(success_rate_straight_line) + "\n")
+        f.write("success_rate_no_straight_line: {}".format(success_rate_no_straight_line) + "\n")
