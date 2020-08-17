@@ -13,7 +13,7 @@
         "obj_size_avg": 8, 
         "robot_radius": 1,
         "max_goal_dist": null,
-        "WS_level": "mixture" 
+        "WS_level": "" 
     },
     "cae": {
         "pooling": "max",
@@ -80,7 +80,6 @@
                 "name": "model_dir",
                 "value": "../models/benchmarking/1"
             }
-
         },
         "2": {
             "param1": {
