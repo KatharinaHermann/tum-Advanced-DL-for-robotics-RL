@@ -16,7 +16,7 @@ from hwr.utils import load_params, set_up_benchmark_params
 
 
 # loading the params:
-params = load_params('params/benchmark_trainings_empty.json')
+params = load_params('params/benchmark_trainings.json')
 benchmark_keys = params["benchmark"].keys()
 
 # deleting the previous runs logs:
@@ -29,7 +29,7 @@ for f in logdir_files:
 
 for key in benchmark_keys:
     # loading original params:
-    params = load_params('params/benchmark_trainings_empty.json')
+    params = load_params('params/benchmark_trainings.json')
 
     # deleting the previous checkpoints:
     if os.path.isdir(params["trainer"]["model_dir"]):
