@@ -98,7 +98,7 @@ class PointrobotTrainer:
 
         if model_dir is not None:
             if not os.path.isdir(model_dir):
-                os.mkdir(model_dir)
+                os.makedirs(model_dir)
             self._latest_path_ckpt = tf.train.latest_checkpoint(model_dir)
             self._checkpoint.restore(self._latest_path_ckpt)
             self.logger.info("Restored {}".format(self._latest_path_ckpt))

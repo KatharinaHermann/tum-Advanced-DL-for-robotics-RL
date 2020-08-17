@@ -29,7 +29,7 @@ for f in logdir_files:
 
 for key in benchmark_keys:
     # loading original params:
-    params = load_params('params/benchmark_params.json')
+    params = load_params('params/benchmark_trainings.json')
 
     # deleting the previous checkpoints:
     if os.path.isdir(params["trainer"]["model_dir"]):

@@ -179,7 +179,7 @@ class PointroboEnv(gym.Env):
         if self.params["env"]["WS_level"] == "hard":
             buffer_index = np.random.randint(low=0, high=self.buffer_size - 1)
             self.workspace = self.workspace_buffer[buffer_index]
-            self.workspace, self.start_pos, self.goal_pos = hard_level_workspace(self.workspace, self.grid_size, self.obj_size_avg-2)
+            self.workspace, self.start_pos, self.goal_pos = hard_level_workspace(self.workspace, self.grid_size, self.obj_size_avg)
         
         if self.params["env"]["WS_level"] == "mixture":
             buffer_index = np.random.randint(low=0, high=int(self.buffer_size/3) - 1)
