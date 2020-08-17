@@ -118,13 +118,13 @@ def load_trajectory_from_file(filename):
 
 def straight_line_feasible(workspace, start, goal, env):
     grid_size = workspace.shape[0]
-    goal = rescale(goal, env.pos_bounds)
-    start = rescale(start, env.pos_bounds)
+    goal_rescaled = rescale(goal, env.pos_bounds)
+    start_rescaled = rescale(start, env.pos_bounds)
     
     pos = start.copy() 
-    action = (goal-start) / (np.linalg.norm(goal-start))
+    action = (goal_rescaled - start_rescaled) / (np.linalg.norm(goal_rescaled - start_rescaled))
 
-    while np.linalg.norm(goal - pos) > env.robot_radius:
+    while np.linalg.norm(goal_rescaled - pos) > env.robot_radius:
         
         x = int(pos[0])
         y = int(pos[1])
