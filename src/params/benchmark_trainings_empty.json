@@ -9,7 +9,7 @@
         "step_reward": -0.06,
         "buffer_size": 100,
         "grid_size": 32,
-        "num_obj_max": 5, 
+        "num_obj_max": 0, 
         "obj_size_avg": 8, 
         "robot_radius": 1,
         "max_goal_dist": null,
@@ -44,14 +44,14 @@
         "mode": "train",
         "relabeling_mode": "random",
         "remove_zigzaging": false,
-        "max_steps": 8e5,
+        "max_steps": 2e5,
         "episode_max_steps": 50,
         "n_experiments": 1,
         "show_progress": false,
         "show_progress_interval": 100,
         "save_model_interval": 1e4,
         "save_summary_interval": 1e3,
-        "logdir": "results/benchmarking",
+        "logdir": "results/benchmarking_empty",
         "logging_level": "INFO",
         "model_dir": "../models/agents",
         "dir_suffix": "",
@@ -78,7 +78,7 @@
             "param2": {
                 "group": "trainer",
                 "name": "model_dir",
-                "value": "../models/benchmarking/1"
+                "value": "../models/benchmarking_empty/1"
             }
         },
         "2": {
@@ -95,7 +95,7 @@
             "param3": {
                 "group": "trainer",
                 "name": "model_dir",
-                "value": "../models/benchmarking/2"
+                "value": "../models/benchmarking_empty/2"
             }
         },
         "3": {
@@ -112,41 +112,19 @@
             "param3": {
                 "group": "trainer",
                 "name": "model_dir",
-                "value": "../models/benchmarking/3"
+                "value": "../models/benchmarking_empty/3"
             }
         },
         "4": {
             "param1": {
                 "group": "trainer",
                 "name": "relabeling_mode",
-                "value": "random"
+                "value": "straight_line"
             },
             "param2": {
                 "group": "trainer",
-                "name": "remove_zigzaging",
-                "value": false
-            },
-            "param3": {
-                "group": "trainer",
                 "name": "model_dir",
-                "value": "../models/benchmarking/4"
-            }
-        },
-        "5": {
-            "param1": {
-                "group": "trainer",
-                "name": "relabeling_mode",
-                "value": "random"
-            },
-            "param2": {
-                "group": "trainer",
-                "name": "remove_zigzaging",
-                "value": true
-            },
-            "param3": {
-                "group": "trainer",
-                "name": "model_dir",
-                "value": "../models/benchmarking/5"
+                "value": "../models/benchmarking_empty/4"
             }
         }
     }
