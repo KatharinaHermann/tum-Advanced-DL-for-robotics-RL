@@ -1,0 +1,447 @@
+{ 
+    "env": {
+        "name": "pointrobo-v0",
+        "normalize": true,
+        "action_low": -1.0,
+        "action_high": 1.0,
+        "goal_reward": 8.0,
+        "collision_reward": -7.0,
+        "step_reward": -0.06,
+        "buffer_size": 100,
+        "grid_size": 32,
+        "num_obj_max": 5, 
+        "obj_size_avg": 8, 
+        "robot_radius": 1,
+        "max_goal_dist": null,
+        "WS_level": "" 
+    },
+    "cae": {
+        "pooling": "max",
+        "latent_dim": 16,
+        "conv_filters": [4, 8, 16],
+        "weights_path": "../models/cae/model_num_5_size_8.h5"
+    },
+    "agent": {
+        "name": "DDPG",
+        "max_grad": 0.6,
+        "lr_actor": 0.0003,
+        "lr_critic": 5e-5,
+        "actor_units": [400, 300],
+        "critic_units": [400, 300],
+        "sigma": 0.1,
+        "tau": 0.004,
+        "n_warmup": 1e4,
+        "memory_capacity": 1e6,
+        "batch_size": 256,
+        "update_interval": 1,
+        "gpu": 0,
+        "lr_decay_steps": [3e5],
+        "actor_lr_decay_vals": [3e-5],
+        "critic_lr_decay_vals": [1e-5]
+    },
+    "trainer": {
+        "train_from_scratch" : true,
+        "mode": "train",
+        "relabeling_mode": "random",
+        "remove_zigzaging": false,
+        "max_steps": 8e5,
+        "episode_max_steps": 50,
+        "n_experiments": 1,
+        "show_progress": false,
+        "show_progress_interval": 100,
+        "save_model_interval": 1e4,
+        "save_summary_interval": 1e3,
+        "logdir": "results/benchmarking",
+        "logging_level": "INFO",
+        "model_dir": "../models/agents",
+        "dir_suffix": "",
+        "use_prioritized_rb": false,
+        "use_nstep_rb": false,
+        "n_step": 4,
+        "test_interval": 1e4,
+        "show_test_progress": false,
+        "test_episodes": 100,
+        "save_test_path": false,
+        "save_test_path_sep": false,
+        "save_test_movie": false,
+        "show_test_images": false,
+        "normalize_obs": false,
+        "show_relabeling": false
+    },
+    "benchmark": {
+        "1": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "no_relabeling"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 0
+            }
+        },
+        "2": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "straight_line"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 0
+            }
+        },
+        "3": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "erease"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 0
+            },
+            "param3": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": false
+            }
+        },
+        "4": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "erease"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 0
+            },
+            "param3": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": true
+            }
+        },
+        "5": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "no_relabeling"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 3
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "easy"
+            }
+        },
+        "6": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "erease"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 3
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "easy"
+            },
+            "param4": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": false
+            }
+        },
+        "7": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "erease"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 3
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "easy"
+            },
+            "param4": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": true
+            }
+        },
+        "8": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "random"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 3
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "easy"
+            },
+            "param4": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": false
+            }
+        },
+        "9": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "random"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 3
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "easy"
+            },
+            "param4": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": true
+            }
+        },
+        "10": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "no_relabeling"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 5
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "middle"
+            }
+        },
+        "11": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "erease"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 5
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "middle"
+            },
+            "param4": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": false
+            }
+        },
+        "12": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "erease"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 5
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "middle"
+            },
+            "param4": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": true
+            }
+        },
+        "13": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "random"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 5
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "middle"
+            },
+            "param4": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": false
+            }
+        },
+        "14": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "random"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 5
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "middle"
+            },
+            "param4": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": true
+            }
+        },
+        "15": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "no_relabeling"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 4
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "hard"
+            }
+        },
+        "16": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "erease"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 4
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "hard"
+            },
+            "param4": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": false
+            }
+        },
+        "17": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "erease"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 4
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "hard"
+            },
+            "param4": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": true
+            }
+        },
+        "18": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "random"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 4
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "hard"
+            },
+            "param4": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": false
+            }
+        },
+        "19": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "random"
+            },
+            "param2": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 4
+            },
+            "param3": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "hard"
+            },
+            "param4": {
+                "group": "trainer",
+                "name": "remove_zigzaging",
+                "value": true
+            }
+        }
+    }
+
+}

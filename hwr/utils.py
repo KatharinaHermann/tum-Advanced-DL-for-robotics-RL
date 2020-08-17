@@ -119,8 +119,7 @@ def straight_line_feasible(workspace, start, goal, env):
     goal = rescale(goal, env.pos_bounds)
     start = rescale(start, env.pos_bounds)
     
-    pos = start.copy()
-        
+    pos = start.copy() 
     action = (goal-start) / (np.linalg.norm(goal-start))
 
     while np.linalg.norm(goal - pos) > env.robot_radius:
@@ -134,3 +133,14 @@ def straight_line_feasible(workspace, start, goal, env):
     
     return True
     
+
+def set_up_benchmark_params(params, key):
+    """sets up the parameters according to params["benchmark"]["key"]"""
+
+    for setting in params["benchmark"][key]:
+        group = params["benchmark"][key][setting]["group"]
+        name = params["benchmark"][key][setting]["name"]
+        value = params["benchmark"][key][setting]["value"]
+        params[group][name] = value
+
+    return params
