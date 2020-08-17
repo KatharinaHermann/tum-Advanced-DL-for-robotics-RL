@@ -88,8 +88,8 @@ def visualize_trajectory(trajectory, fig, env):
         y = [point['position'][1] for point in trajectory]
         x = [point['position'][0] for point in trajectory]
         goal = trajectory[0]['goal']
-        start = rescale(trajectory[0]['position'], env.pos_bounds)
-        end = rescale(trajectory[-1]['position'], env.pos_bounds)
+        start = trajectory[0]['position']
+        end = trajectory[-1]['position']
 
     # plotting:
     fig.clf()
@@ -115,19 +115,21 @@ def load_trajectory_from_file(filename):
     assert os.path.exists(filename), "File: {} does not exist.".format(filename)
     return joblib.load(filename)
 
-
-def straight_line_feasible(workspace, start, goal):
+def straight_line_feasible(workspace, start, goal, env):
+    goal = rescale(goal, env.pos_bounds)
+    start = rescale(start, env.pos_bounds)
     
     pos = start.copy() 
     action = (goal-start) / (np.linalg.norm(goal-start))
 
-    while np.linalg.norm(goal - pos) > 0:
+    while np.linalg.norm(goal - pos) > env.robot_radius:
+        
         x = int(pos[0])
         y = int(pos[1])
 
         if workspace[y-2: y+3, x-2: x+3].any():
             return False
-        pos += 0.5* action
+        pos += action
     
     return True
     

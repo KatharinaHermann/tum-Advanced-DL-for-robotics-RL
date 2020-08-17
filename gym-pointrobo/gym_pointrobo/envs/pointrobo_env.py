@@ -170,7 +170,6 @@ class PointroboEnv(gym.Env):
     def setup_rndm_workspace_from_buffer(self):
         """Choose random workspace from buffer"""
         
-<<<<<<< HEAD
         if (self.params["env"]["WS_level"] == "easy") or (self.params["env"]["WS_level"] == "middle"):
             buffer_index = np.random.randint(low=0, high=self.buffer_size - 1)
             self.workspace = self.workspace_buffer[buffer_index]
@@ -180,14 +179,7 @@ class PointroboEnv(gym.Env):
         if self.params["env"]["WS_level"] == "hard":
             buffer_index = np.random.randint(low=0, high=self.buffer_size - 1)
             self.workspace = self.workspace_buffer[buffer_index]
-=======
-        if self.params["env"]["WS_level"] in ["easy", "middle", ""]:
-            self.start_pos, self.goal_pos = get_start_goal_for_workspace(self.workspace,
-                max_goal_dist=self.max_goal_dist)
-        
-        else:
->>>>>>> master
-            self.workspace, self.start_pos, self.goal_pos = hard_level_workspace(self.workspace, self.grid_size, self.obj_size_avg)
+            self.workspace, self.start_pos, self.goal_pos = hard_level_workspace(self.workspace, self.grid_size, self.obj_size_avg-2)
         
         if self.params["env"]["WS_level"] == "mixture":
             buffer_index = np.random.randint(low=0, high=int(self.buffer_size/3) - 1)
@@ -202,7 +194,7 @@ class PointroboEnv(gym.Env):
                     max_goal_dist=self.max_goal_dist)
             if ws_level == 2: 
                 self.workspace = self.workspace_buffer_hard[buffer_index]
-                self.workspace, self.start_pos, self.goal_pos = hard_level_workspace(self.workspace, self.grid_size, self.obj_size_avg)
+                self.workspace, self.start_pos, self.goal_pos = hard_level_workspace(self.workspace, self.grid_size, self.obj_size_avg-2)
 
 
     def collision_check(self):
