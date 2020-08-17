@@ -69,18 +69,6 @@
         "show_relabeling": false
     },
     "benchmark": {
-        "1": {
-            "param1": {
-                "group": "trainer",
-                "name": "relabeling_mode",
-                "value": "no_relabeling"
-            },
-            "param2": {
-                "group": "trainer",
-                "name": "model_dir",
-                "value": "../models/benchmarking/1"
-            }
-        },
         "2": {
             "param1": {
                 "group": "trainer",
