@@ -120,7 +120,7 @@ def hard_level_workspace(workspace, grid_size, obj_size_avg):
     #goal_blocked = workspace[y_goal-2: y_goal+3, x_goal-2: x_goal+3].any()
                         
     if goal_blocked:
-        workspace[y_goal-2: y_goal+3, x_goal-2: x_goal+3] = 0
+        workspace[y_min: y_max, x_min: x_max] = 0
         
     #Check whether start feasible
     x_start = int(goal[0])
@@ -135,7 +135,7 @@ def hard_level_workspace(workspace, grid_size, obj_size_avg):
     #start_blocked = workspace[y_start-2: y_start+3, x_start-2: x_start+3].any()
                         
     if start_blocked:
-        workspace[y_start-2: y_start+3, x_start-2: x_start+3] = 0
+        workspace[y_min: y_max, x_min: x_max] = 0
 
     return workspace, start, goal
 
