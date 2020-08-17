@@ -128,9 +128,9 @@ def straight_line_feasible(workspace, start, goal):
 
         if workspace[y-2: y+3, x-2: x+3].any():
             return False
-        pos + 0.5* action
+        pos += 0.5* action
 
-        pos += action
+        #pos += action
     
     return True
     

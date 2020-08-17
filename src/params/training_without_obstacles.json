@@ -13,7 +13,7 @@
         "obj_size_avg": 8, 
         "robot_radius": 1,
         "max_goal_dist": null,
-        "WS_level": "mixture" 
+        "WS_level": "middle" 
     },
     "cae": {
         "pooling": "max",
@@ -41,8 +41,8 @@
     },
     "trainer": {
         "train_from_scratch" : true,
-        "mode": "train",
-        "relabeling_mode": "erease",
+        "mode": "evaluate",
+        "relabeling_mode": "no_relabeling",
         "remove_zigzaging": false,
         "max_steps": 1e6,
         "episode_max_steps": 50,
@@ -59,7 +59,7 @@
         "use_nstep_rb": false,
         "n_step": 4,
         "test_interval": 1e4,
-        "show_test_progress": false,
+        "show_test_progress": true,
         "test_episodes": 100,
         "save_test_path": false,
         "save_test_path_sep": false,
