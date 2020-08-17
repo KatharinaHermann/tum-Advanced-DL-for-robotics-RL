@@ -12,7 +12,8 @@
         "num_obj_max": 5,
         "obj_size_avg": 8, 
         "robot_radius": 1,
-        "max_goal_dist": null
+        "max_goal_dist": null,
+        "WS_level": ""
     },
     "cae": {
         "pooling": "max",
