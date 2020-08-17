@@ -180,7 +180,7 @@ def get_start_goal_for_workspace(workspace, max_goal_dist=None):
 
     grid_size = workspace.shape[0]
 
-    #Generate start point (repeat until point is found where no object ist placed)
+    # Generate start point (repeat until point is found where no object ist placed)
     start_blocked = True
     while start_blocked:
         
