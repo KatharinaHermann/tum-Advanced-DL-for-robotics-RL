@@ -116,6 +116,22 @@ def load_trajectory_from_file(filename):
     return joblib.load(filename)
 
 
+def straight_line_feasible(workspace, start, goal):
+    
+    pos = start.copy() 
+    action = (goal-start) / (np.linalg.norm(goal-start))
+
+    while np.linalg.norm(goal - pos) > 0:
+        x = int(pos[0])
+        y = int(pos[1])
+
+        if workspace[y-2: y+3, x-2: x+3].any():
+            return False
+        pos += 0.5* action
+    
+    return True
+    
+
 def set_up_benchmark_params(params, key):
     """sets up the parameters according to params["benchmark"]["key"]"""
 
