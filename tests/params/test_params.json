@@ -12,7 +12,8 @@
         "num_obj_max": 5,
         "obj_size_avg": 8, 
         "robot_radius": 1,
-        "max_goal_dist": null
+        "max_goal_dist": null,
+        "WS_level": ""
     },
     "cae": {
         "pooling": "max",
@@ -33,7 +34,9 @@
         "memory_capacity": 1e6,
         "batch_size": 256,
         "update_interval": 1,
-        "gpu": 0
+        "gpu": 0,
+        "weight_decay_l1": 0,
+        "weight_decay_l2": 1e-2
     },
     "trainer": {
         "train_from_scratch" : true,

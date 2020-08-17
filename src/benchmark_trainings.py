@@ -31,16 +31,16 @@ for key in benchmark_keys:
     # loading original params:
     params = load_params('params/benchmark_trainings.json')
 
+    # setting up training run:
+    params = set_up_benchmark_params(params, key)
+    params["trainer"]["logdir"] = os.path.join(params["trainer"]["logdir"], key)
+    param_log_path = os.path.join(params["trainer"]["logdir"], "params.json")  
+
     # deleting the previous checkpoints:
     if os.path.isdir(params["trainer"]["model_dir"]):
         ckp_files = glob.glob(os.path.join(params["trainer"]["model_dir"], '*'))
         for f in ckp_files:
-            os.remove(f)
-
-    # setting up training run:
-    params = set_up_benchmark_params(params, key)
-    params["trainer"]["logdir"] = os.path.join(params["trainer"]["logdir"], key)
-    param_log_path = os.path.join(params["trainer"]["logdir"], "params.json")        
+            os.remove(f)      
 
     #Initialize the environment
     env = gym.make(
