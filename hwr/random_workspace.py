@@ -110,7 +110,14 @@ def hard_level_workspace(workspace, grid_size, obj_size_avg):
     #Check whether goal feasible
     x_goal = int(goal[0])
     y_goal = int(goal[1])
-    goal_blocked = workspace[y_goal-2: y_goal+3, x_goal-2: x_goal+3].any()
+
+    #Check if there is an obsrtacle near the start position
+    y_min = y_goal - 3 if y_goal - 3 >= 0 else 0
+    y_max = y_goal + 4 if y_goal + 4 <= (grid_size - 1) else grid_size - 1
+    x_min = x_goal - 3 if x_goal - 3 >= 0 else 0
+    x_max = x_goal + 4 if x_goal + 4 <= (grid_size - 1) else grid_size - 1
+    goal_blocked = workspace[y_min: y_max, x_min: x_max].any()
+    #goal_blocked = workspace[y_goal-2: y_goal+3, x_goal-2: x_goal+3].any()
                         
     if goal_blocked:
         workspace[y_goal-2: y_goal+3, x_goal-2: x_goal+3] = 0
@@ -118,7 +125,14 @@ def hard_level_workspace(workspace, grid_size, obj_size_avg):
     #Check whether start feasible
     x_start = int(goal[0])
     y_start = int(goal[1])
-    start_blocked = workspace[y_start-2: y_start+3, x_start-2: x_start+3].any()
+
+    #Check if there is an obsrtacle near the start position
+    y_min = y_start - 3 if y_start - 3 >= 0 else 0
+    y_max = y_start + 4 if y_start + 4 <= (grid_size - 1) else grid_size - 1
+    x_min = x_start - 3 if x_start - 3 >= 0 else 0
+    x_max = x_start + 4 if x_start + 4 <= (grid_size - 1) else grid_size - 1
+    start_blocked = workspace[y_min: y_max, x_min: x_max].any()
+    #start_blocked = workspace[y_start-2: y_start+3, x_start-2: x_start+3].any()
                         
     if start_blocked:
         workspace[y_start-2: y_start+3, x_start-2: x_start+3] = 0
