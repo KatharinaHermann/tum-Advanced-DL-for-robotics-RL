@@ -115,22 +115,30 @@ def load_trajectory_from_file(filename):
     assert os.path.exists(filename), "File: {} does not exist.".format(filename)
     return joblib.load(filename)
 
+
 def straight_line_feasible(workspace, start, goal):
     
-    pos = start.copy()
-        
+    pos = start.copy() 
     action = (goal-start) / (np.linalg.norm(goal-start))
 
     while np.linalg.norm(goal - pos) > 0:
-        
         x = int(pos[0])
         y = int(pos[1])
 
         if workspace[y-2: y+3, x-2: x+3].any():
             return False
         pos += 0.5* action
-
-        #pos += action
     
     return True
     
+
+def set_up_benchmark_params(params, key):
+    """sets up the parameters according to params["benchmark"]["key"]"""
+
+    for setting in params["benchmark"][key]:
+        group = params["benchmark"][key][setting]["group"]
+        name = params["benchmark"][key][setting]["name"]
+        value = params["benchmark"][key][setting]["value"]
+        params[group][name] = value
+
+    return params

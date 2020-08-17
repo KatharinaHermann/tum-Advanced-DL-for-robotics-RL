@@ -189,7 +189,11 @@ def get_start_goal_for_workspace(workspace, max_goal_dist=None):
         y = int(start[1])
 
         #Check if there is an obsrtacle near the start position
-        start_blocked = workspace[y-3: y+4, x-3: x+4].any()
+        y_min = y - 3 if y - 3 >= 0 else 0
+        y_max = y + 4 if y + 4 <= (grid_size - 1) else grid_size - 1
+        x_min = x - 3 if x - 3 >= 0 else 0
+        x_max = x + 4 if x + 4 <= (grid_size - 1) else grid_size - 1
+        start_blocked = workspace[y_min: y_max, x_min: x_max].any()
         
 
     # Generate goal point (repeat until point is found where no object ist placed) and assign goal point with a 1
@@ -208,8 +212,12 @@ def get_start_goal_for_workspace(workspace, max_goal_dist=None):
 
         x = int(goal[0])
         y = int(goal[1])
-        goal_blocked = workspace[y-3: y+4, x-3: x+4].any()
-
+        y_min = y - 3 if y - 3 >= 0 else 0
+        y_max = y + 4 if y + 4 <= (grid_size - 1) else grid_size - 1
+        x_min = x - 3 if x - 3 >= 0 else 0
+        x_max = x + 4 if x + 4 <= (grid_size - 1) else grid_size - 1
+        goal_blocked = workspace[y_min: y_max, x_min: x_max].any()
+        
     return start, goal
 
 
