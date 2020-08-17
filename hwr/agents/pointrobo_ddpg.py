@@ -13,12 +13,12 @@ class Actor(tf.keras.Model):
         super().__init__(name=name)
 
         self._action_space = action_space
-        units = params["agent"]["units"]
+        units = params["agent"]["actor_units"]
         l1 = params["agent"]["weight_decay_l1"]
         l2 = params["agent"]["weight_decay_l2"]
 
         self.l1 = Dense(units[0], name="L1", kernel_regularizer=regularizers.L1L2(l1=l1, l2=l2))
-        self.l2 = Dense(params["agent"]["units"][0], name="L2", kernel_regularizer=regularizers.L1L2(l1=l1, l2=l2))
+        self.l2 = Dense(units[1], name="L2", kernel_regularizer=regularizers.L1L2(l1=l1, l2=l2))
         self.l3 = Dense(action_space.high.size, name="L3", kernel_regularizer=regularizers.L1L2(l1=l1, l2=l2))
 
         with tf.device("/cpu:0"):
@@ -38,7 +38,7 @@ class Critic(tf.keras.Model):
     def __init__(self, state_shape, action_dim, params, name="Critic"):
         super().__init__(name=name)
 
-        units = params["agent"]["units"]
+        units = params["agent"]["critic_units"]
         l1 = params["agent"]["weight_decay_l1"]
         l2 = params["agent"]["weight_decay_l2"]
 
