@@ -214,7 +214,7 @@ class PointrobotTrainer:
                                 fig=self._relabel_fig,
                                 env=self._env
                                 )
-                            plt.pause(3)
+                            plt.pause(1)
 
                         relabeling_times.append(time.time() - relabeling_begin)
 
