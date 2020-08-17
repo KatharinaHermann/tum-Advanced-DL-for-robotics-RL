@@ -121,11 +121,10 @@ def straight_line_feasible(workspace, start, goal, env):
     goal_rescaled = rescale(goal, env.pos_bounds)
     start_rescaled = rescale(start, env.pos_bounds)
     
-    pos = start.copy() 
+    pos = start_rescaled.copy() 
     action = (goal_rescaled - start_rescaled) / (np.linalg.norm(goal_rescaled - start_rescaled))
 
     while np.linalg.norm(goal_rescaled - pos) > env.robot_radius:
-        
         x = int(pos[0])
         y = int(pos[1])
         y_min = y - 3 if y - 3 >= 0 else 0
