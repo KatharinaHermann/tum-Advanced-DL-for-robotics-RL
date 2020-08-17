@@ -163,14 +163,15 @@ class PointrobotRelabeler:
                                     shift_distance=shift_distance)
             #else:
                 #print("No Collision!!!!!!")
-            #Sample new obstacles in workspace
-            workspace = self._sample_objects(workspace=workspace, trajectory=trajectory, num_objects=env.num_obj_max, avg_object_size=env.obj_size_avg, env =env)
-                
-            for data_point in trajectory:
-                data_point['workspace'] = workspace
+            
             
             # add new goal state to the trajectory:
             if len(trajectory) > 1:
+                #Sample new obstacles in workspace
+                workspace = self._sample_objects(workspace=trajectory[0]['workspace'], trajectory=trajectory, num_objects=env.num_obj_max, avg_object_size=env.obj_size_avg, env=env)
+                
+                for data_point in trajectory:
+                    data_point['workspace'] = workspace
                 return self._set_new_goal(trajectory, env)
             else:
                 return []
@@ -414,7 +415,13 @@ class PointrobotRelabeler:
                         x = int(point['position'][0])
                         y = int(point['position'][1])
 
-                        point_blocked = workspace[y-2: y+3, x-2: x+3].any()
+                        y_min = y - 3 if y - 3 >= 0 else 0
+                        y_max = y + 4 if y + 4 <= (env.grid_size - 1) else env.grid_size - 1
+                        x_min = x - 3 if x - 3 >= 0 else 0
+                        x_max = x + 4 if x + 4 <= (env.grid_size - 1) else env.grid_size - 1
+                        point_blocked = workspace[y_min: y_max, x_min: x_max].any()
+
+                        #point_blocked = workspace[y-2: y+3, x-2: x+3].any()
                         
                         if point_blocked:
                             workspace[y-2: y+3, x-2: x+3] = 0
