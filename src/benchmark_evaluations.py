@@ -16,16 +16,21 @@ from hwr.utils import load_params, set_up_benchmark_params
 
 
 # loading the params:
-params = load_params('params/benchmark_params.json')
+params = load_params('params/benchmark_evaluations.json')
 benchmark_keys = params["benchmark"].keys()
 
 for key in benchmark_keys:
     # loading original params:
-    params = load_params('params/benchmark_params.json')
+    params = load_params('params/benchmark_evaluations.json')
 
     # setting up training run:
     params = set_up_benchmark_params(params, key)
-    params["trainer"]["logdir"] = os.path.join(params["trainer"]["logdir"], key)        
+    params["trainer"]["logdir"] = os.path.join(params["trainer"]["logdir"], key)
+
+    ######################
+    # only for testing:
+    params["trainer"]["model_dir"] = "../models/agents"
+    ######################
 
     #Initialize the environment
     env = gym.make(

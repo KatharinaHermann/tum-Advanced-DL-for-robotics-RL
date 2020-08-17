@@ -60,7 +60,7 @@
         "n_step": 4,
         "test_interval": 1e4,
         "show_test_progress": false,
-        "test_episodes": 1000,
+        "test_episodes": 100,
         "save_test_path": false,
         "save_test_path_sep": false,
         "save_test_movie": false,
@@ -83,7 +83,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "0"
+                "value": 0
             }
         },
         "2": {
@@ -100,7 +100,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "3"
+                "value": 3
             }
         },
         "3": {
@@ -117,7 +117,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "5"
+                "value": 5
             }
         },
         "4": {
@@ -134,7 +134,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "4"
+                "value": 4
             }
         },
         "5": {
@@ -151,7 +151,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "0"
+                "value": 0
             }
         },
         "6": {
@@ -168,7 +168,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "3"
+                "value": 3
             }
         },
         "7": {
@@ -185,7 +185,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "5"
+                "value": 5
             }
         },
         "8": {
@@ -202,7 +202,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "4"
+                "value": 4
             }
         },
         "9": {
@@ -219,7 +219,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "0"
+                "value": 0
             }
         },
         "10": {
@@ -236,7 +236,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "3"
+                "value": 3
             }
         },
         "11": {
@@ -253,7 +253,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "5"
+                "value": 5
             }
         },
         "12": {
@@ -270,7 +270,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "4"
+                "value": 4
             }
         },
         "13": {
@@ -287,7 +287,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "0"
+                "value": 0
             }
         },
         "14": {
@@ -304,7 +304,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "3"
+                "value": 3
             }
         },
         "15": {
@@ -321,7 +321,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "5"
+                "value": 5
             }
         },
         "16": {
@@ -338,7 +338,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "4"
+                "value": 4
             }
         },
         "17": {
@@ -355,7 +355,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "0"
+                "value": 0
             }
         },
         "18": {
@@ -372,7 +372,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "3"
+                "value": 3
             }
         },
         "19": {
@@ -389,7 +389,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "5"
+                "value": 5
             }
         },
         "20": {
@@ -406,7 +406,7 @@
             "param3": {
                 "group": "env",
                 "name": "num_obj_max",
-                "value": "4"
+                "value": 4
             }
         }               
     }
