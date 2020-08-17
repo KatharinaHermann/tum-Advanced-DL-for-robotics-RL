@@ -325,6 +325,9 @@ class PointrobotTrainer:
         print("avg test success_rate for straight_line episodes: {}".format(success_rate_straight_line))
         print("avg test success_rate for no_straight_line episodes: {}".format(success_rate_no_straight_line))
 
+        return avg_test_return, success_rate, ratio_straight_lines, success_rate_straight_line, success_rate_no_straight_line
+
+
     def evaluate_policy_continuously(self):
         """
         Periodically search the latest checkpoint, and keep evaluating with the latest model until user kills process.

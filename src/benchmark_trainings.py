@@ -16,7 +16,7 @@ from hwr.utils import load_params, set_up_benchmark_params
 
 
 # loading the params:
-params = load_params('params/benchmark_params.json')
+params = load_params('params/benchmark_trainings.json')
 benchmark_keys = params["benchmark"].keys()
 
 # deleting the previous runs logs:
@@ -32,9 +32,10 @@ for key in benchmark_keys:
     params = load_params('params/benchmark_params.json')
 
     # deleting the previous checkpoints:
-    ckp_files = glob.glob(os.path.join(params["trainer"]["model_dir"], '*'))
-    for f in ckp_files:
-        os.remove(f)
+    if os.path.isdir(params["trainer"]["model_dir"]):
+        ckp_files = glob.glob(os.path.join(params["trainer"]["model_dir"], '*'))
+        for f in ckp_files:
+            os.remove(f)
 
     # setting up training run:
     params = set_up_benchmark_params(params, key)
@@ -69,9 +70,4 @@ for key in benchmark_keys:
     with open(param_log_path, 'w') as f:
         json.dump(params["benchmark"][key], f)
 
-    if params["trainer"]["mode"] == "train":
-        trainer.train()
-    elif params["trainer"]["mode"] == "evaluate":
-        trainer.evaluate()
-    else:
-        print("Unknown training mode. Expected \"train\" or \"evaluate\", received: {}".format(params["trainer"]["mode"]))
+    trainer.train()
