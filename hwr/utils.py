@@ -115,7 +115,9 @@ def load_trajectory_from_file(filename):
     assert os.path.exists(filename), "File: {} does not exist.".format(filename)
     return joblib.load(filename)
 
+
 def straight_line_feasible(workspace, start, goal, env):
+    grid_size = workspace.shape[0]
     goal = rescale(goal, env.pos_bounds)
     start = rescale(start, env.pos_bounds)
     
@@ -126,8 +128,12 @@ def straight_line_feasible(workspace, start, goal, env):
         
         x = int(pos[0])
         y = int(pos[1])
+        y_min = y - 3 if y - 3 >= 0 else 0
+        y_max = y + 4 if y + 4 <= (grid_size - 1) else grid_size - 1
+        x_min = x - 3 if x - 3 >= 0 else 0
+        x_max = x + 4 if x + 4 <= (grid_size - 1) else grid_size - 1
 
-        if workspace[y-2: y+3, x-2: x+3].any():
+        if workspace[y_min: y_max, x_min: x_max].any():
             return False
         pos += action
     
