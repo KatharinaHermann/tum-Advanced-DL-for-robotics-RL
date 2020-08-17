@@ -41,8 +41,8 @@
     },
     "trainer": {
         "train_from_scratch" : true,
-        "mode": "evaluate",
-        "relabeling_mode": "no_relabeling",
+        "mode": "train",
+        "relabeling_mode": "erease",
         "remove_zigzaging": false,
         "max_steps": 1e6,
         "episode_max_steps": 50,
@@ -66,6 +66,6 @@
         "save_test_movie": false,
         "show_test_images": false,
         "normalize_obs": false,
-        "show_relabeling": false
+        "show_relabeling": true
     }
 }
