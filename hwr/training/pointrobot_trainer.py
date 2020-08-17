@@ -410,11 +410,11 @@ class PointrobotTrainer:
                    
             total_test_return += episode_return
 
-            if straight_line_feasible(workspace, start, goal):
+            if straight_line_feasible(workspace, start, goal, self._test_env):
                 straight_line_episode += 1
                 if reward == self._test_env.goal_reward:        
                     success_traj_straight_line += 1
-            elif not straight_line_feasible(workspace, start, goal):
+            else:
                 no_straight_line_episode += 1
                 if reward == self._test_env.goal_reward:        
                     success_traj_no_straight_line += 1
