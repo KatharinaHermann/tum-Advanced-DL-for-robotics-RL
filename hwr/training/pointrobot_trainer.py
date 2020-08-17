@@ -438,8 +438,12 @@ class PointrobotTrainer:
         success_rate = success_traj / self._test_episodes
         if straight_line_episode > 0:
             success_rate_straight_line = success_traj_straight_line/straight_line_episode
+        else:
+            success_rate_straight_line = 0
         if no_straight_line_episode > 0:
             success_rate_no_straight_line = success_traj_no_straight_line/no_straight_line_episode
+        else:
+            success_rate_no_straight_line = 0
         ratio_straight_lines = straight_line_episode/ self._test_episodes
 
         return avg_test_return, success_rate, ratio_straight_lines, success_rate_straight_line, success_rate_no_straight_line
