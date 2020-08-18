@@ -62,7 +62,7 @@
         "n_step": 4,
         "test_interval": 1e4,
         "show_test_progress": false,
-        "test_episodes": 1000,
+        "test_episodes": 100,
         "save_test_path": false,
         "save_test_path_sep": false,
         "save_test_movie": false,
@@ -71,57 +71,6 @@
         "show_relabeling": false
     },
     "benchmark": {
-        "1": {
-            "param1": {
-                "group": "trainer",
-                "name": "model_dir",
-                "value": "../models/benchmarking/1"
-            },
-            "param2": {
-                "group": "env",
-                "name": "WS_level",
-                "value": ""
-            },
-            "param3": {
-                "group": "env",
-                "name": "num_obj_max",
-                "value": 0
-            }
-        },
-        "2": {
-            "param1": {
-                "group": "trainer",
-                "name": "model_dir",
-                "value": "../models/benchmarking/1"
-            },
-            "param2": {
-                "group": "env",
-                "name": "WS_level",
-                "value": "easy"
-            },
-            "param3": {
-                "group": "env",
-                "name": "num_obj_max",
-                "value": 3
-            }
-        },
-        "3": {
-            "param1": {
-                "group": "trainer",
-                "name": "model_dir",
-                "value": "../models/benchmarking/1"
-            },
-            "param2": {
-                "group": "env",
-                "name": "WS_level",
-                "value": "middle"
-            },
-            "param3": {
-                "group": "env",
-                "name": "num_obj_max",
-                "value": 5
-            }
-        },
         "4": {
             "param1": {
                 "group": "trainer",
@@ -410,6 +359,57 @@
                 "name": "num_obj_max",
                 "value": 4
             }
-        }               
+        },
+        "1": {
+            "param1": {
+                "group": "trainer",
+                "name": "model_dir",
+                "value": "../models/benchmarking/1"
+            },
+            "param2": {
+                "group": "env",
+                "name": "WS_level",
+                "value": ""
+            },
+            "param3": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 0
+            }
+        },
+        "2": {
+            "param1": {
+                "group": "trainer",
+                "name": "model_dir",
+                "value": "../models/benchmarking/1"
+            },
+            "param2": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "easy"
+            },
+            "param3": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 3
+            }
+        },
+        "3": {
+            "param1": {
+                "group": "trainer",
+                "name": "model_dir",
+                "value": "../models/benchmarking/1"
+            },
+            "param2": {
+                "group": "env",
+                "name": "WS_level",
+                "value": "middle"
+            },
+            "param3": {
+                "group": "env",
+                "name": "num_obj_max",
+                "value": 5
+            }
+        }         
     }
 }

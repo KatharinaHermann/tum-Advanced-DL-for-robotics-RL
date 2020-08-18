@@ -93,7 +93,7 @@ class PointroboEnv(gym.Env):
 
 
     def reset(self):
-        """Resets the robot state to the initial state"""        
+        """Resets the robot state to the initial state"""  
         self.setup_rndm_workspace_from_buffer()
         self.agent_pos = self.start_pos.astype(np.float32)
 
@@ -169,7 +169,6 @@ class PointroboEnv(gym.Env):
 
     def setup_rndm_workspace_from_buffer(self):
         """Choose random workspace from buffer"""
-        
         if self.params["env"]["WS_level"] in ["easy", "middle", ""]:
             buffer_index = np.random.randint(low=0, high=self.buffer_size - 1)
             self.workspace = self.workspace_buffer[buffer_index]

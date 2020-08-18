@@ -20,6 +20,7 @@ params = load_params('params/benchmark_evaluations.json')
 benchmark_keys = params["benchmark"].keys()
 
 for key in benchmark_keys:
+    print('------ Evaluation {} -------'.format(key))
     # loading original params:
     params = load_params('params/benchmark_evaluations.json')
 
