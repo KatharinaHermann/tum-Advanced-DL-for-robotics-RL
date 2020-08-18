@@ -37,7 +37,9 @@
         "gpu": 0,
         "lr_decay_steps": [3e5],
         "actor_lr_decay_vals": [3e-5],
-        "critic_lr_decay_vals": [1e-5]
+        "critic_lr_decay_vals": [1e-5],
+        "weight_decay_l1": 0,
+        "weight_decay_l2": 0
     },
     "trainer": {
         "train_from_scratch" : true,
@@ -69,18 +71,6 @@
         "show_relabeling": false
     },
     "benchmark": {
-        "1": {
-            "param1": {
-                "group": "trainer",
-                "name": "relabeling_mode",
-                "value": "no_relabeling"
-            },
-            "param2": {
-                "group": "trainer",
-                "name": "model_dir",
-                "value": "../models/benchmarking/1"
-            }
-        },
         "2": {
             "param1": {
                 "group": "trainer",
