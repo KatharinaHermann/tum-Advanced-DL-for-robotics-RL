@@ -19,10 +19,10 @@ def random_workspace(grid_size, num_obj_max, obj_size_avg):
         origin = np.asarray(origin, dtype=None, order=None)
 
         #Generate a width and height from a Gaussian distribution for each object
-        width = np.random.normal(loc=obj_size_avg, scale=1, size=(num_objects,1))
+        width = np.random.normal(loc=(obj_size_avg), scale=1, size=(num_objects,1))
         width= np.asarray(width, dtype=int, order=None)
         
-        height = np.random.normal(loc=obj_size_avg, scale=1, size=(num_objects,1))
+        height = np.random.normal(loc=(obj_size_avg), scale=1, size=(num_objects,1))
         height = np.asarray(height, dtype=int, order=None)
     
         #Initialize workspace
@@ -62,7 +62,7 @@ def hard_level_workspace(workspace, grid_size, obj_size_avg):
     #placing 2 obstacles in a vertical distance of "the diagonal of the object" to the straight line between start and goal
     
     #Creating the first obstacle
-    origin = start + step_size * straight_step  + (diagonal + 1)* vertical_step
+    origin = start + step_size * straight_step  + (2*diagonal+2)* vertical_step
     #assigning bounds for x direction
     if (origin[0] + 0.5 * width) > grid_size:
         right_bound = grid_size
@@ -85,7 +85,7 @@ def hard_level_workspace(workspace, grid_size, obj_size_avg):
     workspace[lower_bound:upper_bound, left_bound:right_bound] = 1
 
     #Creating the second obstacle
-    origin = start + step_size * straight_step  - (diagonal + 1)* vertical_step
+    origin = start + step_size * straight_step  - (0.1*diagonal)* vertical_step
     #assigning bounds for x direction
     if (origin[0] + 0.5 * width) > grid_size:
         right_bound = grid_size
@@ -121,7 +121,7 @@ def hard_level_workspace(workspace, grid_size, obj_size_avg):
                         
     if goal_blocked:
         #workspace[y_goal-2: y_goal+3, x_goal-2: x_goal+3] = 0
-        workspace[y_min_goal: y_max_goal, x_min_goal: x_max_goal] = 0
+        workspace[(y_min_goal+1): (y_max_goal-1), (x_min_goal+1): (x_max_goal-1)] = 0
         
     #Check whether start feasible
     x_start = int(start[0])
@@ -137,7 +137,7 @@ def hard_level_workspace(workspace, grid_size, obj_size_avg):
                         
     if start_blocked:
         #workspace[y_start-2: y_start+3, x_start-2: x_start+3] = 0
-        workspace[y_min_start: y_max_start, x_min_start: x_max_start] = 0
+        workspace[(y_min_start+1): (y_max_start-1), (x_min_start+1): (x_max_start-1)] = 0
 
     return workspace, start, goal
 

@@ -9,7 +9,7 @@
         "step_reward": -0.01,
         "buffer_size": 100,
         "grid_size": 32,
-        "num_obj_max": 5, 
+        "num_obj_max": 0, 
         "obj_size_avg": 8, 
         "robot_radius": 1,
         "max_goal_dist": null,
