@@ -24,8 +24,8 @@
     "agent": {
         "name": "DDPG",
         "max_grad": 0.6,
-        "lr_actor": 0.0003,
-        "lr_critic": 5e-5,
+        "lr_actor": 3e-5,
+        "lr_critic": 1e-5,
         "actor_units": [400, 300],
         "critic_units": [400, 300],
         "sigma": 0.1,
@@ -35,11 +35,11 @@
         "batch_size": 256,
         "update_interval": 1,
         "gpu": 0,
-        "lr_decay_steps": [3e5],
+        "lr_decay_steps": [],
         "actor_lr_decay_vals": [3e-5],
         "critic_lr_decay_vals": [1e-5],
         "weight_decay_l1": 0,
-        "weight_decay_l2": 0
+        "weight_decay_l2": 0.001
     },
     "trainer": {
         "train_from_scratch" : true,
@@ -71,6 +71,28 @@
         "show_relabeling": false
     },
     "benchmark": {
+        "1": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "no_relabeling"
+            },
+            "param2": {
+                "group": "trainer",
+                "name": "model_dir",
+                "value": "../models/benchmarking/2"
+            },
+            "param3": {
+                "group": "agent",
+                "name": "lr_actor",
+                "value": 1e-4
+            },
+            "param4": {
+                "group": "agent",
+                "name": "lr_critic",
+                "value": 1e-4
+            }
+        },
         "2": {
             "param1": {
                 "group": "trainer",
