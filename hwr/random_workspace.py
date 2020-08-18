@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import scipy.ndimage as ndimage
-
+from matplotlib.colors import ListedColormap
 
 def random_workspace(grid_size, num_obj_max, obj_size_avg):
     """generates a workspace of size: grid_size x grid_size with obstacles indicated with ones.
@@ -19,10 +19,10 @@ def random_workspace(grid_size, num_obj_max, obj_size_avg):
         origin = np.asarray(origin, dtype=None, order=None)
 
         #Generate a width and height from a Gaussian distribution for each object
-        width = np.random.normal(loc=obj_size_avg, scale=1, size=(num_objects,1))
+        width = np.random.normal(loc=(obj_size_avg), scale=1, size=(num_objects,1))
         width= np.asarray(width, dtype=int, order=None)
         
-        height = np.random.normal(loc=obj_size_avg, scale=1, size=(num_objects,1))
+        height = np.random.normal(loc=(obj_size_avg), scale=1, size=(num_objects,1))
         height = np.asarray(height, dtype=int, order=None)
     
         #Initialize workspace
@@ -62,7 +62,7 @@ def hard_level_workspace(workspace, grid_size, obj_size_avg):
     #placing 2 obstacles in a vertical distance of "the diagonal of the object" to the straight line between start and goal
     
     #Creating the first obstacle
-    origin = (start + step_size * straight_step  + (diagonal + 1.5)* vertical_step).astype(np.int)
+    origin = start + step_size * straight_step  + (2*diagonal+2)* vertical_step
     #assigning bounds for x direction
     if (origin[0] + 0.5 * width) > grid_size:
         right_bound = grid_size
@@ -85,7 +85,7 @@ def hard_level_workspace(workspace, grid_size, obj_size_avg):
     workspace[lower_bound:upper_bound, left_bound:right_bound] = 1
 
     #Creating the second obstacle
-    origin = start + step_size * straight_step  - (diagonal + 1.5)* vertical_step
+    origin = start + step_size * straight_step  - (0.1*diagonal)* vertical_step
     #assigning bounds for x direction
     if (origin[0] + 0.5 * width) > grid_size:
         right_bound = grid_size
@@ -112,30 +112,32 @@ def hard_level_workspace(workspace, grid_size, obj_size_avg):
     y_goal = int(goal[1])
 
     #Check if there is an obsrtacle near the start position
-    y_min = y_goal - 3 if y_goal - 3 >= 0 else 0
-    y_max = y_goal + 4 if y_goal + 4 <= (grid_size - 1) else grid_size - 1
-    x_min = x_goal - 3 if x_goal - 3 >= 0 else 0
-    x_max = x_goal + 4 if x_goal + 4 <= (grid_size - 1) else grid_size - 1
-    goal_blocked = workspace[y_min: y_max, x_min: x_max].any()
+    y_min_goal = y_goal - 3 if y_goal - 3 >= 0 else 0
+    y_max_goal = y_goal + 4 if y_goal + 4 <= (grid_size - 1) else grid_size - 1
+    x_min_goal = x_goal - 3 if x_goal - 3 >= 0 else 0
+    x_max_goal = x_goal + 4 if x_goal + 4 <= (grid_size - 1) else grid_size - 1
+    goal_blocked = workspace[y_min_goal: y_max_goal, x_min_goal: x_max_goal].any()
     #goal_blocked = workspace[y_goal-2: y_goal+3, x_goal-2: x_goal+3].any()
                         
     if goal_blocked:
-        workspace[y_goal-2: y_goal+3, x_goal-2: x_goal+3] = 0
+        #workspace[y_goal-2: y_goal+3, x_goal-2: x_goal+3] = 0
+        workspace[(y_min_goal+1): (y_max_goal-1), (x_min_goal+1): (x_max_goal-1)] = 0
         
     #Check whether start feasible
-    x_start = int(goal[0])
-    y_start = int(goal[1])
+    x_start = int(start[0])
+    y_start = int(start[1])
 
     #Check if there is an obsrtacle near the start position
-    y_min = y_start - 3 if y_start - 3 >= 0 else 0
-    y_max = y_start + 4 if y_start + 4 <= (grid_size - 1) else grid_size - 1
-    x_min = x_start - 3 if x_start - 3 >= 0 else 0
-    x_max = x_start + 4 if x_start + 4 <= (grid_size - 1) else grid_size - 1
-    start_blocked = workspace[y_min: y_max, x_min: x_max].any()
+    y_min_start = y_start - 3 if y_start - 3 >= 0 else 0
+    y_max_start = y_start + 4 if y_start + 4 <= (grid_size - 1) else grid_size - 1
+    x_min_start = x_start - 3 if x_start - 3 >= 0 else 0
+    x_max_start = x_start + 4 if x_start + 4 <= (grid_size - 1) else grid_size - 1
+    start_blocked = workspace[y_min_start: y_max_start, x_min_start: x_max_start].any()
     #start_blocked = workspace[y_start-2: y_start+3, x_start-2: x_start+3].any()
                         
     if start_blocked:
-        workspace[y_start-2: y_start+3, x_start-2: x_start+3] = 0
+        #workspace[y_start-2: y_start+3, x_start-2: x_start+3] = 0
+        workspace[(y_min_start+1): (y_max_start-1), (x_min_start+1): (x_max_start-1)] = 0
 
     return workspace, start, goal
 
@@ -288,25 +290,38 @@ def image_interpolation(*, img, pixel_size=1, order=1, mode='nearest'):
 ############# TEST SAMPLE WORKSPACE #########################
 
 if __name__ == '__main__':
-    workspace = mid_level_workspace(32, 8, 5)
-    workspace_sample, start, goal = hard_level_workspace(workspace, 32, 5)
-    #start, goal = get_start_goal_for_workspace(workspace_sample)
-
-    workspace_sample[int(start[1]), int(start[0])] = 2
-    workspace_sample[int(goal[1]), int(goal[0])] = 3
-
-    fig1 = visualize_workspace(workspace_sample)
-    robot = visualize_robot(start,1)
-
-    fig2 = visualize_distance_field(workspace_sample)
     
+    for i in range(1000):
     
-    plt.show()
+        #workspace = random_workspace(32, 3, 8)
+        workspace = mid_level_workspace(32, 1, 8)
+        workspace, start, goal = hard_level_workspace(workspace, 32, 8)
+        #start, goal = get_start_goal_for_workspace(workspace)
+
+        #workspace_sample[int(start[1]), int(start[0])] = 2
+        #workspace_sample[int(goal[1]), int(goal[0])] = 3
+        
+        fig= plt.figure(2)
+        fig.clf()
+        ax = fig.gca()
+        cmap = ListedColormap(['#240B3B', '#81BEF7'])
+        ax.matshow(workspace, cmap=cmap)
+        
+        circle_start = plt.Circle((start[0], start[1]), 1.0, figure=fig, color="w")
+        ax.add_artist(circle_start)
+
+        circle_goal = plt.Circle((goal[0], goal[1]), 1.0, figure=fig, color="#37EC52")
+        ax.add_artist(circle_goal)
+
+        #fig2 = visualize_distance_field(workspace_sample)
+        
+        
+        plt.pause(0.5)
 
     
     #Calculates the distance from a point "x" to the nearest obstacle
     pixel_size=1 #10/32
-    dist_img = ndimage.distance_transform_edt(-workspace_sample + 1)  # Excpects blocks as 0 and free space as 1
+    dist_img = ndimage.distance_transform_edt(-workspace + 1)  # Excpects blocks as 0 and free space as 1
     dist_fun = image_interpolation(img=dist_img, pixel_size=pixel_size)
     x=np.array([float(start[0]),float(start[1])])
     dist= dist_fun(x=x)
