@@ -1,4 +1,4 @@
-{
+{ 
     "env": {
         "name": "pointrobo-v0",
         "normalize": true,
@@ -9,10 +9,11 @@
         "step_reward": -0.01,
         "buffer_size": 100,
         "grid_size": 32,
-        "num_obj_max": 0,
+        "num_obj_max": 0, 
         "obj_size_avg": 8, 
         "robot_radius": 1,
-        "max_goal_dist": null
+        "max_goal_dist": null,
+        "WS_level": "" 
     },
     "cae": {
         "pooling": "max",
@@ -22,23 +23,29 @@
     },
     "agent": {
         "name": "DDPG",
-        "max_grad": 1.0,
-        "lr_actor": 1e-4,
-        "lr_critic": 1e-4,
+        "max_grad": 0.6,
+        "lr_actor": 0.0003,
+        "lr_critic": 5e-5,
         "actor_units": [400, 300],
         "critic_units": [400, 300],
         "sigma": 0.1,
-        "tau": 0.005,
+        "tau": 0.004,
         "n_warmup": 1e4,
         "memory_capacity": 1e6,
         "batch_size": 256,
         "update_interval": 1,
-        "gpu": 0
+        "gpu": 0,
+        "lr_decay_steps": [3e5],
+        "actor_lr_decay_vals": [3e-5],
+        "critic_lr_decay_vals": [1e-5],
+        "weight_decay_l1": 0,
+        "weight_decay_l2": 1e-3
     },
     "trainer": {
         "train_from_scratch" : true,
         "mode": "train",
-        "relabeling_mode": "straight_line",
+        "relabeling_mode": "random",
+        "remove_zigzaging": true,
         "max_steps": 1e6,
         "episode_max_steps": 50,
         "n_experiments": 1,
@@ -60,6 +67,7 @@
         "save_test_path_sep": false,
         "save_test_movie": false,
         "show_test_images": false,
-        "normalize_obs": false
+        "normalize_obs": false,
+        "show_relabeling": false
     }
 }

@@ -5,10 +5,10 @@ import logging
 import argparse
 import joblib
 import glob
-from matplotlib import animation
 
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from gym.spaces import Box
 
 from tf2rl.experiments.utils import save_path, frames_to_gif
@@ -20,7 +20,8 @@ from tf2rl.envs.normalizer import EmpiricalNormalizer
 # sys.path.append(os.path.join(os.getcwd(), "lib"))
 from hwr.cae.cae import CAE
 from hwr.relabeling.pointrobot_relabeling import PointrobotRelabeler
-
+from hwr.utils import visualize_trajectory
+from hwr.utils import straight_line_feasible
 
 if tf.config.experimental.list_physical_devices('GPU'):
     for cur_device in tf.config.experimental.list_physical_devices("GPU"):
@@ -60,7 +61,8 @@ class PointrobotTrainer:
         # Initialize workspace relabeler:
         self._relabeler = PointrobotRelabeler(
             ws_shape=(self._env.grid_size, self._env.grid_size),
-            mode=params["trainer"]["relabeling_mode"]
+            mode=params["trainer"]["relabeling_mode"],
+            remove_zigzaging=params["trainer"]["remove_zigzaging"]
             )
 
         # prepare log directory
@@ -84,6 +86,9 @@ class PointrobotTrainer:
         self.writer = tf.summary.create_file_writer(self._output_dir)
         self.writer.set_as_default()
 
+        # relabeling visualization:
+        self._relabel_fig = plt.figure(2)
+
 
     def _set_check_point(self, model_dir):
         # Save and restore model
@@ -93,7 +98,7 @@ class PointrobotTrainer:
 
         if model_dir is not None:
             if not os.path.isdir(model_dir):
-                os.mkdir(model_dir)
+                os.makedirs(model_dir)
             self._latest_path_ckpt = tf.train.latest_checkpoint(model_dir)
             self._checkpoint.restore(self._latest_path_ckpt)
             self.logger.info("Restored {}".format(self._latest_path_ckpt))
@@ -137,6 +142,14 @@ class PointrobotTrainer:
                 total_steps > self._policy.n_warmup:
                 self._env.render()
 
+            if total_steps in self._params["agent"]["lr_decay_steps"]:
+                ind = self._params["agent"]["lr_decay_steps"].index(total_steps)
+                self._params["agent"]["lr_actor"] = self._params["agent"]["actor_lr_decay_vals"][ind]
+                self._params["agent"]["lr_actor"] = self._params["agent"]["critic_lr_decay_vals"][ind]
+                self._policy.actor_optimizer.learning_rate = self._params["agent"]["lr_actor"]
+                self._policy.critic_optimizer.learning_rate = self._params["agent"]["lr_critic"]
+                print("---- Learning rate: {}".format(self._policy.actor_optimizer.learning_rate))
+
             #Get action randomly for warmup /from Actor-NN otherwise
             if total_steps < self._policy.n_warmup:
                 action = self._env.action_space.sample()
@@ -168,11 +181,20 @@ class PointrobotTrainer:
                 if (reward != self._env.goal_reward):
                     """Workspace relabeling"""
 
+                    # plotting the trajectory:
+                    if self._params["trainer"]["show_relabeling"]:                    
+                        self._relabel_fig = visualize_trajectory(
+                            trajectory=self.trajectory, 
+                            fig=self._relabel_fig,
+                            env=self._env
+                            )
+                        plt.pause(1)
+
                     relabeling_begin = time.time()
                     # Create new workspace for the trajectory:
                     relabeled_trajectory = self._relabeler.relabel(trajectory=self.trajectory, env=self._env)
 
-                    if len(relabeled_trajectory) != 0:
+                    if relabeled_trajectory:
                         relabeled_ws = relabeled_trajectory[0]['workspace']
                         relabeled_reduced_ws = self._CAE.evaluate(relabeled_ws)
                         
@@ -185,7 +207,17 @@ class PointrobotTrainer:
                             self._replay_buffer.add(obs=relabeled_obs_full, act=point['action'],
                                 next_obs=relabeled_next_obs_full, rew=point['reward'], done=point['done'])
 
-                    relabeling_times.append(time.time() - relabeling_begin)
+                        # plotting the relabeled trajectory:
+                        if self._params["trainer"]["show_relabeling"]:
+                            self._relabel_fig = visualize_trajectory( 
+                                trajectory=relabeled_trajectory,
+                                fig=self._relabel_fig,
+                                env=self._env
+                                )
+                            plt.pause(1)
+
+                        relabeling_times.append(time.time() - relabeling_begin)
+
                 else:
                     success_traj_train += 1
 
@@ -230,7 +262,7 @@ class PointrobotTrainer:
                 training_begin = time.time()
                 #Sample a new batch of experiences from the replay buffer for training
                 samples = self._replay_buffer.sample(self._policy.batch_size)
-                
+
                 with tf.summary.record_if(total_steps % self._save_summary_interval == 0):
                     # Here we update the Actor-NN, Critic-NN, and the Target-Actor-NN & Target-Critic-NN 
                     # after computing the Critic-loss and the Actor-loss
@@ -255,13 +287,19 @@ class PointrobotTrainer:
                 # setting evaluation mode for deterministic actions:
                 self._policy.eval_mode = True
 
-                avg_test_return, success_rate = self.evaluate_policy(total_steps)
+                avg_test_return, success_rate, ratio_straight_lines, success_rate_straight_line, success_rate_no_straight_line = self.evaluate_policy(total_steps)
                 self.logger.info("Evaluation: Total Steps: {0: 7} Average Reward {1: 5.4f} and Sucess rate: {2: 5.4f} for {3: 2} episodes".format(
                     total_steps, avg_test_return, success_rate, self._test_episodes))
                 tf.summary.scalar(
                     name="Common/average_test_return", data=avg_test_return)
                 tf.summary.scalar(
                     name="Common/test_success_rate", data=success_rate)
+                tf.summary.scalar(
+                    name="Ratio_feasible straight_line episodes", data=ratio_straight_lines)
+                tf.summary.scalar(
+                    name="test_success_rate straight_line episodes", data=success_rate_straight_line)
+                tf.summary.scalar(
+                    name="test_success_rate no_straight_line episodes", data=success_rate_no_straight_line)
                 tf.summary.scalar(name="Common/fps", data=fps)
                 self.writer.flush()
 
@@ -279,10 +317,15 @@ class PointrobotTrainer:
         """method for evaluating a pretrained agent for some episodes."""
         self._policy.eval_mode = True
 
-        avg_test_return, success_rate = self.evaluate_policy(total_steps=0)
+        avg_test_return, success_rate, ratio_straight_lines, success_rate_straight_line, success_rate_no_straight_line = self.evaluate_policy(total_steps=0)
         print("----- Evaluation -----")
-        print("average test return: {}".format(avg_test_return))
-        print("average test success rate: {}".format(success_rate))
+        print("avg test return: {}".format(avg_test_return))
+        print("avg test success rate: {}".format(success_rate))
+        print("Ratio of feasible straight_line episodes: {}".format(ratio_straight_lines))
+        print("avg test success_rate for straight_line episodes: {}".format(success_rate_straight_line))
+        print("avg test success_rate for no_straight_line episodes: {}".format(success_rate_no_straight_line))
+
+        return avg_test_return, success_rate, ratio_straight_lines, success_rate_straight_line, success_rate_no_straight_line
 
 
     def evaluate_policy_continuously(self):
@@ -313,10 +356,16 @@ class PointrobotTrainer:
             replay_buffer = get_replay_buffer(
                 self._policy, self._test_env, size=self._episode_max_steps)
 
+        straight_line_episode = 0 
+        no_straight_line_episode = 0
+        success_traj_straight_line = 0
+        success_traj_no_straight_line = 0
+
         for i in range(self._test_episodes):
             episode_return = 0.
             frames = []
             workspace, goal, obs = self._test_env.reset()
+            start = obs
             reduced_workspace = self._CAE.evaluate(workspace)
             #Concatenate position observation with start, goal, and reduced workspace!!
             obs_full = np.concatenate((obs, goal, reduced_workspace))
@@ -364,6 +413,15 @@ class PointrobotTrainer:
                    
             total_test_return += episode_return
 
+            if straight_line_feasible(workspace, start, goal, self._test_env):
+                straight_line_episode += 1
+                if reward == self._test_env.goal_reward:        
+                    success_traj_straight_line += 1
+            else:
+                no_straight_line_episode += 1
+                if reward == self._test_env.goal_reward:        
+                    success_traj_no_straight_line += 1
+
             if reward == self._test_env.goal_reward:        
                 success_traj += 1
 
@@ -378,8 +436,17 @@ class PointrobotTrainer:
 
         avg_test_return = total_test_return / self._test_episodes
         success_rate = success_traj / self._test_episodes
+        if straight_line_episode > 0:
+            success_rate_straight_line = success_traj_straight_line/straight_line_episode
+        else:
+            success_rate_straight_line = 0
+        if no_straight_line_episode > 0:
+            success_rate_no_straight_line = success_traj_no_straight_line/no_straight_line_episode
+        else:
+            success_rate_no_straight_line = 0
+        ratio_straight_lines = straight_line_episode/ self._test_episodes
 
-        return avg_test_return, success_rate
+        return avg_test_return, success_rate, ratio_straight_lines, success_rate_straight_line, success_rate_no_straight_line
 
 
     def _save_traj_separately(self, prefix):

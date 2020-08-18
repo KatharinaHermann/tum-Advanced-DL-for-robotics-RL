@@ -33,7 +33,12 @@
         "memory_capacity": 1e6,
         "batch_size": 256,
         "update_interval": 1,
-        "gpu": 0
+        "gpu": 0,
+        "lr_decay_steps": [3e5],
+        "actor_lr_decay_vals": [3e-5],
+        "critic_lr_decay_vals": [1e-5],
+        "weight_decay_l1": 0,
+        "weight_decay_l2": 1e-2
     },
     "trainer": {
         "train_from_scratch" : true,
@@ -60,7 +65,8 @@
         "save_test_path_sep": false,
         "save_test_movie": false,
         "show_test_images": false,
-        "normalize_obs": false
+        "normalize_obs": false,
+        "show_relabeling": false
     },
     "hyper_tuning": {
         "num_of_runs": 20,
