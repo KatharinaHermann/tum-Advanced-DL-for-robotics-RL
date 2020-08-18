@@ -39,7 +39,7 @@
         "actor_lr_decay_vals": [3e-5],
         "critic_lr_decay_vals": [1e-5],
         "weight_decay_l1": 0,
-        "weight_decay_l2": 1e-2
+        "weight_decay_l2": 0
     },
     "trainer": {
         "train_from_scratch" : true,
