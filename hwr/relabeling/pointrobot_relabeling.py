@@ -424,7 +424,7 @@ class PointrobotRelabeler:
                         #point_blocked = workspace[y-2: y+3, x-2: x+3].any()
                         
                         if point_blocked:
-                            workspace[y-2: y+3, x-2: x+3] = 0
+                            workspace[y_min: y_max, x_min: x_max] = 0
 
 
             return workspace
