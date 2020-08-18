@@ -194,7 +194,7 @@ class PointroboEnv(gym.Env):
                     max_goal_dist=self.max_goal_dist)
             if ws_level == 2: 
                 self.workspace = self.workspace_buffer_hard[buffer_index]
-                self.workspace, self.start_pos, self.goal_pos = hard_level_workspace(self.workspace, self.grid_size, self.obj_size_avg-2)
+                self.workspace, self.start_pos, self.goal_pos = hard_level_workspace(self.workspace.copy(), self.grid_size, self.obj_size_avg-2)
 
 
     def collision_check(self):
