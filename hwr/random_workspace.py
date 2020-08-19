@@ -62,7 +62,7 @@ def hard_level_workspace(workspace, grid_size, obj_size_avg):
     #placing 2 obstacles in a vertical distance of "the diagonal of the object" to the straight line between start and goal
     
     #Creating the first obstacle
-    origin = start + step_size * straight_step  + (2*diagonal+2)* vertical_step
+    origin = start + step_size * straight_step  + (diagonal + 1) * vertical_step
     #assigning bounds for x direction
     if (origin[0] + 0.5 * width) > grid_size:
         right_bound = grid_size
@@ -85,7 +85,7 @@ def hard_level_workspace(workspace, grid_size, obj_size_avg):
     workspace[lower_bound:upper_bound, left_bound:right_bound] = 1
 
     #Creating the second obstacle
-    origin = start + step_size * straight_step  - (0.1*diagonal)* vertical_step
+    origin = start + step_size * straight_step  - (diagonal + 1) * vertical_step
     #assigning bounds for x direction
     if (origin[0] + 0.5 * width) > grid_size:
         right_bound = grid_size
