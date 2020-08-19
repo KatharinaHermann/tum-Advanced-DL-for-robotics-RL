@@ -24,7 +24,7 @@
     "agent": {
         "name": "DDPG",
         "max_grad": 0.6,
-        "lr_actor": 5e-6,
+        "lr_actor": 3e-5,
         "lr_critic": 1e-5,
         "actor_units": [400, 300],
         "critic_units": [400, 300],
@@ -35,9 +35,9 @@
         "batch_size": 256,
         "update_interval": 1,
         "gpu": 0,
-        "lr_decay_steps": [],
-        "actor_lr_decay_vals": [1e-5],
-        "critic_lr_decay_vals": [1e-5],
+        "lr_decay_steps": [6e4],
+        "actor_lr_decay_vals": [1e-6],
+        "critic_lr_decay_vals": [1e-6],
         "weight_decay_l1": 0,
         "weight_decay_l2": 1e-3
     },
