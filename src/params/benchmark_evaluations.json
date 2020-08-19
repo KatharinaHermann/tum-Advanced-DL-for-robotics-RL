@@ -102,7 +102,7 @@
             "param2": {
                 "group": "env",
                 "name": "WS_level",
-                "value": "medium"
+                "value": "middle"
             },
             "param3": {
                 "group": "env",
@@ -158,7 +158,7 @@
             "param2": {
                 "group": "env",
                 "name": "WS_level",
-                "value": "medium"
+                "value": "middle"
             },
             "param3": {
                 "group": "env",
@@ -214,7 +214,7 @@
             "param2": {
                 "group": "env",
                 "name": "WS_level",
-                "value": "medium"
+                "value": "middle"
             },
             "param3": {
                 "group": "env",
@@ -270,7 +270,7 @@
             "param2": {
                 "group": "env",
                 "name": "WS_level",
-                "value": "medium"
+                "value": "middle"
             },
             "param3": {
                 "group": "env",
@@ -326,7 +326,7 @@
             "param2": {
                 "group": "env",
                 "name": "WS_level",
-                "value": "medium"
+                "value": "middle"
             },
             "param3": {
                 "group": "env",
