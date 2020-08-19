@@ -21,7 +21,6 @@ results
 
 # models:
 models/agents
-models/benchmarking_empty
 
 # others:
 pseudo_algorithm.txt

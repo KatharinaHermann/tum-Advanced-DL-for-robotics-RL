@@ -35,9 +35,9 @@
         "batch_size": 256,
         "update_interval": 1,
         "gpu": 0,
-        "lr_decay_steps": [],
-        "actor_lr_decay_vals": [1e-5],
-        "critic_lr_decay_vals": [1e-5],
+        "lr_decay_steps": [6e4],
+        "actor_lr_decay_vals": [1e-6],
+        "critic_lr_decay_vals": [1e-6],
         "weight_decay_l1": 0,
         "weight_decay_l2": 1e-3
     },
@@ -46,7 +46,7 @@
         "mode": "train",
         "relabeling_mode": "random",
         "remove_zigzaging": false,
-        "max_steps": 3e5,
+        "max_steps": 1e5,
         "episode_max_steps": 50,
         "n_experiments": 1,
         "show_progress": false,
@@ -71,6 +71,28 @@
         "show_relabeling": false
     },
     "benchmark": {
+        "1": {
+            "param1": {
+                "group": "trainer",
+                "name": "relabeling_mode",
+                "value": "no_relabeling"
+            },
+            "param2": {
+                "group": "trainer",
+                "name": "model_dir",
+                "value": "../models/benchmarking_empty/1"
+            },
+            "param3": {
+                "group": "trainer",
+                "name": "max_steps",
+                "value": 5e5
+            },
+            "param4": {
+                "group": "agent",
+                "name": "lr_decay_steps",
+                "value": []
+            }
+        },
         "2": {
             "param1": {
                 "group": "trainer",
