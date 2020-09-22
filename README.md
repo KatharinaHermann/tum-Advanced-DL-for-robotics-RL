@@ -1,5 +1,7 @@
 # Advanced Deep Learning for Robotics Project
 
+This is a project of the course Advanced Deep Learning in Robotics at the Technical University of Munich. Our chosen topic is to develop a method to train a Neural Motion Planner (NMP) agent with Reinforcement Learning (RL)  in an environment with randomly placed obstacles. The aim of the method is to reduce training time as much as possible meanwhile using a very simple and sparse reward function. For this we use Hindsight Experience Replay (HER), but we extend it by not just assigning a new goal, but also a new workspace to the unsuccessful trajectories.
+
 ## Installation
 
 Requirements:
